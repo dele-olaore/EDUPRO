@@ -1,0 +1,159 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="gfeepaymentForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">View Fee Payments</span><br/>
+							<span style="font-size:16px;">View payment history</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<!-- <li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newRefMP')}.show();" styleClass="image-command-link">Add new</a:commandLink>
+								</li> -->
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div class="dialog">
+				<rich:panel>
+					<div class="dialog">
+						<a4j:outputPanel id="payFormPanel">
+						<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+							<h:outputLabel for="fstuds">Student</h:outputLabel>
+							<h:selectOneMenu id="fstuds" value="#{bursaryBean.fee_payment.student_id}" defaultLabel="Select student...">
+								<f:selectItem itemValue="0" itemLabel="" />
+								<f:selectItems value="#{studentBean.guardianStudents}" var="stud" itemValue="#{stud.student_id}" itemLabel="#{stud.student_fn} #{stud.student_mn} #{stud.student_ln} (#{stud.rollNumber})" />
+								<a4j:support event="onchange" reRender="payFormPanel" />
+							</h:selectOneMenu>
+							<rich:message for="fstuds" style="color: red;"/>
+							
+							<h:outputLabel for="ffes">Fee</h:outputLabel>
+							<h:selectOneMenu id="ffes" value="#{bursaryBean.fee_payment.fee_id}" defaultLabel="Select fee...">
+								<f:selectItem itemValue="0" itemLabel="" />
+								<f:selectItems value="#{bursaryBean.fee_payment.fees}" var="fee" itemValue="#{fee.fee_id}" itemLabel="#{fee.fee_nm}" />
+							</h:selectOneMenu>
+							<rich:message for="ffes" style="color: red;"/>
+						</h:panelGrid>
+						</a4j:outputPanel>
+					</div>
+					<div class="actionButtons">
+						<rich:toolBar>
+							<rich:toolBarGroup>
+							<a4j:commandButton value="View Payment History" action="#{bursaryBean.ViewStudentFeePayments}" reRender="paymentsPanel" />
+							</rich:toolBarGroup>
+						</rich:toolBar>
+					</div>
+				</rich:panel>
+				<rich:spacer height="15" />
+				<a4j:outputPanel id="paymentsPanel">
+					<rich:dataTable id="feePayments" value="#{bursaryBean.feePayments}" var="obj" rows="50" width="100%" rendered="#{bursaryBean.feePayments.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying available payments" />
+					</f:facet>
+					<rich:column sortBy="#{obj.date_paid}" style="vertical-align: top">
+						<f:facet name="header">Date</f:facet>
+						<h:outputText value="#{obj.date_paid}">
+							<f:convertDateTime type="date" dateStyle="long"/>
+						</h:outputText>
+					</rich:column>
+					<rich:column sortBy="#{obj.fee_nm}" filterBy="#{obj.fee_nm}" style="vertical-align: top">
+						<f:facet name="header">Fee</f:facet>
+						<h:outputText value="#{obj.fee_nm}" />
+					</rich:column>
+					<rich:column filterBy="#{obj.fee_desc}" style="vertical-align: top">
+						<f:facet name="header">Description</f:facet>
+						<h:outputText value="#{obj.fee_desc}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.amount_paid}" style="vertical-align: top">
+						<f:facet name="header">Amount paid</f:facet>
+						<h:outputText value="#{obj.amount_paid}" rendered="#{obj.payment_id != bursaryBean.fee_payment.payment_id}">
+							<f:convertNumber pattern="N#,##0.00;(N#,##0.00)"/>
+						</h:outputText>
+						<h:inputText value="#{obj.amount_paid}" size="35" rendered="#{obj.payment_id == bursaryBean.fee_payment.payment_id}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.balance}" style="vertical-align: top">
+						<f:facet name="header">Balance</f:facet>
+						<h:outputText value="#{obj.balance}">
+							<f:convertNumber pattern="N#,##0.00;(N#,##0.00)"/>
+						</h:outputText>
+					</rich:column>
+					<rich:column sortBy="#{obj.status}" style="vertical-align: top">
+						<f:facet name="header">Status</f:facet>
+						<h:outputText value="Confirmed" rendered="#{obj.status == 1}" />
+						<h:outputText value="Not Confirmed" rendered="#{obj.status == 0}" />
+					</rich:column>
+					<rich:column align="center" style="vertical-align: top">
+						<f:facet name="header">Update</f:facet>
+						
+						<h:outputText value="Can't Update" rendered="#{obj.status == 1}" />
+						
+						<a4j:commandLink reRender="feePayments,paymentsPanel" value="Update" rendered="#{obj.payment_id != bursaryBean.fee_payment.payment_id and obj.status != 1 and obj.user_id == authenticator.user.user_id}" immediate="true">
+							<f:setPropertyActionListener value="#{obj}" target="#{bursaryBean.fee_payment}"/>
+						</a4j:commandLink>
+						
+						<a4j:commandLink reRender="messagepanel,feePayments,paymentsPanel" action="#{bursaryBean.UpdateFeePayment}" value="SAVE" rendered="#{obj.payment_id == bursaryBean.fee_payment.payment_id}" immediate="true">
+							<f:setPropertyActionListener value="#{obj}" target="#{bursaryBean.fee_payment}"/>
+						</a4j:commandLink>
+						
+						<h:outputText value=" - " rendered="#{obj.payment_id == bursaryBean.fee_payment.payment_id}" />
+						
+						<a4j:commandLink reRender="feePayments,paymentsPanel" action="#{bursaryBean.setFee_payment(null)}" value="CANCEL" rendered="#{obj.payment_id == bursaryBean.fee_payment.payment_id}" immediate="true" />
+						
+					</rich:column>
+					<rich:column align="center" style="vertical-align: top">
+						<f:facet name="header">Delete</f:facet>
+						
+						<h:outputText value="Can't Delete" rendered="#{obj.status == 1}" />
+						
+						<a4j:commandLink reRender="feePayments,paymentsPanel" value="Delete" action="#{bursaryBean.DeleteFeePayment}" rendered="#{obj.payment_id != bursaryBean.fee_payment.payment_id and obj.status != 1 and obj.user_id == authenticator.user.user_id}" immediate="true">
+							<f:setPropertyActionListener value="#{obj}" target="#{bursaryBean.fee_payment}"/>
+						</a4j:commandLink>
+						
+					</rich:column>
+					</rich:dataTable>
+					<h:outputText value="No payments found" rendered="#{empty bursaryBean.feePayments}"/>
+					<rich:datascroller id="dsfeePayments" for="feePayments" renderIfSinglePage="false" reRender="feePayments,paymentsPanel" />
+				</a4j:outputPanel>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+</ui:composition>

@@ -1,0 +1,389 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="subjectsForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Subjects</span><br/>
+							<span style="font-size:16px;">Manage various subjects the school offer</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newSubjectMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Add new subject</a:commandLink>
+									<!-- <a href="#" onclick="return false;" style="color:#fff;text-decoration:none;">Add new</a> -->
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:tabPanel id="subjectsTab">
+				<rich:tab id="subTab" label="Subjects" immediate="true">
+					<a4j:outputPanel id="mypanel">
+					<rich:dataTable id="subjects" value="#{settingsBean.subjects}" var="obj" rows="50" width="100%" rendered="#{settingsBean.subjects.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying available subjects" />
+					</f:facet>
+					<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}">
+						<f:facet name="header">Subject Name</f:facet>
+						<h:outputText value="#{obj.name}" rendered="#{obj.id != settingsBean.subject.id}" />
+						<h:inputText value="#{obj.name}" size="40" rendered="#{obj.id == settingsBean.subject.id}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.desc}" filterBy="#{obj.desc}">
+						<f:facet name="header">Subject Description</f:facet>
+						<h:outputText value="#{obj.desc}" rendered="#{obj.id != settingsBean.subject.id}" />
+						<h:inputTextarea value="#{obj.desc}"  rendered="#{obj.id == settingsBean.subject.id}" required="true" style="width: 300px; height: 100px;">
+							<rich:beanValidator/>
+						</h:inputTextarea>
+					</rich:column>
+					<rich:column align="center">
+						<f:facet name="header">Update</f:facet>
+						<a4j:commandLink reRender="subjects" value="Update" rendered="#{obj.id != settingsBean.subject.id}">
+							<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.subject}"/>
+						</a4j:commandLink>
+						
+						<a4j:commandLink reRender="subjects,messagepanel" action="#{settingsBean.UpdateSubject}" value="SAVE" rendered="#{obj.id == settingsBean.subject.id}">
+							<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.subject}"/>
+						</a4j:commandLink>
+						
+						<h:outputText value=" - " rendered="#{obj.id == settingsBean.subject.id}" />
+						
+						<a4j:commandLink reRender="subjects" action="#{settingsBean.reset}" value="CANCEL" rendered="#{obj.id == settingsBean.subject.id}" />
+						
+					</rich:column>
+					</rich:dataTable>
+					<h:outputText value="No subjects found" rendered="#{empty settingsBean.subjects}"/>
+					<rich:datascroller id="dssubjects" for="subjects" renderIfSinglePage="false" reRender="mypanel,subjects" />
+					</a4j:outputPanel>
+					</rich:tab>
+					<rich:tab id="staffSubTab" label="Map Subjects to Staffs" immediate="true">
+						<rich:panel>
+							<f:facet name="header">
+							<h:outputText value="Select staff"/>
+							</f:facet>
+							
+							<div class="dialog">
+								<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+									<h:outputLabel for="scat">Staff Category</h:outputLabel>
+									<h:selectOneMenu id="scat" value="#{dropdownBean.staff_cat_id}" defaultLabel="Select a category...">
+										<f:selectItem itemValue="0" itemLabel="" />
+										<f:selectItems value="#{dropdownBean.staffCategories}"/>
+										<a4j:support event="onchange" reRender="staf" ajaxSingle="true" />
+									</h:selectOneMenu>
+									<rich:message for="scat" style="color: red;"/>
+									
+									<h:outputLabel for="sdept">Staff Department</h:outputLabel>
+									<h:selectOneMenu id="sdept" value="#{dropdownBean.department_id}" defaultLabel="Select a department...">
+										<f:selectItem itemValue="0" itemLabel="" />
+										<f:selectItems value="#{dropdownBean.departments}"/>
+										<a4j:support event="onchange" reRender="staf" ajaxSingle="true" />
+									</h:selectOneMenu>
+									<rich:message for="sdept" style="color: red;"/>
+									
+									<h:outputLabel for="staf">Staff</h:outputLabel>
+									<h:selectOneMenu id="staf" value="#{settingsBean.refOBJ.id3}" defaultLabel="Select a staff...">
+										<f:selectItem itemValue="0" itemLabel="" />
+										<f:selectItems value="#{dropdownBean.staffsByCatDept}"/>
+									</h:selectOneMenu>
+									<rich:message for="staf" style="color: red;"/>
+								</h:panelGrid>
+							</div>
+							<div class="actionButtons">
+								<rich:toolBar>
+									<rich:toolBarGroup>
+									<a4j:commandButton value="Show Subjects for Selected Staff" reRender="staffSubsPanel" />
+									</rich:toolBarGroup>
+								</rich:toolBar>
+							</div>
+						</rich:panel>
+						<rich:spacer height="15" />
+						<a4j:outputPanel id="staffSubsPanel">
+							<rich:dataTable id="staffSubjects" value="#{settingsBean.staffSubjects}" var="obj" rows="20" width="100%" rendered="#{settingsBean.staffSubjects.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying staff subjects" />
+								</f:facet>
+								<rich:column sortBy="#{obj.id}" filterBy="#{obj.id}">
+									<f:facet name="header">ID</f:facet>
+									<h:outputText value="#{obj.id}"/>
+								</rich:column>
+								<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}">
+									<f:facet name="header">Subject Name</f:facet>
+									<h:outputText value="#{obj.name}" />
+								</rich:column>
+								<rich:column sortBy="#{obj.desc}" filterBy="#{obj.desc}">
+									<f:facet name="header">Subject Description</f:facet>
+									<h:outputText value="#{obj.desc}" />
+								</rich:column>
+								<rich:column align="center">
+									<f:facet name="header">Remove</f:facet>
+									<a4j:commandLink reRender="staffSubsPanel" value="Remove" action="#{settingsBean.MapStafftoSubject(2)}">
+										<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.refOBJ}"/>
+									</a4j:commandLink>
+								</rich:column>
+							</rich:dataTable>
+							<h:outputText value="No subjects mapped for selected staff" rendered="#{empty settingsBean.staffSubjects}"/>
+							<rich:datascroller id="dsstaffSubjects" for="staffSubjects" renderIfSinglePage="false" />
+						</a4j:outputPanel>
+						<rich:spacer height="15" />
+						<div class="dialog">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="subs">Subjects</h:outputLabel>
+								<h:selectOneMenu id="subs" value="#{settingsBean.refOBJ.id2}" defaultLabel="Select a subject...">
+									<f:selectItems value="#{settingsBean.subjects}" var="sub" itemValue="#{sub.id}" itemLabel="#{sub.name}"/>
+								</h:selectOneMenu>
+								<rich:message for="subs" style="color: red;"/>
+							</h:panelGrid>
+						</div>
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<h:commandButton value="Map" action="#{settingsBean.MapStafftoSubject(1)}" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+					</rich:tab>
+					<rich:tab id="classSubTab" label="Map Subjects to Classes" immediate="true">
+						<rich:panel>
+							<f:facet name="header">
+							<h:outputText value="Select class"/>
+							</f:facet>
+							
+							<div class="dialog">
+								<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+									<h:outputLabel for="cls">Class</h:outputLabel>
+									<h:selectOneMenu id="cls" value="#{settingsBean.class_subject.class_id}" defaultLabel="Select a class...">
+										<f:selectItem itemValue="0" itemLabel="" />
+										<f:selectItems value="#{dropdownBean.classes}"/>
+									</h:selectOneMenu>
+									<rich:message for="cls" style="color: red;"/>
+								</h:panelGrid>
+							</div>
+							<div class="actionButtons">
+								<rich:toolBar>
+									<rich:toolBarGroup>
+									<a4j:commandButton value="Show Subjects for Selected Class" reRender="classSubsPanel" />
+									</rich:toolBarGroup>
+								</rich:toolBar>
+							</div>
+						</rich:panel>
+						<rich:spacer height="15" />
+						<a4j:outputPanel id="classSubsPanel">
+							<rich:dataTable id="classSubjects" value="#{settingsBean.classSubjects}" var="obj" rows="20" width="100%" rendered="#{settingsBean.classSubjects.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying class subjects" />
+								</f:facet>
+								<rich:column sortBy="#{obj.sub_nm}" filterBy="#{obj.sub_nm}">
+									<f:facet name="header">Subject</f:facet>
+									<h:outputText value="#{obj.sub_nm}" />
+								</rich:column>
+								<rich:column>
+									<f:facet name="header">Subject Description</f:facet>
+									<h:outputText value="#{obj.sub_desc}" />
+								</rich:column>
+								<rich:column>
+									<f:facet name="header">Minimum Grade</f:facet>
+									<h:outputText value="#{obj.grade_letter} (#{obj.grade_remark})" />
+								</rich:column>
+								<rich:column sortBy="#{obj.desc}">
+									<f:facet name="header">Core?</f:facet>
+									<h:outputText value="#{(obj.core == 1) ? 'Core' : 'Non-Core'}" />
+								</rich:column>
+								<rich:column align="center">
+									<f:facet name="header">Remove</f:facet>
+									<a4j:commandLink reRender="classSubsPanel" value="Remove" action="#{settingsBean.MapClasstoSubject(2)}">
+										<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.class_subject}"/>
+									</a4j:commandLink>
+								</rich:column>
+							</rich:dataTable>
+							<h:outputText value="No subjects mapped for selected class" rendered="#{empty settingsBean.classSubjects}"/>
+							<rich:datascroller id="dsclassSubjects" for="classSubjects" renderIfSinglePage="false" />
+						</a4j:outputPanel>
+						<rich:spacer height="15" />
+						<div class="dialog">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="subs2">Subjects</h:outputLabel>
+								<h:selectOneMenu id="subs2" value="#{settingsBean.class_subject.sub_id}" defaultLabel="Select a subject...">
+									<f:selectItems value="#{settingsBean.subjects}" var="sub" itemValue="#{sub.id}" itemLabel="#{sub.name}"/>
+								</h:selectOneMenu>
+								<rich:message for="subs2" style="color: red;"/>
+								
+								<h:outputLabel for="sgrade">Minimun grade</h:outputLabel>
+								<h:selectOneMenu id="sgrade" value="#{settingsBean.class_subject.grade_id}" defaultLabel="Select minimum grade...">
+									<f:selectItems value="#{settingsBean.grades}" var="g" itemValue="#{g.grade_id}" itemLabel="#{g.grade_letter} (#{g.grade_remark})"/>
+								</h:selectOneMenu>
+								<rich:message for="sgrade" style="color: red;"/>
+								
+								<h:outputLabel for="score">Core?</h:outputLabel>
+								<h:selectOneMenu id="score" value="#{settingsBean.class_subject.core}" defaultLabel="Select a subject type...">
+									<f:selectItem itemValue="1" itemLabel="Core" />
+									<f:selectItem itemValue="0" itemLabel="Non-Core" />
+								</h:selectOneMenu>
+								<rich:message for="score" style="color: red;"/>
+							</h:panelGrid>
+						</div>
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<h:commandButton value="Map" action="#{settingsBean.MapClasstoSubject(1)}" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+					</rich:tab>
+					<rich:tab id="classSubStaffTab" label="Map Subjects Teachers to Classes" immediate="true">
+						<rich:panel>
+							<f:facet name="header">
+							<h:outputText value="Select subject in a class"/>
+							</f:facet>
+							
+							<div class="dialog">
+								<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+									<h:outputLabel for="cls2">Class</h:outputLabel>
+									<h:selectOneMenu id="cls2" value="#{settingsBean.refOBJ.id}" defaultLabel="Select a class...">
+										<f:selectItem itemValue="0" itemLabel="" />
+										<f:selectItems value="#{dropdownBean.classes}"/>
+										<a4j:support event="onchange" reRender="subs3" ajaxSingle="true" />
+									</h:selectOneMenu>
+									<rich:message for="cls2" style="color: red;"/>
+									
+									<h:outputLabel for="subs3">Subject</h:outputLabel>
+									<h:selectOneMenu id="subs3" value="#{settingsBean.refOBJ.id2}" defaultLabel="Select a subject...">
+										<f:selectItems value="#{dropdownBean.getClassSubjects(settingsBean.refOBJ.id)}"/>
+										<a4j:support event="onchange" reRender="staffs2" ajaxSingle="true" />
+									</h:selectOneMenu>
+									<rich:message for="subs3" style="color: red;"/>
+								</h:panelGrid>
+							</div>
+							<div class="actionButtons">
+								<rich:toolBar>
+									<rich:toolBarGroup>
+									<a4j:commandButton value="Show Teachers for Selected Subject for Class" reRender="classSubStaffsPanel" />
+									</rich:toolBarGroup>
+								</rich:toolBar>
+							</div>
+						</rich:panel>
+						<rich:spacer height="15" />
+						<a4j:outputPanel id="classSubStaffsPanel">
+							<rich:dataTable id="classSubjectStaffs" value="#{settingsBean.classSubjectStaffs}" var="obj" rows="20" width="100%" rendered="#{settingsBean.classSubjectStaffs.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying selected subject teachers for selected class" />
+								</f:facet>
+								<rich:column sortBy="#{obj.staff_fn}" filterBy="#{obj.staff_fn}">
+									<f:facet name="header">Staff</f:facet>
+									<h:outputText value="#{obj.staff_fn} #{obj.staff_mn} #{obj.staff_ln}" />
+								</rich:column>
+								<rich:column align="center">
+									<f:facet name="header">Remove</f:facet>
+									<a4j:commandLink reRender="classSubStaffsPanel" value="Remove" />
+								</rich:column>
+							</rich:dataTable>
+							<h:outputText value="No teachers mapped for selected subject" rendered="#{empty settingsBean.classSubjectStaffs}"/>
+							<rich:datascroller id="dsclassSubjectStaffs" for="classSubjectStaffs" renderIfSinglePage="false" />
+						</a4j:outputPanel>
+						<rich:spacer height="15" />
+						<div class="dialog">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="staffs2">Possible teachers</h:outputLabel>
+								<h:selectOneMenu id="staffs2" value="#{settingsBean.refOBJ.id3}" defaultLabel="Select a staff...">
+									<f:selectItems value="#{dropdownBean.getSubjectStaffs(settingsBean.refOBJ.id2)}"/>
+								</h:selectOneMenu>
+								<rich:message for="staffs2" style="color: red;"/>
+							</h:panelGrid>
+						</div>
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<h:commandButton value="Map" action="#{settingsBean.MapStaffSubjecttoClass(1)}" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+					</rich:tab>
+				</rich:tabPanel>
+			</td>
+		</tr>
+	</table>
+	</div>
+</h:form>
+
+<rich:modalPanel id="newSubjectMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Insert / Update Subject"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newSubjectMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:350px;overflow:auto;">
+<h:form id="newSubjectForm">
+<rich:panel>
+	<f:facet name="header">
+	<h:outputText value="Subject details"/>
+	</f:facet>
+	
+	<div class="dialog">
+		<a4j:outputPanel id="messagepanel2">
+			<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		</a4j:outputPanel>
+	
+		<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+			<h:outputLabel for="sub_name">Subject name</h:outputLabel>
+			<h:inputText id="sub_name" value="#{settingsBean.subject.name}" required="true" size="35">
+				<rich:beanValidator/>
+			</h:inputText>
+			<rich:message for="sub_name" style="color: red;"/>
+			
+			<h:outputLabel for="sub_desc">Subject description</h:outputLabel>
+			<h:inputTextarea id="sub_desc" value="#{settingsBean.subject.desc}" required="true" style="width: 300px; height: 100px;">
+				<rich:beanValidator/>
+			</h:inputTextarea>
+			<rich:message for="sub_desc" style="color: red;"/>
+		</h:panelGrid>
+		
+		<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+				<a4j:commandButton value="Save" action="#{settingsBean.CreateSubject}" reRender="mypanel,newSubjectForm" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+				<a:commandLink onclick="#{rich:component('newSubjectMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+	</div>
+</rich:panel>
+</h:form>
+</div>
+</rich:modalPanel>
+</ui:composition>

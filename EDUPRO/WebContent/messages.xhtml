@@ -1,0 +1,265 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    template="WEB-INF/layout/basic_layout.xhtml">
+<ui:define name="pageTitle"> Messages</ui:define>
+<ui:define name="body">
+	<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Messages</span><br/>
+							<span style="font-size:16px;">Send and receive messages from users.</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('composeMessageMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Compose</a:commandLink>
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<h:form>
+			<rich:tabPanel id="messagesTab">
+				<rich:tab id="inboxTab" label="Inbox" immediate="true">
+					<rich:dataTable id="inbox" value="#{messagesBean.inbox}" var="obj" rows="100" width="100%">
+						<rich:column sortBy="#{obj.username}" filterBy="#{obj.username}">
+							<f:facet name="header">From</f:facet>
+							<h:commandLink view="/message.xhtml" action="#{messagesBean.setViewingMessage(obj, 1)}">
+								<h:outputText value="#{obj.sender_nm}" rendered="#{obj.status == 1}" style="font-weight:bold;" />
+								<h:outputText value="#{obj.sender_nm}" rendered="#{obj.status == 0}" />
+							</h:commandLink>
+						</rich:column>
+						<rich:column sortBy="#{obj.subject}" filterBy="#{obj.subject}">
+							<f:facet name="header">Subject</f:facet>
+							<h:commandLink view="/message.xhtml" action="#{messagesBean.setViewingMessage(obj, 1)}">
+							<h:outputText value="#{obj.subject}" rendered="#{obj.status == 1}" style="font-weight:bold;" />
+							<h:outputText value="#{obj.subject}" rendered="#{obj.status == 0}" />
+							</h:commandLink>
+						</rich:column>
+						<rich:column sortBy="#{obj.sent_dt}" filterBy="#{obj.sent_dt}">
+							<f:facet name="header">Date</f:facet>
+							<h:commandLink view="/message.xhtml" action="#{messagesBean.setViewingMessage(obj, 1)}">
+							<h:outputText value="#{obj.sent_dt}" rendered="#{obj.status == 1}" style="font-weight:bold;">
+								<f:convertDateTime type="date" dateStyle="long" />
+							</h:outputText>
+							<h:outputText value="#{obj.sent_dt}" rendered="#{obj.status == 0}">
+								<f:convertDateTime type="date" dateStyle="long" />
+							</h:outputText>
+							</h:commandLink>
+						</rich:column>
+						<rich:column>
+							<f:facet name="header"></f:facet>
+							<a4j:commandLink value="Delete" onclick="if(!confirm('Want to delete this message?'))return false;" action="#{messagesBean.DeleteMessage(obj)}" reRender="inbox,messagesTab" />
+						</rich:column>
+					</rich:dataTable>
+				</rich:tab>
+				<rich:tab id="sentTab" label="Sent" immediate="true">
+					<a4j:outputPanel id="sentPanel">
+					<rich:dataTable id="sent" value="#{messagesBean.sent}" var="obj" rows="100" width="100%">
+						<rich:column sortBy="#{obj.username}" filterBy="#{obj.username}">
+							<f:facet name="header">To</f:facet>
+							<h:commandLink view="/message.xhtml" action="#{messagesBean.setViewingMessage(obj, 2)}">
+							<rich:dataTable value="#{obj.to}" var="t" rows="1" width="100%">
+								<rich:column>
+								<h:outputText value="#{t.name}" rendered="#{obj.to.size() == 1}" />
+								<h:outputText value="#{t.name}; #{obj.to.get(1).name}" rendered="#{obj.to.size() == 2}" />
+								<h:outputText value="#{t.name}; #{obj.to.get(1).name}; ..." rendered="#{obj.to.size() > 2}" />
+								</rich:column>
+							</rich:dataTable>
+							</h:commandLink>
+						</rich:column>
+						<rich:column sortBy="#{obj.subject}" filterBy="#{obj.subject}">
+							<f:facet name="header">Subject</f:facet>
+							<h:commandLink view="/message.xhtml" action="#{messagesBean.setViewingMessage(obj, 2)}">
+							<h:outputText value="#{obj.subject}" />
+							</h:commandLink>
+						</rich:column>
+						<rich:column sortBy="#{obj.sent_dt}" filterBy="#{obj.sent_dt}">
+							<f:facet name="header">Date</f:facet>
+							<h:commandLink view="/message.xhtml" action="#{messagesBean.setViewingMessage(obj, 2)}">
+							<h:outputText value="#{obj.sent_dt}">
+								<f:convertDateTime type="date" dateStyle="long" />
+							</h:outputText>
+							</h:commandLink>
+						</rich:column>
+					</rich:dataTable>
+					</a4j:outputPanel>
+				</rich:tab>
+			</rich:tabPanel>
+			</h:form>
+		</td>
+	</tr>
+	</table>
+	</div>
+	
+	<rich:modalPanel id="composeMessageMP" minHeight="600" width="750" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Compose message"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('composeMessageMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:650px;overflow:auto;">
+	<h:form id="composeMessageForm">
+		<a4j:outputPanel id="messagepanel2">
+			<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		
+			<div style="width:30%;float:left;">
+			<rich:panel>
+				<f:facet name="header">
+				<h:outputText value="Add staff(s) to recipients list"/>
+				</f:facet>
+				
+				<div class="dialog">
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="scat">Staff Category</h:outputLabel>
+						<h:selectOneMenu id="scat" value="#{dropdownBean.staff_cat_id}" defaultLabel="Select a category...">
+							<f:selectItem itemValue="-1" itemLabel="" />
+							<f:selectItems value="#{dropdownBean.staffCategories}"/>
+							<a4j:support event="onchange" reRender="staffsPanel" ajaxSingle="true" />
+						</h:selectOneMenu>
+						<rich:message for="scat" style="color: red;"/>
+						
+						<h:outputLabel for="sdept">Staff Department</h:outputLabel>
+						<h:selectOneMenu id="sdept" value="#{dropdownBean.department_id}" defaultLabel="Select a department...">
+							<f:selectItem itemValue="-1" itemLabel="" />
+							<f:selectItems value="#{dropdownBean.departments}"/>
+							<a4j:support event="onchange" reRender="staffsPanel" ajaxSingle="true" />
+						</h:selectOneMenu>
+						<rich:message for="sdept" style="color: red;"/>
+					</h:panelGrid>
+					<br/>
+					<a4j:outputPanel id="staffsPanel">
+					<rich:dataTable id="staffs" value="#{dropdownBean.staffs}" var="obj" rows="50" width="100%" rendered="#{dropdownBean.staffs.size() > 0}">
+						<rich:column sortBy="#{obj.staff_fn}" filterBy="#{obj.staff_fn}">
+							<h:outputText value="#{obj.staff_fn} #{obj.staff_mn} #{obj.staff_ln}" />
+						</rich:column>
+						<rich:column align="center">
+							<f:facet name="header">Add</f:facet>
+							<a4j:commandLink reRender="messagepanel2" value="Add" immediate="true" action="#{messagesBean.AddRecipient('S', obj.staff_id, obj.staff_fn, obj.staff_mn, obj.staff_ln)}" />
+						</rich:column>
+					</rich:dataTable>
+					</a4j:outputPanel>
+				</div>
+			</rich:panel>
+			<br/>
+			<rich:panel>
+				<f:facet name="header">
+				<h:outputText value="Add student(s) to recipients list"/>
+				</f:facet>
+				<div class="dialog">
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="cls2">Class</h:outputLabel>
+						<h:selectOneMenu id="cls2" value="#{dropdownBean.class_id}" defaultLabel="Select a class...">
+							<f:selectItem itemValue="-1" itemLabel="" />
+							<f:selectItems value="#{dropdownBean.classes}"/>
+							<a4j:support event="onchange" reRender="studentsPanel" ajaxSingle="true" />
+						</h:selectOneMenu>
+						<rich:message for="cls2" style="color: red;"/>
+					</h:panelGrid>
+					<br/>
+					<a4j:outputPanel id="studentsPanel">
+					<rich:dataTable id="students" value="#{dropdownBean.students}" var="obj" rows="100" width="100%" rendered="#{dropdownBean.students.size() > 0}">
+						<rich:column sortBy="#{obj.student_fn}" filterBy="#{obj.student_fn}">
+							<h:outputText value="#{obj.student_fn} #{obj.student_mn} #{obj.student_ln}" />
+						</rich:column>
+						<rich:column align="center">
+							<f:facet name="header">Add</f:facet>
+							<a4j:commandLink reRender="messagepanel2" value="Add" ajaxSingle="true" action="#{messagesBean.AddRecipient('ST', obj.student_id, obj.student_fn, obj.student_mn, obj.student_ln)}" />
+						</rich:column>
+					</rich:dataTable>
+					</a4j:outputPanel>
+				</div>
+			</rich:panel>
+			</div>
+			<div style="width:67%;float:right;">
+			<rich:panel>
+				<f:facet name="header">
+				<h:outputText value="Recipients"/>
+				</f:facet>
+				
+				<div class="dialog">
+					<rich:dataTable id="recipients" value="#{messagesBean.messageToSend.to}" var="obj" rows="20" width="100%" rendered="#{messagesBean.messageToSend.to.size() > 0}">
+						<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}">
+							<h:outputText value="#{obj.name}" />
+						</rich:column>
+						<rich:column align="center">
+							<f:facet name="header">Remove</f:facet>
+							<a4j:commandLink reRender="messagepanel2" value="Remove" immediate="true" action="#{messagesBean.RemoveRecipient(obj.username)}" />
+						</rich:column>
+					</rich:dataTable>
+				</div>
+			</rich:panel>
+			<br/>
+			<rich:panel>
+				<f:facet name="header">
+				<h:outputText value="Message"/>
+				</f:facet>
+				
+				<div class="dialog">
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="messSub">Subject</h:outputLabel>
+						<h:inputText id="messSub" value="#{messagesBean.messageToSend.subject}" size="48" />
+						<rich:message for="messSub" style="color: red;"/>
+						
+						<h:outputLabel for="messBody">Message</h:outputLabel>
+						<h:inputTextarea id="messBody" value="#{messagesBean.messageToSend.body}" style="width: 300px; height: 100px;" />
+						<rich:message for="messBody" style="color: red;"/>
+					</h:panelGrid>
+				</div>
+				<div class="actionButtons">
+					<rich:toolBar>
+						<rich:toolBarGroup>
+						<a4j:commandButton value="Send" onclick="if(document.getElementById('composeMessageForm:messSub').value == ''){return confirm('Want to send a message with a blank title?');}" action="#{messagesBean.SendMessage}" reRender="messagepanel2,sentPanel" />
+						</rich:toolBarGroup>
+					</rich:toolBar>
+				</div>
+			</rich:panel>
+			</div>
+		</a4j:outputPanel>
+	</h:form>
+	</div>
+	<div class="actionButtons">
+		<rich:toolBar>
+			<rich:toolBarGroup location="right">
+			<a:commandLink onclick="#{rich:component('composeMessageMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+			</rich:toolBarGroup>
+		</rich:toolBar>
+	</div>
+	</rich:modalPanel>
+</ui:define>
+</ui:composition>

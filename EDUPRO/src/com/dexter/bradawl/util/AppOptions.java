@@ -1,0 +1,165 @@
+package com.dexter.bradawl.util;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.annotations.Synchronized;
+
+import com.dexter.bradawl.dto.School;
+import com.dexter.bradawl.dto.Session;
+import com.dexter.bradawl.dto.Term;
+import com.dexter.bradawl.model.OptionModel;
+import com.dexter.bradawl.model.SessionModel;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
+@Name("appOptions")
+@Scope(ScopeType.APPLICATION)
+@Startup
+@Synchronized
+public class AppOptions implements java.io.Serializable
+{
+	private static final long serialVersionUID = 1L;
+	
+	private String defaultSkin;
+	private List<String> availableSkins;
+	
+	private String fileSavePath;
+	
+	private boolean appSetup;
+	
+	private School school;
+	
+	private Session session;
+	private ArrayList<Term> sessionTerms;
+	private Term currentTerm;
+	
+	private int ranNum;
+	
+	Random rnd = new Random(10000000);
+	
+	public AppOptions()
+	{
+		setAppSetup(new Utils().checkAppSetup());
+		if(getAppSetup())
+		{
+			school = new OptionModel().getSchool();
+		}
+	}
+	
+	public void reloadSchool()
+	{
+		if(getAppSetup())
+		{
+			school = new OptionModel().getSchool();
+		}
+	}
+	
+	public boolean getAppSetup()
+	{
+		return appSetup;
+	}
+	
+	public void setAppSetup(boolean appSetup)
+	{
+		this.appSetup = appSetup;
+	}
+	
+	public String getDefaultSkin()
+	{
+		return defaultSkin;
+	}
+	
+	public void setDefaultSkin(String defaultSkin)
+	{
+		this.defaultSkin = defaultSkin;
+	}
+	
+	public List<String> getAvailableSkins()
+	{
+		return availableSkins;
+	}
+	
+	public void setAvailableSkins(List<String> availableSkins)
+	{
+		this.availableSkins = availableSkins;
+	}
+	
+	public String getFileSavePath()
+	{
+		return fileSavePath;
+	}
+	
+	public void setFileSavePath(String fileSavePath)
+	{
+		this.fileSavePath = fileSavePath;
+	}
+
+	public School getSchool()
+	{
+		if(school == null)
+			school = new OptionModel().getSchool();
+		
+		return school;
+	}
+	
+	public Session getSession()
+	{
+		if(session == null)
+			session = new SessionModel().GetCurrentSession();
+		
+		return session;
+	}
+	
+	public void setSession(Session session)
+	{
+		this.session = session;
+	}
+	
+	public Term getCurrentTerm()
+	{
+		if(currentTerm == null)
+		{
+			ArrayList<Term> list = getSessionTerms();
+			for(Term term : list)
+			{
+				if(term.getTerm_end_dt() == null || (term.getTerm_end_dt() != null && term.getTerm_end_dt().after(new Date())))
+				{
+					currentTerm = term;
+					break;
+				}
+			}
+		}
+		
+		return currentTerm;
+	}
+	
+	public void setCurrentTerm(Term currentTerm)
+	{
+		this.currentTerm = currentTerm;
+	}
+	
+	public ArrayList<Term> getSessionTerms()
+	{
+		if(getSession() != null)
+		{
+			sessionTerms = new SessionModel().GetSessionTerms(session.getSession_id());
+		}
+		
+		return sessionTerms;
+	}
+
+	public int getRanNum() {
+		reRan();
+		return ranNum;
+	}
+	
+	public void reRan()
+	{
+		ranNum = rnd.nextInt();
+	}
+}

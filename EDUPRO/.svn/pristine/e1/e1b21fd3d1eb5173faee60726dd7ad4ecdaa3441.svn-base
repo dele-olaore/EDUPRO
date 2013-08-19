@@ -1,0 +1,58 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    template="WEB-INF/layout/basic_layout.xhtml">
+<ui:define name="pageTitle"> Staffs</ui:define>
+<ui:define name="body">
+	<div style="width: 800px" align="center">
+		<table width="100%" cellspacing="2" cellpadding="2">
+		<tr>
+			<td align="left">
+				<table>
+					<tr>
+						<td valign="top" align="left">
+							<p>
+								<span style="font-size:30px;font-weight:bold;color:#888;">Manage Staffs</span><br/>
+								<span style="font-size:16px;">Create and manage staffs</span>
+							</p>
+						</td>
+						<td valign="bottom" align="right">
+							<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<rich:spacer height="2" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<rich:tabPanel id="staffsTab">
+					<rich:tab id="catTab" label="Staff departments">
+						<ui:include src="staff_departments.xhtml"/>
+					</rich:tab>
+					<rich:tab id="createStaffTab" label="Create a new staff">
+						<ui:include src="create_staff.xhtml"/>
+					</rich:tab>
+					<rich:tab id="viewStaffsTab" label="View and update staffs">
+						<ui:include src="view_staffs.xhtml"/>
+					</rich:tab>
+				</rich:tabPanel>
+			</td>
+		</tr>
+		</table>
+	</div>
+</ui:define>
+</ui:composition>

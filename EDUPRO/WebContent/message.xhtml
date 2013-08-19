@@ -1,0 +1,113 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    template="WEB-INF/layout/basic_layout.xhtml">
+<ui:define name="pageTitle"> Message</ui:define>
+<ui:define name="body">
+	<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Message</span><br/>
+							<span style="font-size:16px;">Viewing selected message</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:150px;">
+									<s:link view="/messages.xhtml">Back to messages</s:link>
+								</li>
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<!-- <a:commandLink onclick="return false;#{rich:component('forwardMessageMP')}.show();" styleClass="image-command-link">Mark as unread</a:commandLink> -->
+									Mark as unread
+								</li>
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<!-- <a:commandLink onclick="return false;#{rich:component('forwardMessageMP')}.show();" styleClass="image-command-link">Forward</a:commandLink> -->
+									Forward
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<h:form>
+				<rich:panel style="width:100%">
+					<h:outputText value="From: #{messagesBean.viewingMessage.sender_nm}" style="font-size: 24px" /><br/><br/>
+					<div style="float:left;width:48%">
+						<h:outputText value="Subject: #{messagesBean.viewingMessage.subject}" style="font-size: 20px" />
+					</div>
+					<div style="float:right;width:48%;text-align:right">
+						<h:outputText value="Sent: #{messagesBean.viewingMessage.sent_dt}" style="color:#888;font-size: 20px">
+							<f:convertDateTime type="date" dateStyle="long" />
+						</h:outputText>
+					</div>
+					<div>
+						<br/><br/><br/><br/>
+						<h:outputText value="Message:" style="font-size: 14px" /> <br/><br/>
+						<h:inputTextarea value="#{messagesBean.viewingMessage.body}" disabled="true" style="font-size:16px;width:98%;height:300px;" />
+					</div>
+				</rich:panel>
+				<br/><br/>
+				<a4j:commandButton value="Reply" onclick="bDown()">
+					
+				</a4j:commandButton>
+			</h:form>
+			<rich:effect for="window" event="onload" type="BlindUp" params="targetId:'replyPanel',duration:0.0" />
+			<rich:effect name="bDown" for="replyPanel" type="BlindDown" params="duration:0.8" />
+			<rich:effect name="bUp" for="replyPanel" type="BlindUp" params="duration:0.8" />
+			<rich:panel id="replyPanel">
+				<div class="dialog">
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="messBody">Message</h:outputLabel>
+						<h:inputTextarea id="messBody" value="#{messagesBean.messageToSend.reply_body}" style="width: 300px; height: 100px;" />
+						<rich:message for="messBody" style="color: red;"/>
+					</h:panelGrid>
+				</div>
+				<div class="actionButtons">
+					<rich:toolBar>
+						<rich:toolBarGroup>
+						<!-- <a4j:commandButton value="Send" /> -->
+						Send
+						</rich:toolBarGroup>
+						<rich:toolBarGroup location="right">
+						<a4j:commandButton value="Close"  onclick="bUp()"/>
+						</rich:toolBarGroup>
+					</rich:toolBar>
+				</div>
+			</rich:panel>
+		</td>
+	</tr>
+</table>
+</div>
+</ui:define>
+</ui:composition>

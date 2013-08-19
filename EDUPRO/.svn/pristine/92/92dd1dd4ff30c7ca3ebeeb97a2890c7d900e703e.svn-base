@@ -1,0 +1,160 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="staffForm">
+
+	<table width="100%" cellspacing="2" cellpadding="2">
+		<tr>
+			<td>
+				<rich:spacer height="2" />
+				<a4j:outputPanel id="messagepanel">
+					<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+				</a4j:outputPanel>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<rich:panel>
+					<f:facet name="header">
+					<h:outputText value="Staff details"/>
+					</f:facet>
+					
+					<div class="dialog">
+						<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+							<h:outputLabel for="fname">First name</h:outputLabel>
+							<h:inputText id="fname" value="#{staffBean.staff.staff_fn}" required="true" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="fname" style="color: red;"/>
+							
+							<h:outputLabel for="mname">Middle name</h:outputLabel>
+							<h:inputText id="mname" value="#{staffBean.staff.staff_mn}" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="mname" style="color: red;"/>
+							
+							<h:outputLabel for="lname">Last name</h:outputLabel>
+							<h:inputText id="lname" value="#{staffBean.staff.staff_ln}" required="true" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="lname" style="color: red;"/>
+							
+							<h:outputLabel for="scat">Category</h:outputLabel>
+							<h:selectOneMenu id="scat" value="#{staffBean.staff.staff_cat_id}" defaultLabel="Select a category...">
+								<f:selectItems value="#{dropdownBean.staffCategories}"/>
+							</h:selectOneMenu>
+							<rich:message for="scat" style="color: red;"/>
+							
+							<h:outputLabel for="sdept">Department</h:outputLabel>
+							<h:selectOneMenu id="sdept" value="#{staffBean.staff.department_id}" defaultLabel="Select a department...">
+								<f:selectItems value="#{dropdownBean.departments}"/>
+							</h:selectOneMenu>
+							<rich:message for="sdept" style="color: red;"/>
+							
+							<h:outputLabel for="empdate">Employed date</h:outputLabel>
+							<rich:calendar id="empdate" value="#{staffBean.staff.dt_employed}" locale="us" datePattern="yyyy-MM-dd">
+								<rich:beanValidator/>
+							</rich:calendar>
+							<rich:message for="empdate" style="color: red;"/>
+							
+							<h:outputLabel for="sphoto">Photo</h:outputLabel>
+							<rich:fileUpload id="sphoto" acceptedTypes="gif,jpg,png" allowFlash="auto" autoclear="false" maxFilesQuantity="1" immediateUpload="true" 
+								fileUploadListener="#{staffBean.sphotolisterner}">
+								<a:support event="onuploadcomplete" ajaxSingle="true" />
+							</rich:fileUpload>
+							<rich:message for="sphoto" style="color: red;"/>
+						</h:panelGrid>
+					</div>
+				</rich:panel>
+				
+				<rich:panel>
+					<f:facet name="header">
+					<h:outputText value="Address details"/>
+					</f:facet>
+					
+					<div class="dialog">
+						<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+							<h:outputLabel for="saddr1">Address line 1</h:outputLabel>
+							<h:inputText id="saddr1" value="#{staffBean.staff.address.addr1}" required="true" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="saddr1" style="color: red;"/>
+							
+							<h:outputLabel for="saddr2">Address line 2</h:outputLabel>
+							<h:inputText id="saddr2" value="#{staffBean.staff.address.addr2}" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="saddr2" style="color: red;"/>
+							
+							<h:outputLabel for="sph1">Phone 1</h:outputLabel>
+							<h:inputText id="sph1" value="#{staffBean.staff.address.phone1}" required="true" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="sph1" style="color: red;"/>
+							
+							<h:outputLabel for="sph2">Phone 2</h:outputLabel>
+							<h:inputText id="sph2" value="#{staffBean.staff.address.phone2}" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="sph2" style="color: red;"/>
+							
+							<h:outputLabel for="semil">Email</h:outputLabel>
+							<h:inputText id="semil" value="#{staffBean.staff.address.email}" required="true" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="semil" style="color: red;"/>
+						</h:panelGrid>
+					</div>
+				</rich:panel>
+				
+				<rich:panel>
+					<f:facet name="header">
+					<h:outputText value="User account details"/>
+					</f:facet>
+					
+					<div class="dialog">
+						<h:panelGrid id="suGrid" columns="2" rowClasses="prop" columnClasses="name,value">
+							<h:outputLabel for="suact">Staff should have a user account?</h:outputLabel>
+							<h:selectBooleanCheckbox id="suact" value="#{staffBean.staff.hasUser}">
+								<a4j:support event="onchange" reRender="surGridPanel" ajaxSingle="true" />
+							</h:selectBooleanCheckbox>
+						</h:panelGrid>
+					
+						<a4j:outputPanel id="surGridPanel">
+						<h:panelGrid id="surGrid" columns="3" rowClasses="prop" columnClasses="name,value,validatormsg" rendered="#{staffBean.staff.hasUser}">
+							<h:outputLabel for="surole">Role</h:outputLabel>
+							<h:selectOneMenu id="surole" value="#{staffBean.staff.user.role_id}" required="true" defaultLabel="Select an account role...">
+								<f:selectItems value="#{dropdownBean.roles}"/>
+							</h:selectOneMenu>
+							<rich:message for="surole" style="color: red;"/>
+							
+							<h:outputLabel for="semil2">Verify email</h:outputLabel>
+							<h:inputText id="semil2" value="#{staffBean.staff.email}" required="true" size="35">
+								<rich:beanValidator/>
+							</h:inputText>
+							<rich:message for="semil2" style="color: red;"/>
+						</h:panelGrid>
+						</a4j:outputPanel>
+					</div>
+					
+				</rich:panel>
+				
+				<div class="actionButtons">
+					<rich:toolBar>
+						<rich:toolBarGroup>
+						<h:commandButton value="Save" action="#{staffBean.CreateNewStaff}" />
+						</rich:toolBarGroup>
+					</rich:toolBar>
+				</div>
+			</td>
+		</tr>
+	</table>
+	
+</h:form>
+</ui:composition>

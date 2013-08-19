@@ -1,0 +1,62 @@
+<rich:toolBar xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:c="http://java.sun.com/jstl/core"
+    itemSeparator="square">
+<f:loadBundle basename="resources.messages" var="bundle"/>
+
+	<rich:toolBarGroup location="left">
+		<h:form id="dashForm">
+			<h:commandLink id="dashboard" action="#{authenticator.Dashboard}" value="Dashboard" rendered="#{authenticator.user != null}"/>
+		</h:form>
+		
+		<c:forEach items="${authenticator.modules}" var="module">
+			<h:form>
+				<rich:dropDownMenu value="#{module.name} module" rendered="#{authenticator.user != null}">
+					<c:forEach items="${authenticator.functions.get(module.id)}" var="func">
+						<rich:menuItem submitMode="none">
+							<s:link view="/#{func.func_page}" value="#{func.name}" />
+						</rich:menuItem>
+						<rich:menuSeparator/>
+					</c:forEach>
+				</rich:dropDownMenu>
+			</h:form>
+		</c:forEach>
+	</rich:toolBarGroup>
+	
+	<rich:toolBarGroup location="center" style="text-align:center" rendered="#{authenticator.user != null}">
+		<c:if test="${settingsBean.session != null}">
+			<span style="text-align:center">
+			<span><b><h:outputText value="#{appOptions.session.session_nm} | #{appOptions.currentTerm.term_nm} " /><h:outputText value="Term starts: #{appOptions.currentTerm.term_st_dt}" /></b></span>
+			</span>
+		</c:if>
+		<c:if test="${settingsBean.session == null}">
+			<span style="font-size:16px;color:red">No session available!</span>
+		</c:if>
+	</rich:toolBarGroup>
+	
+	<rich:toolBarGroup location="right" rendered="#{authenticator.user != null}">
+		<h:form>
+		<rich:dropDownMenu value="#{bundle['org.jboss.seam.loginSuccessful2']} #{authenticator.user.username} (#{authenticator.user.role_nm})">
+			<rich:menuItem submitMode="none">
+				<s:link view="/changepassword.xhtml" value="Change Password" />
+			</rich:menuItem>
+			<rich:menuSeparator/>
+			<rich:menuItem submitMode="none">
+				<s:link view="/passwordresetq.xhtml" value="Password Reset Questions" />
+			</rich:menuItem>
+		</rich:dropDownMenu>
+		</h:form>
+		<span style="vertical-align: middle;">
+		<s:link view="/messages.xhtml" rendered="#{authenticator.user != null}">
+			<h:graphicImage url="/images/messages.png" alt="Messages" width="24px" height="24px"/>
+			<h:outputText value="(#{messagesBean.unread})" height="24px" />
+		</s:link>
+		</span>
+		<h:form id="logoutForm"><h:commandLink id="logout" action="#{authenticator.signOut}" value="Sign Out" rendered="#{authenticator.user != null}"/></h:form>
+	</rich:toolBarGroup>
+
+</rich:toolBar>

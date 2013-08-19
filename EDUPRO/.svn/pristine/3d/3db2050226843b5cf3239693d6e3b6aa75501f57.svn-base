@@ -1,0 +1,142 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="refsForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Clubs</span><br/>
+							<span style="font-size:16px;">Create and manage various clubs within the school system</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newRefMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Add new</a:commandLink>
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<a4j:outputPanel id="mypanel">
+			<rich:dataTable id="refs" value="#{settingsBean.clubs}" var="obj" rows="20" width="100%" rendered="#{settingsBean.clubs.size() > 0}">
+			<f:facet name="header">
+				<h:outputText value="Displaying available clubs" />
+			</f:facet>
+			<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}" style="vertical-align: top">
+				<f:facet name="header">Club</f:facet>
+				<h:outputText value="#{obj.name}" rendered="#{obj.id != settingsBean.refOBJ.id}" />
+				<h:inputText value="#{obj.name}" size="40" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+			</rich:column>
+			<rich:column style="vertical-align: top">
+				<f:facet name="header">Description</f:facet>
+				<h:outputText value="#{obj.desc}" rendered="#{obj.id != settingsBean.refOBJ.id}" />
+				<h:inputText value="#{obj.desc}" size="40" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+			</rich:column>
+			<rich:column align="center" style="vertical-align: top">
+				<f:facet name="header">Update</f:facet>
+				<a4j:commandLink reRender="refs" value="Update" rendered="#{obj.id != settingsBean.refOBJ.id}">
+					<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.refOBJ}"/>
+				</a4j:commandLink>
+				
+				<a4j:commandLink reRender="refs,messagepanel" action="#{settingsBean.UpdateRefObject(6)}" value="SAVE" rendered="#{obj.id == settingsBean.refOBJ.id}">
+					<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.refOBJ}"/>
+				</a4j:commandLink>
+				
+				<h:outputText value=" - " rendered="#{obj.id == settingsBean.refOBJ.id}" />
+				
+				<a4j:commandLink reRender="refs" action="#{settingsBean.reset}" value="CANCEL" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+				
+			</rich:column>
+			</rich:dataTable>
+			<h:outputText value="No clubs found" rendered="#{empty settingsBean.clubs}"/>
+			<rich:datascroller id="dsrefs" for="refs" renderIfSinglePage="false" reRender="mypanel" />
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	</table>
+</div>
+</h:form>
+
+<rich:modalPanel id="newRefMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Create new Club"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newRefMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:350px;overflow:auto;">
+<h:form id="newRefForm">
+<rich:panel>
+	<f:facet name="header">
+	<h:outputText value="Club details"/>
+	</f:facet>
+	
+	<div class="dialog">
+		<a4j:outputPanel id="messagepanel2">
+			<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		</a4j:outputPanel>
+	
+		<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+			<h:outputLabel for="trname">Club</h:outputLabel>
+			<h:inputText id="rname" value="#{settingsBean.refOBJ.name}" required="true" size="35">
+				<rich:beanValidator/>
+			</h:inputText>
+			<rich:message for="rname" style="color: red;"/>
+			
+			<h:outputLabel for="rdesc">Club description</h:outputLabel>
+			<h:inputTextarea id="rdesc" value="#{settingsBean.refOBJ.desc}" required="true" style="width: 300px; height: 100px;">
+				<rich:beanValidator/>
+			</h:inputTextarea>
+			<rich:message for="rdesc" style="color: red;"/>
+		</h:panelGrid>
+		
+		<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+				<a4j:commandButton value="Save" action="#{settingsBean.CreateRefObject(6)}" reRender="mypanel,newRefForm" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+				<a:commandLink onclick="#{rich:component('newRefMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+	</div>
+</rich:panel>
+</h:form>
+</div>
+</rich:modalPanel>
+
+</ui:composition>

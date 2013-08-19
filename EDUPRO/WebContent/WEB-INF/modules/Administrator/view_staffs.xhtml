@@ -1,0 +1,307 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="staffsViewForm">
+
+	<table width="100%" cellspacing="2" cellpadding="2">
+		<tr>
+			<td>
+				<rich:spacer height="2" />
+				<a4j:outputPanel id="messagepanel">
+					<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+				</a4j:outputPanel>
+			</td>
+		</tr>
+		
+		<tr>
+			<td colspan="2">
+				<a4j:outputPanel id="mypanel">
+				<c:if test="${staffBean.staffs.size() > 0}">
+				<c:if test="${staffBean.viewingStaff.staff_id > 0}">
+					<a4j:commandLink reRender="mypanel" value="Back to search result" action="#{staffBean.setViewingStaff(null)}" immediate="true" /> -> <h:outputText value=" #{staffBean.viewingStaff.staff_fn} #{staffBean.viewingStaff.staff_mn} #{staffBean.viewingStaff.staff_ln} " />
+					
+					<div class="dialog" style="text-align: center">
+						<a4j:outputPanel id="picPanel">
+						<h:graphicImage url="/uploads/school/staffs/#{staffBean.viewingStaff.staff_id}?ranNum=#{appOptions.ranNum}" alt="#{staffBean.viewingStaff.staff_fn} #{staffBean.viewingStaff.staff_mn} #{staffBean.viewingStaff.staff_ln}" width="120px" height="120px" />
+						</a4j:outputPanel>
+					</div>
+					<div class="dialog">
+						<rich:tabPanel id="staffTab">
+							<rich:tab id="pdTab" label="Staff details">
+								<rich:panel>
+									<f:facet name="header">
+									<h:outputText value="Personal details"/>
+									</f:facet>
+									<div class="dialog">
+									<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+										<h:outputLabel for="sfn">First name</h:outputLabel>
+										<h:inputText id="sfn" value="#{staffBean.viewingStaff.staff_fn}" required="true" size="35">
+											<rich:beanValidator/>
+										</h:inputText>
+										<rich:message for="sfn" style="color: red;"/>
+										
+										<h:outputLabel for="smn">Middle name</h:outputLabel>
+										<h:inputText id="smn" value="#{staffBean.viewingStaff.staff_mn}" required="false" size="35">
+											<rich:beanValidator/>
+										</h:inputText>
+										<rich:message for="smn" style="color: red;"/>
+										
+										<h:outputLabel for="sln">Last name</h:outputLabel>
+										<h:inputText id="sln" value="#{staffBean.viewingStaff.staff_ln}" required="true" size="35">
+											<rich:beanValidator/>
+										</h:inputText>
+										<rich:message for="sln" style="color: red;"/>
+										
+										<h:outputLabel for="scat2">Category</h:outputLabel>
+										<h:selectOneMenu id="scat2" value="#{staffBean.viewingStaff.staff_cat_id}" defaultLabel="Select a category...">
+											<f:selectItems value="#{dropdownBean.staffCategories}"/>
+										</h:selectOneMenu>
+										<rich:message for="scat2" style="color: red;"/>
+										
+										<h:outputLabel for="sdept2">Department</h:outputLabel>
+										<h:selectOneMenu id="sdept2" value="#{staffBean.viewingStaff.department_id}" defaultLabel="Select a department...">
+											<f:selectItems value="#{dropdownBean.departments}"/>
+										</h:selectOneMenu>
+										<rich:message for="sdept2" style="color: red;"/>
+										
+										<h:outputLabel for="empdate">Employed date</h:outputLabel>
+										<rich:calendar id="empdate" value="#{staffBean.viewingStaff.dt_employed}" locale="us" datePattern="yyyy-MM-dd">
+											<rich:beanValidator/>
+										</rich:calendar>
+										<rich:message for="empdate" style="color: red;"/>
+									</h:panelGrid>
+									</div>
+								</rich:panel>
+								<rich:spacer height="20" />
+								<rich:panel>
+									<f:facet name="header">
+									<h:outputText value="Address details"/>
+									</f:facet>
+									
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="saddr1">Address line 1</h:outputLabel>
+											<h:inputText id="saddr1" value="#{staffBean.viewingStaff.address.addr1}" required="true" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="saddr1" style="color: red;"/>
+											
+											<h:outputLabel for="saddr2">Address line 2</h:outputLabel>
+											<h:inputText id="saddr2" value="#{staffBean.viewingStaff.address.addr2}" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="saddr2" style="color: red;"/>
+											
+											<h:outputLabel for="sph1">Phone 1</h:outputLabel>
+											<h:inputText id="sph1" value="#{staffBean.viewingStaff.address.phone1}" required="true" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="sph1" style="color: red;"/>
+											
+											<h:outputLabel for="sph2">Phone 2</h:outputLabel>
+											<h:inputText id="sph2" value="#{staffBean.viewingStaff.address.phone2}" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="sph2" style="color: red;"/>
+											
+											<h:outputLabel for="semil">Email</h:outputLabel>
+											<h:inputText id="semil" value="#{staffBean.viewingStaff.address.email}" required="true" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="semil" style="color: red;"/>
+										</h:panelGrid>
+									</div>
+								</rich:panel>
+								<rich:spacer height="20" />
+								<rich:panel>
+									<f:facet name="header">
+									<h:outputText value="User Account details"/>
+									</f:facet>
+									
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg" rendered="#{staffBean.viewingStaff.user.username != null and staffBean.viewingStaff.user.username.length() > 0}">
+											<h:outputLabel for="uaccnm">Username</h:outputLabel>
+											<h:outputText id="uaccnm" value="#{staffBean.viewingStaff.user.username}" />
+											<rich:message for="uaccnm" style="color: red;"/>
+											
+											<h:outputLabel for="uaccpwr">Reset Password?</h:outputLabel>
+											<h:selectBooleanCheckbox id="uaccpwr" value="#{staffBean.viewingStaff.user.resetPassword}" />
+											<rich:message for="uaccpwr" style="color: red;"/>
+										</h:panelGrid>
+										
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg" rendered="#{staffBean.viewingStaff.user.username == null or staffBean.viewingStaff.user.username.length() == 0}">
+											<h:outputLabel for="uaccnew">Create User Account?</h:outputLabel>
+											<h:selectBooleanCheckbox id="uaccnew" value="#{staffBean.viewingStaff.user.createAccount}" />
+											<rich:message for="uaccnew" style="color: red;"/>
+											
+										</h:panelGrid>
+									</div>
+								</rich:panel>
+								<rich:spacer height="20" />
+								<rich:panel>
+									<f:facet name="header">
+									<h:outputText value="Account Status details"/>
+									</f:facet>
+									
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="accstat">Account status</h:outputLabel>
+											<h:selectOneMenu id="accstat" value="#{staffBean.viewingStaff.status_id}" defaultLabel="Select an account status...">
+												<f:selectItem itemValue="1" itemLabel="Active" />
+												<f:selectItem itemValue="-1" itemLabel="Not Active / Suspended" />
+											</h:selectOneMenu>
+											<rich:message for="accstat" style="color: red;"/>
+										</h:panelGrid>
+									</div>
+								</rich:panel>
+								<rich:spacer height="20" />
+								<rich:panel>
+									<f:facet name="header">
+									<h:outputText value="Update picture"/>
+									</f:facet>
+									
+									<div class="dialog">
+										<h:panelGrid columns="1" rowClasses="prop">
+											<rich:fileUpload id="staff_picture" acceptedTypes="gif,jpg,png" allowFlash="auto" autoclear="false" maxFilesQuantity="1" immediateUpload="true" 
+												fileUploadListener="#{staffBean.sphotolisterner}">
+												<a:support event="onuploadcomplete" ajaxSingle="true" reRender="picPanel" />
+											</rich:fileUpload>
+										</h:panelGrid>
+									</div>
+								</rich:panel>
+								
+								<div class="actionButtons">
+									<rich:toolBar>
+										<rich:toolBarGroup>
+										<h:commandButton value="Update" action="#{staffBean.UpdateStaff}" />
+										</rich:toolBarGroup>
+									</rich:toolBar>
+								</div>
+							</rich:tab>
+						</rich:tabPanel>
+					</div>
+				</c:if>
+				<c:if test="${staffBean.staffs.size() > 0 and staffBean.viewingStaff.staff_id == 0}">
+				<a4j:outputPanel id="staffsPanel">
+				<rich:dataTable id="staffs" value="#{staffBean.staffs}" var="obj" rows="20" width="100%" rendered="#{staffBean.staffs.size() > 0}">
+				<f:facet name="header">
+					<h:outputText value="Displaying found staffs" />
+				</f:facet>
+				
+				<rich:column style="vertical-align: top" sortBy="#{obj.staff_fn} #{obj.staff_ln}" filterBy="#{obj.staff_fn} #{obj.staff_ln}">
+					<f:facet name="header">Name</f:facet>
+					<h:outputText value="#{obj.staff_fn} #{obj.staff_mn} #{obj.staff_ln}"/>
+				</rich:column>
+				<rich:column style="vertical-align: top">
+					<f:facet name="header">Address</f:facet>
+					<h:outputText value="#{obj.address.addr1}, #{obj.address.addr2}"/>
+					<br/>
+					Phone 1: <h:outputText value=" #{obj.address.phone1}"/>
+					<br/>
+					Phone 2: <h:outputText value=" #{obj.address.phone2}"/>
+					<br/>
+					Email: <h:outputText value=" #{obj.address.email}"/>
+				</rich:column>
+				<rich:column style="vertical-align: top">
+					<f:facet name="header">Details</f:facet>
+					Category: <h:outputText value="#{obj.staff_cat_nm}"/>
+					<br/>
+					Department: <h:outputText value="#{obj.department_nm}"/>
+					<br/>
+					Date employed: <h:outputText value="#{obj.dt_employed}"/>
+				</rich:column>
+				<rich:column style="vertical-align: top">
+					<f:facet name="header">User Account</f:facet>
+					Username: <h:outputText value=" #{obj.user.username}" rendered="#{obj.user.username != null and obj.user.username.length() > 0}"/><h:outputText value=" No user account" rendered="#{obj.user.username == null or obj.user.username.length() == 0}"/>
+					<br/><br/>
+					<a4j:commandLink reRender="mypanel" value="Reset Password" action="#{staffBean.ResetStaffPassword}" immediate="true" rendered="#{obj.user.username != null and obj.user.username.length() > 0}">
+						<f:setPropertyActionListener value="#{obj}" target="#{staffBean.viewingStaff}"/>
+					</a4j:commandLink>
+				</rich:column>
+				<rich:column style="vertical-align: top">
+					<f:facet name="header">Status</f:facet>
+					<h:outputText value="#{obj.status_nm}"/>
+				</rich:column>
+				<rich:column style="vertical-align: top">
+					<f:facet name="header">Action</f:facet>
+					<a4j:commandLink reRender="mypanel" value="View" action="#{staffBean.ViewStaff}" immediate="true">
+						<f:setPropertyActionListener value="#{obj}" target="#{staffBean.viewingStaff}"/>
+					</a4j:commandLink>
+				</rich:column>
+				</rich:dataTable>
+				<h:outputText value="No record found!" rendered="#{staffBean.staffs.size() == 0 and staffBean.staff.staff_fn != null}"/>
+				<rich:datascroller id="dsstaffsPanel" for="staffs" renderIfSinglePage="false" reRender="staffsPanel, staffs" />
+				</a4j:outputPanel>
+				</c:if>
+				<rich:spacer height="20" />
+				</c:if>
+				
+				<c:if test="${staffBean.viewingStaff.staff_id == 0}">
+					<rich:panel>
+						<f:facet name="header">
+						<h:outputText value="Search details"/>
+						</f:facet>
+						
+						<div class="dialog">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="scat">Category</h:outputLabel>
+								<h:selectOneMenu id="scat" value="#{staffBean.staff.staff_cat_id}" defaultLabel="Select a category...">
+									<f:selectItem itemValue="0" itemLabel="All Categories" />
+									<f:selectItems value="#{dropdownBean.staffCategories}"/>
+								</h:selectOneMenu>
+								<rich:message for="scat" style="color: red;"/>
+								
+								<h:outputLabel for="sdept">Department</h:outputLabel>
+								<h:selectOneMenu id="sdept" value="#{staffBean.staff.department_id}" defaultLabel="Select a department...">
+									<f:selectItem itemValue="0" itemLabel="All Departments" />
+									<f:selectItems value="#{dropdownBean.departments}"/>
+								</h:selectOneMenu>
+								<rich:message for="sdept" style="color: red;"/>
+								
+								<h:outputLabel for="sfn">First name</h:outputLabel>
+								<h:inputText id="sfn" value="#{staffBean.staff.staff_fn}" required="false" size="35">
+									<rich:beanValidator/>
+								</h:inputText>
+								<rich:message for="sfn" style="color: red;"/>
+								
+								<h:outputLabel for="sln">Last name</h:outputLabel>
+								<h:inputText id="sln" value="#{staffBean.staff.staff_ln}" required="false" size="35">
+									<rich:beanValidator/>
+								</h:inputText>
+								<rich:message for="sln" style="color: red;"/>
+								
+								<h:outputLabel for="sstat">Status</h:outputLabel>
+								<h:selectOneMenu id="sstat" value="#{staffBean.staff.status_id}" defaultLabel="Select a department...">
+									<f:selectItem itemValue="0" itemLabel="" />
+									<f:selectItem itemValue="1" itemLabel="Active" />
+									<f:selectItem itemValue="-1" itemLabel="Not Active / Suspended" />
+								</h:selectOneMenu>
+								<rich:message for="sstat" style="color: red;"/>
+							</h:panelGrid>
+						</div>
+						
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<h:commandButton value="View Staffs" action="#{staffBean.ViewStaffs}" reRender="staffs,mypanel" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+						
+					</rich:panel>
+				</c:if>
+				
+				</a4j:outputPanel>
+			</td>
+		</tr>
+	</table>
+</h:form>
+</ui:composition>
+					

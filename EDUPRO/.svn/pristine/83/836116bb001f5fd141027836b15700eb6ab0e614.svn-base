@@ -1,0 +1,115 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+    <rich:dragIndicator id="indicator" />
+	<h:form id="timetableForm">
+		<div style="width: 800px" align="center">
+			<table width="100%" cellspacing="2" cellpadding="2">
+			<tr>
+				<td align="left">
+					<table>
+						<tr>
+							<td valign="top" align="left">
+								<p>
+									<span style="font-size:30px;font-weight:bold;color:#888;">Time Table</span><br/>
+									<span style="font-size:16px;"></span>
+								</p>
+							</td>
+							<td valign="bottom" align="right">
+								<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<rich:spacer height="2" />
+					<a4j:outputPanel id="messagepanel">
+						<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+					</a4j:outputPanel>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<h:panelGrid columns="5" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="sclass">Class</h:outputLabel>
+						<h:selectOneMenu id="sclass" value="#{timetableBean.class_id}" required="true" defaultLabel="Select class...">
+							<f:selectItems value="#{dropdownBean.classes}"/>
+						</h:selectOneMenu>
+						<rich:message for="sclass" style="color: red;"/>
+						
+						<h:outputText value="" />
+						<h:commandButton value="Show Class Timetable" action="#{timetableBean.LoadClassTimetable}" />
+					</h:panelGrid>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<table width="100%">
+						<tr valign="top">
+							<td width="20%">
+								<h:outputText value="Available subjects" />
+								<rich:dataList var="sub" value="#{timetableBean.classSubjects}" rows="20">
+									<a4j:outputPanel style="width:100px;border:1px solid gray;padding:2px" layout="block">
+										<rich:dragSupport dragIndicator=":indicator" dragType="CLASS_SUBJECT" dragValue="#{sub}">
+			                                <rich:dndParam name="label" value="#{sub.sub_desc}" />
+			                            </rich:dragSupport>
+	            						<h:outputText value="#{sub.sub_nm}"/><br/>
+	            					</a4j:outputPanel>
+            					</rich:dataList>
+            				</td>
+            				<td width="80%">
+            					<a4j:outputPanel id="tablePanel">
+            					<rich:dataTable id="ttable"
+                    				onRowMouseOver="this.style.backgroundColor='#F1F1F1'"
+                    				onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+                    				cellpadding="0" cellspacing="0" 
+                    				width="100%" border="0" var="dayTiming" value="#{timetableBean.days}" rendered="#{timetableBean.days.size() > 0}">
+                
+				                    <rich:column>
+				                    	<f:facet name="header"><h:outputText value="Day" /></f:facet>
+										<h:outputText value="#{dayTiming.day_nm}" />
+				                    </rich:column>
+				                    <rich:column style="width:85%">
+				                    	<f:facet name="header"><h:outputText value="Table" /></f:facet>
+										<rich:dataGrid value="#{dayTiming.ttable}" var="e" columns="#{dayTiming.ttable.size()}" width="100%" rendered="#{timetableBean.days.size() > 0}">
+				                    		<rich:panel style="width:80px;height:80px">
+												<f:facet name="header">
+													<h:outputText value="HH: #{e.start_time_hr} MM: #{e.start_time_min}" />
+												</f:facet>
+												<rich:dropSupport acceptedTypes="CLASS_SUBJECT" dropValue="#{e}" dropListener="#{timetableBean.processDrop}" reRender="messagepanel,ttable,tablePanel" rendered="#{not e.brk and e.subject_id == 0}">
+												</rich:dropSupport>
+												
+						                    	<h:outputText style="height:50px;width:50px;background:red" value="BREAK" rendered="#{e.brk}" />
+						                    	
+						                    	<h:outputText value="#{e.sub_nm}" rendered="#{e.subject_id > 0}" />
+						                    	<rich:spacer height="2" rendered="#{e.subject_id > 0}" />
+						                    	<a4j:commandLink reRender="messagepanel,ttable,tablePanel" action="#{timetableBean.RemoveClassSubTimeMap}" value="(remove)" rendered="#{e.subject_id > 0}">
+													<f:setPropertyActionListener value="#{e}" target="#{timetableBean.csdt}"/>
+												</a4j:commandLink>
+						                    	
+				                            </rich:panel>
+										</rich:dataGrid>
+				                    </rich:column>
+			                    </rich:dataTable>
+			                    </a4j:outputPanel>
+            				</td>
+            			</tr>
+            		</table>
+				</td>
+			</tr>
+			</table>
+		</div>
+	</h:form>
+</ui:composition>

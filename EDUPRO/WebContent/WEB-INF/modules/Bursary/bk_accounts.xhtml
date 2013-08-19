@@ -1,0 +1,228 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="bankAccountForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Bank Account</span><br/>
+							<span style="font-size:16px;">Manage institution's bank accounts</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:150px;">
+									<a:commandLink onclick="#{rich:component('newBankMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Add new Bank</a:commandLink>
+								</li>
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:150px;">
+									<a:commandLink onclick="#{rich:component('newBankAccountMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Add new Bank Account</a:commandLink>
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div class="dialog">
+				<rich:tabPanel id="bksTab">
+					<rich:tab id="banksTab" label="Banks" immediate="true">
+						<a4j:outputPanel id="banksPanel">
+							<rich:dataTable id="banks" value="#{bursaryBean.banks}" var="obj" rows="20" width="100%" rendered="#{bursaryBean.banks.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying available banks" />
+								</f:facet>
+								
+								<rich:column sortBy="#{obj.name}" style="vertical-align: top">
+									<f:facet name="header">Bank</f:facet>
+									<h:outputText value="#{obj.name}" rendered="#{obj.id != bursaryBean.bank.id}"/>
+									<h:inputText value="#{obj.name}" rendered="#{obj.id == bursaryBean.bank.id}"/>
+								</rich:column>
+								
+								<rich:column align="center" style="vertical-align: top">
+									<f:facet name="header">Update</f:facet>
+									<a4j:commandLink reRender="banks,banksPanel" value="Update" rendered="#{obj.id != bursaryBean.bank.id}" immediate="true">
+										<f:setPropertyActionListener value="#{obj}" target="#{bursaryBean.bank}"/>
+									</a4j:commandLink>
+									
+									<a4j:commandLink reRender="messagepanel,banks,banksPanel" action="#{bursaryBean.UpdateBank}" value="SAVE" rendered="#{obj.id == bursaryBean.bank.id}" immediate="true">
+										<f:setPropertyActionListener value="#{obj}" target="#{bursaryBean.bank}"/>
+									</a4j:commandLink>
+									
+									<h:outputText value=" - " rendered="#{obj.id == bursaryBean.bank.id}" />
+									
+									<a4j:commandLink reRender="banks,banksPanel" action="#{bursaryBean.setBank(null)}" value="CANCEL" rendered="#{obj.id == bursaryBean.bank.id}" immediate="true" />
+									
+								</rich:column>
+								
+							</rich:dataTable>
+							<h:outputText value="No banks found" rendered="#{empty bursaryBean.banks}"/>
+							<rich:datascroller id="dsbanks" for="banks" renderIfSinglePage="false" reRender="banksPanel" />
+						</a4j:outputPanel>
+					</rich:tab>
+					<rich:tab id="accountsTab" label="Bank Accounts" immediate="true">
+						<a4j:outputPanel id="accountsPanel">
+							<rich:dataTable id="accounts" value="#{bursaryBean.bankAccounts}" var="obj" rows="20" width="100%" rendered="#{bursaryBean.bankAccounts.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying available bank accounts" />
+								</f:facet>
+								
+								<rich:column sortBy="#{obj.bank_nm}" style="vertical-align: top">
+									<f:facet name="header">Bank</f:facet>
+									<h:outputText value="#{obj.bank_nm}" rendered="#{obj.id != bursaryBean.bankAccount.id}"/>
+									<h:selectOneMenu id="bk" value="#{obj.bank_id}" defaultLabel="Select bank..." rendered="#{obj.id == bursaryBean.bankAccount.id}">
+										<f:selectItems value="#{bursaryBean.banks}" var="bkOBJ" itemValue="#{bkOBJ.id}" itemLabel="#{bkOBJ.name}" />
+									</h:selectOneMenu>
+								</rich:column>
+								
+								<rich:column sortBy="#{obj.account_nm}" style="vertical-align: top">
+									<f:facet name="header">Account name</f:facet>
+									<h:outputText value="#{obj.account_nm}" rendered="#{obj.id != bursaryBean.bankAccount.id}"/>
+									<h:inputText value="#{obj.account_nm}" rendered="#{obj.id == bursaryBean.bankAccount.id}"/>
+								</rich:column>
+								
+								<rich:column sortBy="#{obj.account_number}" style="vertical-align: top">
+									<f:facet name="header">Account number</f:facet>
+									<h:outputText value="#{obj.account_number}" rendered="#{obj.id != bursaryBean.bankAccount.id}"/>
+									<h:inputText value="#{obj.account_number}" rendered="#{obj.id == bursaryBean.bankAccount.id}"/>
+								</rich:column>
+								
+								<rich:column align="center" style="vertical-align: top">
+									<f:facet name="header">Update</f:facet>
+									<a4j:commandLink reRender="accounts,accountsPanel" value="Update" rendered="#{obj.id != bursaryBean.bankAccount.id}" immediate="true">
+										<f:setPropertyActionListener value="#{obj}" target="#{bursaryBean.bankAccount}"/>
+									</a4j:commandLink>
+									
+									<a4j:commandLink reRender="messagepanel,accounts,accountsPanel" action="#{bursaryBean.UpdateBankAccount}" value="SAVE" rendered="#{obj.id == bursaryBean.bankAccount.id}" immediate="true">
+										<f:setPropertyActionListener value="#{obj}" target="#{bursaryBean.bankAccount}"/>
+									</a4j:commandLink>
+									
+									<h:outputText value=" - " rendered="#{obj.id == bursaryBean.bankAccount.id}" />
+									
+									<a4j:commandLink reRender="accounts,accountsPanel" action="#{bursaryBean.setBankAccount(null)}" value="CANCEL" rendered="#{obj.id == bursaryBean.bankAccount.id}" immediate="true" />
+									
+								</rich:column>
+								
+							</rich:dataTable>
+							<h:outputText value="No banks accounts found" rendered="#{empty bursaryBean.bankAccounts}"/>
+							<rich:datascroller id="dsaccounts" for="accounts" renderIfSinglePage="false" reRender="accountsPanel" />
+						</a4j:outputPanel>
+					</rich:tab>
+				</rich:tabPanel>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+
+<rich:modalPanel id="newBankMP" minHeight="350" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Create new bank"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newBankMP')">X</a>
+	</f:facet>
+	<h:form id="newBankMPForm">
+		<div style="width:100%;height:250px;overflow:auto;">
+			<a4j:outputPanel id="newBankMPMessagePanel">
+				<h:messages styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+			
+			<div class="dialog">
+				<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+					<h:outputLabel for="bkname">Bank</h:outputLabel>
+					<h:inputText id="bkname" value="#{bursaryBean.bank.name}" />
+					<rich:message for="bkname" style="color: red;"/>
+				</h:panelGrid>
+			</div>
+		</div>
+		<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+					<a4j:commandButton value="SAVE" action="#{bursaryBean.CreateBank}" reRender="newBankMPForm,newBankMPMessagePanel,banksPanel,newBankAccountMPPanel,accountsPanel" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+					<a:commandLink onclick="#{rich:component('newBankMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+	</h:form>
+</rich:modalPanel>
+
+<rich:modalPanel id="newBankAccountMP" minHeight="350" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Create new bank account"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newBankAccountMP')">X</a>
+	</f:facet>
+	<h:form id="newBankAccountMPForm">
+		<div style="width:100%;height:250px;overflow:auto;">
+			<a4j:outputPanel id="newBankAccountMPMessagePanel">
+				<h:messages styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+			
+			<div class="dialog">
+				<a4j:outputPanel id="newBankAccountMPPanel">
+				<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+					<h:outputLabel for="bk">Bank</h:outputLabel>
+					<h:selectOneMenu id="bk" value="#{bursaryBean.bankAccount.bank_id}" defaultLabel="Select bank...">
+						<f:selectItem itemValue="0" itemLabel="" />
+						<f:selectItems value="#{bursaryBean.banks}" var="bkOBJ" itemValue="#{bkOBJ.id}" itemLabel="#{bkOBJ.name}" />
+					</h:selectOneMenu>
+					<rich:message for="bk" style="color: red;"/>
+					
+					<h:outputLabel for="acnm">Account name</h:outputLabel>
+					<h:inputText id="acnm" value="#{bursaryBean.bankAccount.account_nm}" />
+					<rich:message for="acnm" style="color: red;"/>
+					
+					<h:outputLabel for="acnum">Account number</h:outputLabel>
+					<h:inputText id="acnum" value="#{bursaryBean.bankAccount.account_number}" />
+					<rich:message for="acnum" style="color: red;"/>
+				</h:panelGrid>
+				</a4j:outputPanel>
+			</div>
+		</div>
+		<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+					<a4j:commandButton value="SAVE" action="#{bursaryBean.CreateBankAccount}" reRender="newBankAccountMPForm,newBankAccountMPMessagePanel,accountsPanel" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+					<a:commandLink onclick="#{rich:component('newBankAccountMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+	</h:form>
+</rich:modalPanel>
+
+</ui:composition>

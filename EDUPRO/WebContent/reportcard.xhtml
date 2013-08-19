@@ -1,0 +1,154 @@
+<p:document xmlns:ui="http://java.sun.com/jsf/facelets"
+            xmlns:s="http://jboss.com/products/seam/taglib"
+            xmlns:p="http://jboss.com/products/seam/pdf"
+            xmlns:h="http://java.sun.com/jsf/html"
+            xmlns:f="http://java.sun.com/jsf/core"
+            title="#{teacherBean.result.student.student_fn} #{teacherBean.result.student.student_mn} #{teacherBean.result.student.student_ln}'s Report Card"
+            keywords="report card,academic performance"
+            subject="#{teacherBean.result.student.student_fn} #{teacherBean.result.student.student_mn} #{teacherBean.result.student.student_ln}'s Academic Performance Report so far in #{teacherBean.result.results.get(0).session_nm} session"
+            author="Bradawl"
+            creator="Bradawl"
+            pageSize="LETTER"
+            margins="0.5 0.5 0.5 2"
+            type="pdf">
+            
+	<p:image value="#{'/uploads/school/logo'}" alignment="center" wrap="true" rendered="#{appOptions.appSetup}">
+		<s:transformImageSize height="80" maintainRatio="true"/>
+	</p:image>
+	
+	<p:font size="12" style="bold,italic">
+		<p:paragraph alignment="center">#{appOptions.school.sch_nm}</p:paragraph>
+	</p:font>
+	
+	<p:font size="6" style="bold,italic">
+		<p:paragraph alignment="center">Motto: #{appOptions.school.sch_motto}</p:paragraph>
+	</p:font>
+	
+	<p:font size="6" style="bold,italic">
+		<p:paragraph alignment="center">Address: #{appOptions.school.address.addr1}, #{appOptions.school.address.addr2}</p:paragraph>
+	</p:font>
+	
+	<p:font size="16" style="bold">
+		<p:paragraph alignment="center" spacingAfter="6">Report Card</p:paragraph>
+	</p:font>
+	
+	<p:table columns="3" widths="1.5 1.5 1" widthPercentage="100" horizontalAlignment="left">
+		<p:cell horizontalAlignment="left" verticalAlignment="top">
+			<p:table columns="2" widths="1 3" widthPercentage="100" horizontalAlignment="left" verticalAlignment="top">
+				<p:font size="10">
+				<p:cell horizontalAlignment="left" verticalAlignment="top">Student</p:cell>
+				<p:cell horizontalAlignment="left" verticalAlignment="top">
+					<p:image value="#{teacherBean.result.student_pic_str}" alignment="left" wrap="true" rendered="#{teacherBean.result.student_pic_str != null}">
+						<s:transformImageSize height="60" maintainRatio="true"/>
+					</p:image>
+					<p:font style="bold">
+						<p:paragraph alignment="left">#{teacherBean.result.student.student_fn} #{teacherBean.result.student.student_mn} #{teacherBean.result.student.student_ln}</p:paragraph>
+					</p:font>
+				</p:cell>
+				
+				<p:cell horizontalAlignment="left" verticalAlignment="top">Class</p:cell>
+				<p:cell horizontalAlignment="left" verticalAlignment="top">
+					<p:font style="bold">#{teacherBean.result.student.class_nm}</p:font>
+				</p:cell>
+				
+				<p:cell horizontalAlignment="left" verticalAlignment="top">Session</p:cell>
+				<p:cell horizontalAlignment="left" verticalAlignment="top">
+					<p:font style="bold">#{teacherBean.result.results.get(0).session_nm}</p:font>
+				</p:cell>
+				</p:font>
+			</p:table>
+		</p:cell>
+		<p:cell horizontalAlignment="left" verticalAlignment="top">
+			<p:table columns="3" widthPercentage="100" horizontalAlignment="left" verticalAlignment="top">
+				<p:font size="10">
+				<p:cell colspan="3" horizontalAlignment="center" verticalAlignment="top">
+					<p:font style="bold"><p:paragraph>Scores distribution</p:paragraph></p:font>
+				</p:cell>
+				
+				<p:cell horizontalAlignment="center">
+					<p:font style="bold"><p:paragraph>Attendance</p:paragraph></p:font>
+				</p:cell>
+				<p:cell horizontalAlignment="center">
+					<p:font style="bold"><p:paragraph>Test</p:paragraph></p:font>
+				</p:cell>
+				<p:cell horizontalAlignment="center">
+					<p:font style="bold"><p:paragraph>Exam</p:paragraph></p:font>
+				</p:cell>
+				
+				<p:cell horizontalAlignment="center">
+					<p:paragraph>#{settingsBean.gradings.get(0).attendance}</p:paragraph>
+				</p:cell>
+				<p:cell horizontalAlignment="center">
+					<p:paragraph>#{settingsBean.gradings.get(0).test}</p:paragraph>
+				</p:cell>
+				<p:cell horizontalAlignment="center">
+					<p:paragraph>#{settingsBean.gradings.get(0).exam}</p:paragraph>
+				</p:cell>
+				</p:font>
+			</p:table>
+		</p:cell>
+		<p:cell horizontalAlignment="left" verticalAlignment="top">
+			<p:table columns="3" widths="1 1.5 1.5" widthPercentage="100" horizontalAlignment="left" verticalAlignment="top">
+				<p:font size="10">
+				<p:cell colspan="3" horizontalAlignment="center" verticalAlignment="top">
+					<p:font style="bold"><p:paragraph>Grades</p:paragraph></p:font>
+				</p:cell>
+				<ui:repeat var="grade" value="#{settingsBean.grades}">
+					<p:cell>
+						<p:paragraph>#{grade.grade_letter}</p:paragraph>
+					</p:cell>
+					<p:cell>
+						<p:paragraph>#{grade.grade_start} - #{grade.grade_end}</p:paragraph>
+					</p:cell>
+					<p:cell>
+						<p:paragraph>#{grade.grade_remark}</p:paragraph>
+					</p:cell>
+				</ui:repeat>
+				</p:font>
+			</p:table>
+		</p:cell>
+	</p:table>
+	
+	<p:font size="16" style="bold,underline">
+		<p:paragraph alignment="center" spacingBefore="10">Performance</p:paragraph>
+	</p:font>
+	<p:paragraph alignment="center" spacingAfter="10"></p:paragraph>
+	
+	<p:table columns="#{teacherBean.result.results.size() + 3}" widthPercentage="100" horizontalAlignment="left" verticalAlignment="top" headerRows="1">
+		<p:font size="10">
+			<p:cell horizontalAlignment="center" verticalAlignment="top"><p:font style="bold">Subject</p:font></p:cell>
+			<p:cell horizontalAlignment="center" verticalAlignment="top"><p:font style="bold">Teacher</p:font></p:cell>
+			<ui:repeat var="termR" value="#{teacherBean.result.results}">
+				<p:cell horizontalAlignment="center" verticalAlignment="top"><p:font style="bold">#{termR.term_nm}</p:font></p:cell>
+			</ui:repeat>
+			<p:cell horizontalAlignment="center" verticalAlignment="top"><p:font style="bold">Remark</p:font></p:cell>
+			
+			<ui:repeat var="subject" value="#{teacherBean.result.subjects}">
+				<p:cell horizontalAlignment="center" verticalAlignment="top">#{subject[1]}</p:cell>
+				<p:cell horizontalAlignment="center" verticalAlignment="top">#{teacherBean.result.results.get(teacherBean.result.results.size()-1).getTeacherName(subject[0])}</p:cell>
+				<ui:repeat var="termR" value="#{teacherBean.result.results}">
+					<p:cell horizontalAlignment="center" verticalAlignment="top">#{termR.getSubScoreStr(subject[0])}</p:cell>
+				</ui:repeat>
+				<p:cell horizontalAlignment="center" verticalAlignment="top">
+					#{teacherBean.result.results.get(teacherBean.result.results.size()-1).getSubScoreGradeRemark(subject[0])}
+				</p:cell>
+			</ui:repeat>
+		</p:font>
+	</p:table>
+	
+	<p:font size="16">
+		<p:paragraph alignment="right" spacingBefore="10" spacingAfter="10">Result: <p:font style="bold" color="#{(teacherBean.result.result_str == 'FAIL') ? 'red' : 'green'}"><p:text value="#{teacherBean.result.result_str}"></p:text></p:font></p:paragraph>
+	</p:font>
+	
+	<p:paragraph alignment="left" spacingAfter="6">Class teacher comment</p:paragraph>
+	<p:table columns="1" widthPercentage="95" horizontalAlignment="center">
+		<p:cell horizontalAlignment="center" verticalAlignment="top" minimumHeight="50">
+		</p:cell>
+	</p:table>
+	<p:paragraph alignment="left">By: #{teacherBean.result.results.get(teacherBean.result.results.size()-1).getClassTeacherName()}</p:paragraph>
+	<p:paragraph alignment="left">Signature: </p:paragraph>
+	
+	<p:image value="#{'/images/edupro-icon.png'}" alignment="right" wrap="true" rendered="#{appOptions.appSetup}">
+		<s:transformImageSize height="50" maintainRatio="true"/>
+	</p:image>
+</p:document>

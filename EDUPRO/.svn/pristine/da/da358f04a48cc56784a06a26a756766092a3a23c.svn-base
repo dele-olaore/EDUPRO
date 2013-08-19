@@ -1,0 +1,251 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="newsForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">News and Events</span><br/>
+							<span style="font-size:16px;">Post and manage news and events</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newNewsMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Post News</a:commandLink>
+								</li>
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newEventMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Post Event</a:commandLink>
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:tabPanel id="mainTab">
+				<rich:tab id="newsTab" label="News" immediate="true">
+					<a4j:outputPanel id="newsPanel">
+						<rich:dataTable id="news" value="#{settingsBean.newsArr}" var="obj" rows="20" width="100%" rendered="#{settingsBean.newsArr.size() > 0}">
+						<f:facet name="header">
+							<h:outputText value="Displaying top 20 most recent news" />
+						</f:facet>
+						<rich:column filterBy="#{obj.news_headline}" style="vertical-align: top">
+							<f:facet name="header">Headline</f:facet>
+							<h:outputText value="#{obj.news_headline}" rendered="#{obj.id != settingsBean.news.id}" />
+							<h:inputText value="#{obj.news_headline}" size="40" rendered="#{obj.id == settingsBean.news.id}" />
+						</rich:column>
+						<rich:column style="vertical-align: top">
+							<f:facet name="header">Details</f:facet>
+							<h:outputText value="#{obj.news_body}" rendered="#{obj.id != settingsBean.news.id}" />
+							<h:inputTextarea value="#{obj.news_body}"  rendered="#{obj.id == settingsBean.news.id}" required="true" style="width: 300px; height: 100px;">
+								<rich:beanValidator/>
+							</h:inputTextarea>
+						</rich:column>
+						<rich:column align="center" style="vertical-align: top">
+							<f:facet name="header">Update</f:facet>
+							<a4j:commandLink reRender="news,newsPanel" value="Update" rendered="#{obj.id != settingsBean.news.id}">
+								<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.news}"/>
+							</a4j:commandLink>
+							
+							<a4j:commandLink reRender="news,newsPanel,messagepanel" action="#{settingsBean.UpdateNews}" value="SAVE" rendered="#{obj.id == settingsBean.news.id}">
+								<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.news}"/>
+							</a4j:commandLink>
+							
+							<h:outputText value=" - " rendered="#{obj.id == settingsBean.news.id}" />
+							
+							<a4j:commandLink reRender="news,newsPanel" action="#{settingsBean.reset}" value="CANCEL" rendered="#{obj.id == settingsBean.news.id}" />
+							
+						</rich:column>
+						</rich:dataTable>
+						<h:outputText value="No news found" rendered="#{empty settingsBean.newsArr}"/>
+						<rich:datascroller id="dsnews" for="news" renderIfSinglePage="false" />
+					</a4j:outputPanel>
+				</rich:tab>
+				<rich:tab id="eventTab" label="Events" immediate="true">
+					<a4j:outputPanel id="eventsPanel">
+						<rich:dataTable id="events" value="#{settingsBean.eventsArr}" var="obj" rows="20" width="100%" rendered="#{settingsBean.eventsArr.size() > 0}">
+						<f:facet name="header">
+							<h:outputText value="Displaying top 20 most recent events" />
+						</f:facet>
+						<rich:column filterBy="#{obj.title}" style="vertical-align: top">
+							<f:facet name="header">Title</f:facet>
+							<h:outputText value="#{obj.title}" rendered="#{obj.id != settingsBean.event.id}" />
+							<h:inputText value="#{obj.title}" size="40" rendered="#{obj.id == settingsBean.event.id}" />
+						</rich:column>
+						<rich:column style="vertical-align: top">
+							<f:facet name="header">Details</f:facet>
+							<h:outputText value="#{obj.body}" rendered="#{obj.id != settingsBean.event.id}" />
+							<h:inputTextarea value="#{obj.body}"  rendered="#{obj.id == settingsBean.event.id}" required="true" style="width: 300px; height: 100px;">
+								<rich:beanValidator/>
+							</h:inputTextarea>
+						</rich:column>
+						<rich:column style="vertical-align: top">
+							<f:facet name="header">Date</f:facet>
+							<h:outputText value="#{obj.date}" rendered="#{obj.id != settingsBean.event.id}" />
+							<rich:calendar value="#{obj.date}" locale="us" datePattern="yyyy-MM-dd" required="true" rendered="#{obj.id == settingsBean.event.id}">
+								<rich:beanValidator/>
+							</rich:calendar>
+						</rich:column>
+						<rich:column align="center" style="vertical-align: top">
+							<f:facet name="header">Update</f:facet>
+							<a4j:commandLink reRender="events,eventsPanel" value="Update" rendered="#{obj.id != settingsBean.event.id}">
+								<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.event}"/>
+							</a4j:commandLink>
+							
+							<a4j:commandLink reRender="events,eventsPanel,messagepanel" action="#{settingsBean.UpdateEvent}" value="SAVE" rendered="#{obj.id == settingsBean.event.id}">
+								<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.event}"/>
+							</a4j:commandLink>
+							
+							<h:outputText value=" - " rendered="#{obj.id == settingsBean.event.id}" />
+							
+							<a4j:commandLink reRender="events,eventsPanel" action="#{settingsBean.reset}" value="CANCEL" rendered="#{obj.id == settingsBean.event.id}" />
+							
+						</rich:column>
+						</rich:dataTable>
+						<h:outputText value="No events found" rendered="#{empty settingsBean.eventsArr}"/>
+						<rich:datascroller id="dsevents" for="events" renderIfSinglePage="false" />
+					</a4j:outputPanel>
+				</rich:tab>
+			</rich:tabPanel>
+		</td>
+	</tr>
+	</table>
+</div>
+</h:form>
+
+<rich:modalPanel id="newNewsMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Post / Update News"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newNewsMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:350px;overflow:auto;">
+	<h:form id="newNewsForm">
+	<rich:panel>
+		<f:facet name="header">
+		<h:outputText value="News details"/>
+		</f:facet>
+		
+		<div class="dialog">
+			<a4j:outputPanel id="messagepanel2">
+				<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		
+			<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+				<h:outputLabel for="newsh">News headline</h:outputLabel>
+				<h:inputText id="newsh" value="#{settingsBean.news.news_headline}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="newsh" style="color: red;"/>
+				
+				<h:outputLabel for="newsd">News details</h:outputLabel>
+				<h:inputTextarea id="newsd" value="#{settingsBean.news.news_body}" required="true" style="width: 300px; height: 100px;">
+					<rich:beanValidator/>
+				</h:inputTextarea>
+				<rich:message for="newsd" style="color: red;"/>
+			</h:panelGrid>
+			
+			<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+				<a4j:commandButton value="Save" action="#{settingsBean.PostNews}" reRender="newsPanel,newNewsForm" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+				<a:commandLink onclick="#{rich:component('newNewsMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+		</div>
+	</rich:panel>
+	</h:form>
+	</div>
+</rich:modalPanel>
+
+<rich:modalPanel id="newEventMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Post / Update Event"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newEventMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:350px;overflow:auto;">
+	<h:form id="newEventForm">
+	<rich:panel>
+		<f:facet name="header">
+		<h:outputText value="Event details"/>
+		</f:facet>
+		
+		<div class="dialog">
+			<a4j:outputPanel id="messagepanel2">
+				<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		
+			<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+				<h:outputLabel for="evet">Event title</h:outputLabel>
+				<h:inputText id="evet" value="#{settingsBean.event.title}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="evet" style="color: red;"/>
+				
+				<h:outputLabel for="eved">Event details</h:outputLabel>
+				<h:inputTextarea id="eved" value="#{settingsBean.event.body}" required="true" style="width: 300px; height: 100px;">
+					<rich:beanValidator/>
+				</h:inputTextarea>
+				<rich:message for="eved" style="color: red;"/>
+				
+				<h:outputLabel for="evedt">Event date</h:outputLabel>
+				<rich:calendar id="evedt" value="#{settingsBean.event.date}" locale="us" datePattern="yyyy-MM-dd" required="true">
+					<rich:beanValidator/>
+				</rich:calendar>
+				<rich:message for="evedt" style="color: red;"/>
+			</h:panelGrid>
+			
+			<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+				<a4j:commandButton value="Save" action="#{settingsBean.PostEvent}" reRender="eventsPanel,newEventForm" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+				<a:commandLink onclick="#{rich:component('newEventMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+		</div>
+	</rich:panel>
+	</h:form>
+	</div>
+</rich:modalPanel>
+
+</ui:composition>

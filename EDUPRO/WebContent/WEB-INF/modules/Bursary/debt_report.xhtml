@@ -1,0 +1,92 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="dreportForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Debtors Report</span><br/>
+							<span style="font-size:16px;">View report on debtors</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div class="dialog">
+				<a4j:outputPanel id="tablePanel">
+					<rich:dataTable id="debtorsTable" value="#{bursaryBean.debtorsList}" var="obj" rows="20" width="100%" rendered="#{bursaryBean.debtorsList.size() > 0}">
+						<f:facet name="header">
+							<h:outputText value="Displaying available debtors" />
+						</f:facet>
+						
+						<rich:column filterBy="#{obj.student_nm}" sortBy="#{obj.student_nm}" style="vertical-align: top">
+							<f:facet name="header">Student</f:facet>
+							<h:outputText value="#{obj.student_nm}" />
+						</rich:column>
+						
+						<rich:column sortBy="#{obj.total_debt}" style="vertical-align: top">
+							<f:facet name="header">Debt amount</f:facet>
+							<h:outputText value="#{obj.total_debt}">
+								<f:convertNumber pattern="N#,##0.00;(N#,##0.00)"/>
+							</h:outputText>
+						</rich:column>
+						
+						<rich:column style="vertical-align: top">
+							<f:facet name="header">Debt details</f:facet>
+						</rich:column>
+						
+					</rich:dataTable>
+					<rich:datascroller id="dsdebtorsTable" for="debtorsTable" renderIfSinglePage="false" reRender="debtorsTable,tablePanel" />
+					<rich:spacer height="15" rendered="#{bursaryBean.debtorsList.size() > 0}" />
+				</a4j:outputPanel>
+				
+				<div class="actionButtons">
+					<rich:toolBar>
+						<rich:toolBarGroup location="right">
+						<h:commandButton value="View Debtors" action="#{bursaryBean.ViewDebtors}" rendered="#{bursaryBean.debtorsList.size() == 0}" />
+						<h:commandButton value="Refresh Debtors List" action="#{bursaryBean.ViewDebtors}" rendered="#{bursaryBean.debtorsList.size() > 0}" />
+						</rich:toolBarGroup>
+					</rich:toolBar>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+</ui:composition>

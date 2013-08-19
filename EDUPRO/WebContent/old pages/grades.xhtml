@@ -1,0 +1,110 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    template="WEB-INF/layout/basic_layout.xhtml">
+
+<f:loadBundle basename="resources.messages" var="bundle"/>
+<ui:define name="pageTitle"> Grades</ui:define>
+<ui:param name="showGlobalMessages" value="false"/>
+<ui:define name="body">
+	<h:form id="gradesForm">
+		<div style="width: 800px" align="center">
+			<table width="100%" cellspacing="2" cellpadding="2">
+			<tr>
+				<td align="left">
+					<table>
+						<tr>
+							<td valign="top" align="left">
+								<p>
+									<span style="font-size:30px;font-weight:bold;color:#888;">Grades</span><br/>
+									<span style="font-size:16px;">View and manage grades</span>
+								</p>
+							</td>
+							<td valign="bottom" align="right">
+								<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+								<div style="height:1.8em;margin:0;padding:0;width:100%">
+									<ul style="float:right;margin:0 0 0 0;padding:0;">
+										<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+											<h:commandLink id="resetLink" onclick="return confirm('#{bundle['confirm.message']}');" action="#{settingsBean.ResetGrades}" style="color:#fff;text-decoration:none;" value="Reset Grades" />
+										</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<rich:spacer height="2" />
+					<a4j:outputPanel id="messagepanel">
+						<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+					</a4j:outputPanel>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<rich:dataTable id="grades" value="#{settingsBean.grades}" var="grade" rows="#{settingsBean.grades.size()}" width="100%" rendered="#{settingsBean.grades.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying grades" />
+					</f:facet>
+					<rich:column sortBy="#{grade.grade_id}" filterBy="#{grade.grade_id}">
+						<f:facet name="header">ID</f:facet>
+						<h:outputText value="#{grade.grade_id}"/>
+					</rich:column>
+					<rich:column sortBy="#{grade.grade_start}" filterBy="#{grade.grade_start}">
+						<f:facet name="header">Start Score</f:facet>
+						<h:outputText value="#{grade.grade_start}" rendered="#{grade.grade_id != settingsBean.grade.grade_id}" />
+						<h:inputText value="#{grade.grade_start}" rendered="#{grade.grade_id == settingsBean.grade.grade_id}" />
+					</rich:column>
+					<rich:column sortBy="#{grade.grade_end}" filterBy="#{grade.grade_end}">
+						<f:facet name="header">End Score</f:facet>
+						<h:outputText value="#{grade.grade_end}" rendered="#{grade.grade_id != settingsBean.grade.grade_id}" />
+						<h:inputText value="#{grade.grade_end}" rendered="#{grade.grade_id == settingsBean.grade.grade_id}" />
+					</rich:column>
+					<rich:column align="center" sortBy="#{grade.grade_letter}" filterBy="#{grade.grade_letter}">
+						<f:facet name="header">Grade Letter</f:facet>
+						<h:outputText value="#{grade.grade_letter}" rendered="#{grade.grade_id != settingsBean.grade.grade_id}" />
+						<h:inputText value="#{grade.grade_letter}" rendered="#{grade.grade_id == settingsBean.grade.grade_id}" />
+					</rich:column>
+					<rich:column align="center" sortBy="#{grade.grade_remark}" filterBy="#{grade.grade_remark}">
+						<f:facet name="header">Grade Remark</f:facet>
+						<h:outputText value="#{grade.grade_remark}" rendered="#{grade.grade_id != settingsBean.grade.grade_id}" />
+						<h:inputText value="#{grade.grade_remark}" rendered="#{grade.grade_id == settingsBean.grade.grade_id}" />
+					</rich:column>
+					<rich:column align="center">
+						<f:facet name="header">Update</f:facet>
+						<a4j:commandLink reRender="grades" value="Update" rendered="#{grade.grade_id != settingsBean.grade.grade_id}">
+							<f:setPropertyActionListener value="#{grade}" target="#{settingsBean.grade}"/>
+						</a4j:commandLink>
+						
+						<a4j:commandLink reRender="grades,messagepanel" action="#{settingsBean.UpdateGrade}" value="SAVE" rendered="#{grade.grade_id == settingsBean.grade.grade_id}">
+							<f:setPropertyActionListener value="#{grade}" target="#{settingsBean.grade}"/>
+						</a4j:commandLink>
+						
+						<h:outputText value=" - " rendered="#{grade.grade_id == settingsBean.grade.grade_id}" />
+						
+						<a4j:commandLink reRender="grades" action="#{settingsBean.reset}" value="CANCEL" rendered="#{grade.grade_id == settingsBean.grade.grade_id}" />
+						
+					</rich:column>
+					</rich:dataTable>
+					<h:outputText value="No grades found" rendered="#{empty settingsBean.grades}"/>
+					<rich:datascroller id="dsgrades" for="grades" renderIfSinglePage="false" />
+				</td>
+			</tr>
+			</table>
+		</div>
+	</h:form>
+</ui:define>
+</ui:composition>

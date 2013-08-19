@@ -1,0 +1,34 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    template="WEB-INF/layout/basic_layout_1.xhtml">
+<ui:define name="pageTitle"> Home</ui:define>
+<ui:define name="body">
+	<h:form id="loginForm">
+		<rich:tabPanel>
+			<rich:tab>
+				Testing the first tab
+			</rich:tab>
+			<rich:tab>
+				Testing the second tab
+			</rich:tab>
+		</rich:tabPanel>
+		<a onclick="Richfaces.showModalPanel('pnl', {top:'10px', left:'10px', height:'400px'});">Show ModalPanel</a>
+	</h:form>
+	<rich:modalPanel id="pnl">
+		<f:facet name="header">
+			<h:outputText value="I'm panel header" />
+		</f:facet>
+		<p>The rich:modalPanel accepts different types of information: from simple text to iterative components such as rich:dataTable, etc.</p>
+		<a onclick="Richfaces.hideModalPanel('pnl');" href="#">Hide ModalPanel</a>
+	</rich:modalPanel>
+</ui:define>
+
+</ui:composition>
+
+
+<s:link view="/dashboard.xhtml" value="Dashboard" propagation="none" rendered="#{authenticator.user != null}" />

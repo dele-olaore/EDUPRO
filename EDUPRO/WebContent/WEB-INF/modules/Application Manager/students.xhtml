@@ -1,0 +1,609 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+	<h:form id="studentsForm">
+		<div style="width: 800px" align="center">
+			<table width="100%" cellspacing="2" cellpadding="2">
+			<tr>
+				<td align="left">
+					<table>
+						<tr>
+							<td valign="top" align="left">
+								<p>
+									<span style="font-size:30px;font-weight:bold;color:#888;">Manage Students</span><br/>
+									<span style="font-size:16px;">Search for students</span>
+								</p>
+							</td>
+							<td valign="bottom" align="right">
+								<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+								<div style="height:1.8em;margin:0;padding:0;width:100%">
+									<ul style="float:right;margin:0 0 0 0;padding:0;">
+										<!-- 
+										<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+											<a href="#" onclick="return false;" style="color:#fff;text-decoration:none;">View all</a>
+										</li> -->
+										<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+											<s:link view="/admission.xhtml" style="color:#fff;text-decoration:none;">Admission</s:link>
+										</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<rich:spacer height="2" />
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<a4j:outputPanel id="stuAjxPanel">
+					<c:if test="${studentBean.viewingStudent.student_id > 0}">
+						<a4j:commandLink reRender="stuAjxPanel" value="Back to search result" action="#{studentBean.setViewingStudent(null)}" immediate="true" /> -> <h:outputText value=" #{studentBean.viewingStudent.student_fn} #{studentBean.viewingStudent.student_mn} #{studentBean.viewingStudent.student_ln} " />
+						
+						<div class="dialog" style="text-align: center">
+							<h:graphicImage url="/uploads/school/students/#{studentBean.viewingStudent.student_id}?ranNum=#{appOptions.ranNum}" alt="#{studentBean.viewingStudent.student_fn} #{studentBean.viewingStudent.student_mn} #{studentBean.viewingStudent.student_ln}" width="120px" height="120px" />
+							<br/>
+							EDUPRO<sup style="font-size:6px">TM</sup> ID: <h:outputText value="#{studentBean.viewingStudent.student_id}" />
+							<br/><br/>
+						</div>
+						<div class="dialog">
+							<rich:tabPanel id="studentTab">
+								<rich:tab id="pdTab" label="Personal details">
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="sfn">First name</h:outputLabel>
+											<h:inputText id="sfn" value="#{studentBean.viewingStudent.student_fn}" required="true" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="sfn" style="color: red;"/>
+											
+											<h:outputLabel for="smn">Middle name</h:outputLabel>
+											<h:inputText id="smn" value="#{studentBean.viewingStudent.student_mn}" required="false" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="smn" style="color: red;"/>
+											
+											<h:outputLabel for="sln">Last name</h:outputLabel>
+											<h:inputText id="sln" value="#{studentBean.viewingStudent.student_ln}" required="true" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="sln" style="color: red;"/>
+											
+											<h:outputLabel for="sgender">Gender</h:outputLabel>
+											<h:selectOneMenu id="sgender" value="#{studentBean.viewingStudent.gender}" required="true" vdefaultLabel="Select a gender...">
+												<f:selectItem itemValue="M" itemLabel="Male" />
+												<f:selectItem itemValue="F" itemLabel="Female" />
+											</h:selectOneMenu>
+											<rich:message for="sgender" style="color: red;"/>
+											
+											<h:outputLabel for="sdob">Date of birth</h:outputLabel>
+											<rich:calendar id="sdob" value="#{studentBean.viewingStudent.dob}" locale="us" datePattern="yyyy-MM-dd" required="true">
+												<rich:beanValidator/>
+											</rich:calendar>
+											<rich:message for="sdob" style="color: red;"/>
+											
+											<h:outputLabel for="sphoto">Photo</h:outputLabel>
+											<rich:fileUpload id="sphoto" acceptedTypes="gif,jpg,png" allowFlash="auto" autoclear="false" maxFilesQuantity="1" immediateUpload="true" 
+												fileUploadListener="#{studentBean.sphotolisterner}">
+												<a:support event="onuploadcomplete" ajaxSingle="true" />
+											</rich:fileUpload>
+											<rich:message for="sphoto" style="color: red;"/>
+											
+											<h:outputLabel for="saddr1">Address line 1</h:outputLabel>
+											<h:inputText id="saddr1" value="#{studentBean.viewingStudent.address.addr1}" required="true" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="saddr1" style="color: red;"/>
+											
+											<h:outputLabel for="saddr2">Address line 2</h:outputLabel>
+											<h:inputText id="saddr2" value="#{studentBean.viewingStudent.address.addr2}" size="35">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="saddr2" style="color: red;"/>
+										</h:panelGrid>
+									</div>
+									<h:inputHidden id="saddrp1" value="#{studentBean.viewingStudent.address.phone1}"/>
+									
+									<div class="actionButtons">
+										<rich:toolBar>
+											<rich:toolBarGroup location="right">
+											<h:commandButton value="Save Changes" action="#{studentBean.UpdateStudent(1)}" />
+											</rich:toolBarGroup>
+										</rich:toolBar>
+									</div>
+								</rich:tab>
+								<rich:tab id="stTab" label="Student details">
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="sden">Date enrolled</h:outputLabel>
+											<rich:calendar id="sden" value="#{studentBean.viewingStudent.date_enrolled}" locale="us" datePattern="yyyy-MM-dd" required="true">
+												<rich:beanValidator/>
+											</rich:calendar>
+											<rich:message for="sden" style="color: red;"/>
+											
+											<h:outputLabel for="srnum">Roll number</h:outputLabel>
+											<h:inputText id="srnum" value="#{studentBean.viewingStudent.rollNumber}" size="5">
+												<rich:beanValidator/>
+											</h:inputText>
+											<rich:message for="srnum" style="color: red;"/>
+											
+											<h:outputLabel for="sclass">Class</h:outputLabel>
+											<h:selectOneMenu id="sclass" value="#{studentBean.viewingStudent.class_id}" required="true" defaultLabel="Select student class...">
+												<f:selectItems value="#{dropdownBean.classes}"/>
+											</h:selectOneMenu>
+											<rich:message for="sclass" style="color: red;"/>
+											
+											<h:outputLabel for="shouse">House</h:outputLabel>
+											<h:selectOneMenu id="shouse" value="#{studentBean.viewingStudent.house_id}" defaultLabel="Select student house...">
+												<f:selectItem itemValue="0" itemLabel="" />
+												<f:selectItems value="#{dropdownBean.houses}"/>
+												<a4j:support event="onchange" reRender="shostelPanel" ajaxSingle="true" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}" />
+											</h:selectOneMenu>
+											<rich:message for="shouse" style="color: red;"/>
+											
+											<h:outputLabel for="stype" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}">Type</h:outputLabel>
+											<h:selectOneMenu id="stype" value="#{studentBean.viewingStudent.student_type}" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}" defaultLabel="Select student type...">
+												<f:selectItem itemValue="D" itemLabel="Day" />
+												<f:selectItem itemValue="B" itemLabel="Border" />
+												<a4j:support event="onchange" reRender="shostelPanel" ajaxSingle="true" />
+											</h:selectOneMenu>
+											<rich:message for="stype" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}" style="color: red;"/>
+											
+											<h:outputLabel for="shostel" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}">Hostel</h:outputLabel>
+											<a4j:outputPanel id="shostelPanel" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}">
+											<h:selectOneMenu id="shostel" value="#{studentBean.viewingStudent.hostel_id}" defaultLabel="Select student hostel...">
+												<f:selectItems value="#{dropdownBean.getHostels(studentBean.viewingStudent.house_id, studentBean.viewingStudent.student_type)}"/>
+											</h:selectOneMenu>
+											</a4j:outputPanel>
+											<rich:message for="shostel" style="color: red;" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}"/>
+											
+											<h:outputLabel for="styped" rendered="#{appOptions.school.op_type_id == 1}">Type</h:outputLabel>
+											<h:selectOneMenu id="styped" value="#{studentBean.viewingStudent.student_type}" rendered="#{appOptions.school.op_type_id == 1}" defaultLabel="Select student type...">
+												<f:selectItem itemValue="D" itemLabel="Day" />
+											</h:selectOneMenu>
+											<rich:message for="styped" rendered="#{appOptions.school.op_type_id == 1}" style="color: red;"/>
+											
+										</h:panelGrid>
+									</div>
+									<div class="actionButtons">
+										<rich:toolBar>
+											<rich:toolBarGroup location="right">
+											<h:commandButton value="Save Changes" action="#{studentBean.UpdateStudent(2)}" />
+											</rich:toolBarGroup>
+										</rich:toolBar>
+									</div>
+								</rich:tab>
+								<rich:tab id="stgTab" label="Guardians">
+									<a4j:outputPanel id="guardiansPanel">
+									<rich:dataTable id="guardians" value="#{studentBean.viewingStudent.guardians}" var="obj" rows="20" width="100%" rendered="#{studentBean.viewingStudent.guardians.size() > 0}">
+									<f:facet name="header">
+										<h:outputText value="Displaying guardians" />
+									</f:facet>
+									
+									<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}" style="vertical-align: top">
+										<f:facet name="header">Name</f:facet>
+										<h:outputText value="(#{obj.title_nm}) #{obj.name} (#{obj.relationship_nm})"/>
+									</rich:column>
+									<rich:column style="vertical-align: top">
+										<f:facet name="header">Address</f:facet>
+										<h:outputText value="Address line 1: #{obj.address.addr1}"/><br/>
+										<h:outputText value="Address line 2: #{obj.address.addr2}"/><br/>
+										<h:outputText value="Phone 1: #{obj.address.phone1}"/><br/>
+										<h:outputText value="Phone 2: #{obj.address.phone2}"/><br/>
+										<h:outputText value="Email: #{obj.address.email}"/><br/>
+									</rich:column>
+									<rich:column style="vertical-align: top">
+										<f:facet name="header">User Account</f:facet>
+										Username: <h:outputText value=" #{obj.user.username}" rendered="#{obj.user.username != null and obj.user.username.length() > 0}"/><h:outputText value=" No user account" rendered="#{obj.user.username == null or obj.user.username.length() == 0}"/>
+										<br/><br/>
+										<a4j:commandLink reRender="guardians, guardiansPanel" value="Reset Password" action="#{studentBean.ResetGuardianPassword}" immediate="true" rendered="#{obj.user.username != null and obj.user.username.length() > 0}">
+											<f:setPropertyActionListener value="#{obj}" target="#{studentBean.guardian}"/>
+										</a4j:commandLink>
+									</rich:column>
+									<rich:column align="center" style="vertical-align: top">
+										<f:facet name="header">Update</f:facet>
+										<h:outputText value="Under construction!"/>
+									</rich:column>
+									<rich:column align="center" style="vertical-align: top">
+										<f:facet name="header">Remove</f:facet>
+										<a4j:commandLink reRender="guardians, guardiansPanel" value="Remove" action="#{studentBean.RemoveGuardianFromDB}" immediate="true">
+											<f:setPropertyActionListener value="#{obj}" target="#{studentBean.guardian}"/>
+										</a4j:commandLink>
+									</rich:column>
+									</rich:dataTable>
+									<h:outputText value="No guardians added" rendered="#{empty studentBean.viewingStudent.guardians}"/>
+									<rich:datascroller id="dsguardians" for="guardians" renderIfSinglePage="false" reRender="guardiansPanel" />
+									
+									<br/><br/>
+									
+									</a4j:outputPanel>
+									
+									<rich:panel>
+									<f:facet name="header">
+										<h:outputText value="Add guardian to student"/>
+									</f:facet>
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="gtitle">Title</h:outputLabel>
+											<h:selectOneMenu id="gtitle" value="#{studentBean.guardian.title_id}" required="false" defaultLabel="Select guardian title...">
+												<f:selectItems value="#{dropdownBean.titles}"/>
+											</h:selectOneMenu>
+											<rich:message for="gtitle" style="color: red;"/>
+										
+											<h:outputLabel for="gn">Name</h:outputLabel>
+											<h:inputText id="gn" value="#{studentBean.guardian.name}" size="50" />
+											<rich:message for="gn" style="color: red;"/>
+											
+											<h:outputLabel for="grel">Relationship to student</h:outputLabel>
+											<h:selectOneMenu id="grel" value="#{studentBean.guardian.relationship_id}" required="false" defaultLabel="Select guardian relationship...">
+												<f:selectItems value="#{dropdownBean.relationships}"/>
+											</h:selectOneMenu>
+											<rich:message for="grel" style="color: red;"/>
+											
+											<h:outputLabel for="gaddr1">Address line 1</h:outputLabel>
+											<h:inputText id="gaddr1" value="#{studentBean.guardian.address.addr1}" size="35"/>
+											<rich:message for="gaddr1" style="color: red;"/>
+											
+											<h:outputLabel for="gaddr2">Address line 2</h:outputLabel>
+											<h:inputText id="gaddr2" value="#{studentBean.guardian.address.addr2}" size="35" />
+											<rich:message for="gaddr2" style="color: red;"/>
+											
+											<h:outputLabel for="gph1">Phone 1</h:outputLabel>
+											<h:inputText id="gph1" value="#{studentBean.guardian.address.phone1}" size="35" />
+											<rich:message for="gph1" style="color: red;"/>
+											
+											<h:outputLabel for="gph2">Phone 2</h:outputLabel>
+											<h:inputText id="gph2" value="#{studentBean.guardian.address.phone2}" size="35"/>
+											<rich:message for="gph2" style="color: red;"/>
+											
+											<h:outputLabel for="gemil">Email</h:outputLabel>
+											<h:inputText id="gemil" value="#{studentBean.guardian.address.email}" size="35">
+												<rich:beanValidator />
+											</h:inputText>
+											<rich:message for="gemil" style="color: red;"/>
+										</h:panelGrid>
+									</div>
+									
+									<div class="actionButtons">
+										<rich:toolBar>
+											<rich:toolBarGroup location="right">
+											<h:commandButton value="Add Guardian" action="#{studentBean.AddGuardianToDB}" />
+											</rich:toolBarGroup>
+										</rich:toolBar>
+									</div>
+									</rich:panel>
+								</rich:tab>
+								<rich:tab id="stmTab" label="Medical">
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="sbg">Blood group</h:outputLabel>
+											<h:selectOneMenu id="sbg" value="#{studentBean.viewingStudent.blood_grp}" required="false" defaultLabel="Select student's blood group...">
+												<f:selectItem itemValue="A+" itemLabel="A+" />
+												<f:selectItem itemValue="B+" itemLabel="B+" />
+												<f:selectItem itemValue="AB+" itemLabel="AB+" />
+												<f:selectItem itemValue="O+" itemLabel="O+" />
+												<f:selectItem itemValue="A-" itemLabel="A-" />
+												<f:selectItem itemValue="B-" itemLabel="B-" />
+												<f:selectItem itemValue="AB-" itemLabel="AB-" />
+												<f:selectItem itemValue="O-" itemLabel="O-" />
+											</h:selectOneMenu>
+											<rich:message for="sbg" style="color: red;"/>
+											
+											<h:outputLabel for="sgt">Genotype</h:outputLabel>
+											<h:selectOneMenu id="sgt" value="#{studentBean.viewingStudent.genotype}" required="false" defaultLabel="Select student's genotype...">
+												<f:selectItem itemValue="AA" itemLabel="AA" />
+												<f:selectItem itemValue="AS" itemLabel="AS" />
+												<f:selectItem itemValue="AC" itemLabel="AC" />
+												<f:selectItem itemValue="SS" itemLabel="SS" />
+												<f:selectItem itemValue="SC" itemLabel="SC" />
+											</h:selectOneMenu>
+											<rich:message for="sgt" style="color: red;"/>
+											
+											<h:outputLabel for="sdisa">Any disability? Please describe</h:outputLabel>
+											<h:inputTextarea id="sdisa" value="#{studentBean.viewingStudent.disability}" style="width: 300px; height: 100px;">
+												<rich:beanValidator/>
+											</h:inputTextarea>
+											<rich:message for="sdisa" style="color: red;"/>
+											
+											<h:outputLabel for="sprec">Any Precaution? Please describe</h:outputLabel>
+											<h:inputTextarea id="sprec" value="#{studentBean.viewingStudent.precaution}" style="width: 300px; height: 100px;">
+												<rich:beanValidator/>
+											</h:inputTextarea>
+											<rich:message for="sprec" style="color: red;"/>
+										</h:panelGrid>
+									</div>
+									
+									<br/><br/>
+									
+									<div class="actionButtons">
+										<rich:toolBar>
+											<rich:toolBarGroup>
+											<h:commandButton value="Save Changes" action="#{studentBean.UpdateStudent(3)}" />
+											</rich:toolBarGroup>
+										</rich:toolBar>
+									</div>
+									
+									<br/><br/>
+									
+									<div class="dialog">
+										<a4j:outputPanel id="medicalsPanel">
+										<rich:dataTable id="medicals" value="#{studentBean.viewingStudent.medicals}" var="obj" rows="20" width="100%" rendered="#{studentBean.viewingStudent.medicals.size() > 0}">
+										<f:facet name="header">
+											<h:outputText value="Displaying medicals" />
+										</f:facet>
+										
+										<rich:column sortBy="#{obj.medical_test_nm}" filterBy="#{obj.medical_test_nm}" style="vertical-align: top">
+											<f:facet name="header">Test</f:facet>
+											<h:outputText value="#{obj.medical_test_nm}"/>
+										</rich:column>
+										<rich:column sortBy="#{obj.medical_result_nm}" filterBy="#{obj.medical_result_nm}" style="vertical-align: top">
+											<f:facet name="header">Result</f:facet>
+											<h:outputText value="#{obj.medical_result_nm}"/>
+										</rich:column>
+										<rich:column sortBy="#{obj.result_summary}" filterBy="#{obj.result_summary}" style="vertical-align: top">
+											<f:facet name="header">Summary</f:facet>
+											<h:outputText value="#{obj.result_summary}"/>
+										</rich:column>
+										<rich:column align="center" style="vertical-align: top">
+											<f:facet name="header">Remove</f:facet>
+											<a4j:commandLink reRender="medicals,medicalsPanel" value="Remove" action="#{studentBean.RemoveMedicalFromDB}" immediate="true">
+												<f:setPropertyActionListener value="#{obj}" target="#{studentBean.medical}"/>
+											</a4j:commandLink>
+										</rich:column>
+										</rich:dataTable>
+										<h:outputText value="No other medicals added" rendered="#{empty studentBean.viewingStudent.medicals}"/>
+										<rich:datascroller id="dsmedicals" for="medicals" renderIfSinglePage="false" reRender="medicalsPanel" />
+										
+										<br/><br/>
+										
+										</a4j:outputPanel>
+									</div>
+									
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="smtest">Test</h:outputLabel>
+											<h:selectOneMenu id="smtest" value="#{studentBean.medical.medical_test_id}" required="true" defaultLabel="Select medical test...">
+												<f:selectItems value="#{dropdownBean.medicaltests}"/>
+											</h:selectOneMenu>
+											<rich:message for="smtest" style="color: red;"/>
+											
+											<h:outputLabel for="smresult">Result</h:outputLabel>
+											<h:selectOneMenu id="smresult" value="#{studentBean.medical.medical_result_id}" required="true" defaultLabel="Select medical test...">
+												<f:selectItems value="#{dropdownBean.medicalresults}"/>
+											</h:selectOneMenu>
+											<rich:message for="smresult" style="color: red;"/>
+											
+											<h:outputLabel for="smsum">Summary</h:outputLabel>
+											<h:inputTextarea id="smsum" value="#{studentBean.medical.result_summary}" style="width: 300px; height: 100px;">
+												<rich:beanValidator/>
+											</h:inputTextarea>
+											<rich:message for="smsum" style="color: red;"/>
+										</h:panelGrid>
+									</div>
+									
+									<br/><br/>
+									
+									<div class="actionButtons">
+										<rich:toolBar>
+											<rich:toolBarGroup>
+											<h:commandButton value="Add Medical Test Result" action="#{studentBean.AddMedicalToDB}" />
+											</rich:toolBarGroup>
+										</rich:toolBar>
+									</div>
+								</rich:tab>
+								<rich:tab id="stoTab" label="Clubs">
+									<div class="dialog">
+										<a4j:outputPanel id="clubsPanel">
+										<rich:dataTable id="clubs" value="#{studentBean.viewingStudent.clubs}" var="obj" rows="20" width="100%" rendered="#{studentBean.viewingStudent.clubs.size() > 0}">
+										<f:facet name="header">
+											<h:outputText value="Displaying added club memberships" />
+										</f:facet>
+										
+										<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}" style="vertical-align: top">
+											<f:facet name="header">Club</f:facet>
+											<h:outputText value="#{obj.name}"/>
+										</rich:column>
+										<rich:column align="center" style="vertical-align: top">
+											<f:facet name="header">Remove</f:facet>
+											<a4j:commandLink reRender="clubs,clubsPanel" value="Remove" action="#{studentBean.RemoveClubFromDB}" immediate="true">
+												<f:setPropertyActionListener value="#{obj}" target="#{studentBean.club}"/>
+											</a4j:commandLink>
+										</rich:column>
+										</rich:dataTable>
+										<h:outputText value="No club membership added" rendered="#{empty studentBean.viewingStudent.clubs}"/>
+										<rich:datascroller id="dsclubs" for="clubs" renderIfSinglePage="false" reRender="clubsPanel" />
+										
+										<br/><br/>
+										
+										</a4j:outputPanel>
+									</div>
+									
+									<div class="dialog">
+										<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+											<h:outputLabel for="sclub">Club</h:outputLabel>
+											<h:selectOneMenu id="sclub" value="#{studentBean.club.id}" defaultLabel="Select club...">
+												<f:selectItems value="#{dropdownBean.clubs}"/>
+											</h:selectOneMenu>
+											<rich:message for="sclub" style="color: red;"/>
+										</h:panelGrid>
+									</div>
+									
+									<div class="actionButtons">
+										<rich:toolBar>
+											<rich:toolBarGroup>
+											<h:commandButton value="Add Club Membership" action="#{studentBean.AddClubToDB}" />
+											</rich:toolBarGroup>
+										</rich:toolBar>
+									</div>
+									
+									<br/><br/>
+								</rich:tab>
+								<rich:tab id="stdocsTab" label="Documents">
+									
+								</rich:tab>
+								<rich:tab id="stawardsTab" label="Awards">
+									
+								</rich:tab>
+								<rich:tab id="stprefectTab" label="Prefectships">
+									
+								</rich:tab>
+								<rich:tab id="stidcrdTab" label="ID Card">
+									
+								</rich:tab>
+							</rich:tabPanel>
+						</div>
+						
+						<rich:spacer height="15" />
+						
+					</c:if>
+					<c:if test="${studentBean.studentsSearchList.size() > 0 and studentBean.viewingStudent.student_id == 0}">
+						<rich:dataTable id="students" value="#{studentBean.studentsSearchList}" var="obj" rows="20" width="100%" rendered="#{studentBean.studentsSearchList.size() > 0}">
+						<f:facet name="header">
+							<h:outputText value="Displaying found students" />
+						</f:facet>
+						
+						<rich:column sortBy="#{obj.student_id}" width="15px">
+							<f:facet name="header">EduPro<sup style="font-size:6px">TM</sup> ID</f:facet>
+							<h:outputText value="#{obj.student_id}"/>
+						</rich:column>
+						<rich:column sortBy="#{obj.rollNumber}" width="15px">
+							<f:facet name="header">Roll No.</f:facet>
+							<h:outputText value="#{obj.rollNumber}"/>
+						</rich:column>
+						<rich:column sortBy="#{obj.student_fn}" filterBy="#{obj.student_fn}">
+							<f:facet name="header">Name</f:facet>
+							<h:outputText value="#{obj.student_fn} #{obj.student_mn} #{obj.student_ln}"/>
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">Gender</f:facet>
+							<h:outputText value="#{(obj.gender == 'M') ? 'Male' : 'Female'}"/>
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">Date of Birth</f:facet>
+							<h:outputText value="#{obj.dob}">
+								<f:convertDateTime type="date" dateStyle="medium"/>
+							</h:outputText>
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">House</f:facet>
+							<h:outputText value="#{obj.house_nm}" />
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">Class</f:facet>
+							<h:outputText value="#{obj.class_nm}" />
+						</rich:column>
+						<rich:column style="vertical-align: top">
+							<f:facet name="header">User Account</f:facet>
+							Username: <h:outputText value=" #{obj.user.username}" rendered="#{obj.user.username != null and obj.user.username.length() > 0}"/><h:outputText value=" No user account" rendered="#{obj.user.username == null or obj.user.username.length() == 0}"/>
+							<br/><br/>
+							<a4j:commandLink reRender="stuAjxPanel" value="Reset Password" action="#{studentBean.ResetStudentPassword}" immediate="true" rendered="#{obj.user.username != null and obj.user.username.length() > 0}">
+								<f:setPropertyActionListener value="#{obj}" target="#{studentBean.viewingStudent}"/>
+							</a4j:commandLink>
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">Action</f:facet>
+							<a4j:commandLink reRender="stuAjxPanel" value="View" action="#{studentBean.ViewStudent}" immediate="true">
+								<f:setPropertyActionListener value="#{obj}" target="#{studentBean.viewingStudent}"/>
+							</a4j:commandLink>
+						</rich:column>
+						</rich:dataTable>
+						<rich:datascroller id="dsstudents" for="students" renderIfSinglePage="false" reRender="students, stuAjxPanel" />
+						<rich:spacer height="10" />
+					</c:if>
+					
+					<c:if test="${studentBean.viewingStudent.student_id == 0}">
+					<rich:panel>
+						<f:facet name="header">
+							<h:outputText value="Search details"/>
+						</f:facet>
+						<div class="dialog">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="sfns">First name</h:outputLabel>
+								<h:inputText id="sfns" value="#{studentBean.student.student_fn}" size="35" />
+								<rich:message for="sfns" style="color: red;"/>
+								
+								<h:outputLabel for="slns">Last name</h:outputLabel>
+								<h:inputText id="slns" value="#{studentBean.student.student_ln}" size="35" />
+								<rich:message for="slns" style="color: red;"/>
+								
+								<h:outputLabel for="sgenders">Gender</h:outputLabel>
+								<h:selectOneMenu id="sgenders" value="#{studentBean.student.gender}" defaultLabel="Select a gender...">
+									<f:selectItem itemValue="" itemLabel="" />
+									<f:selectItem itemValue="M" itemLabel="Male" />
+									<f:selectItem itemValue="F" itemLabel="Female" />
+								</h:selectOneMenu>
+								<rich:message for="sgenders" style="color: red;"/>
+								
+								<h:outputLabel for="srnums">Roll number</h:outputLabel>
+								<h:inputText id="srnums" value="#{studentBean.student.rollNumber}" size="5" />
+								<rich:message for="srnums" style="color: red;"/>
+								
+								<h:outputLabel for="sepid">EduPro<sup style="font-size:6px">TM</sup> ID</h:outputLabel>
+								<h:inputText id="sepid" value="#{studentBean.student.student_id}" size="5" />
+								<rich:message for="sepid" style="color: red;"/>
+								
+								<h:outputLabel for="sryrs">Year enrolled</h:outputLabel>
+								<h:inputText id="sryrs" value="#{studentBean.student.student_year_enroll}" size="5" />
+								<rich:message for="sryrs" style="color: red;"/>
+								
+								<h:outputLabel for="sclasss">Class</h:outputLabel>
+								<h:selectOneMenu id="sclasss" value="#{studentBean.student.class_id}" defaultLabel="Select student class...">
+									<f:selectItem itemValue="0" itemLabel="" />
+									<f:selectItems value="#{dropdownBean.classes}"/>
+								</h:selectOneMenu>
+								<rich:message for="sclasss" style="color: red;"/>
+								
+								<h:outputLabel for="shouses">House</h:outputLabel>
+								<h:selectOneMenu id="shouses" value="#{studentBean.student.house_id}" defaultLabel="Select student house...">
+									<f:selectItem itemValue="0" itemLabel="" />
+									<f:selectItems value="#{dropdownBean.houses}"/>
+								</h:selectOneMenu>
+								<rich:message for="shouses" style="color: red;"/>
+								
+								<h:outputLabel for="stypes" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}">Type</h:outputLabel>
+								<h:selectOneMenu id="stypes" value="#{studentBean.student.student_type}" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}" defaultLabel="Select student type...">
+									<f:selectItem itemValue="" itemLabel="" />
+									<f:selectItem itemValue="D" itemLabel="Day" />
+									<f:selectItem itemValue="B" itemLabel="Border" />
+								</h:selectOneMenu>
+								<rich:message for="stypes" rendered="#{appOptions.school.op_type_id == 2 or appOptions.school.op_type_id == 3}" style="color: red;"/>
+								
+								<h:outputLabel for="stypeds" rendered="#{appOptions.school.op_type_id == 1}">Type</h:outputLabel>
+								<h:selectOneMenu id="stypeds" value="#{studentBean.student.student_type}" rendered="#{appOptions.school.op_type_id == 1}" defaultLabel="Select student type...">
+									<f:selectItem itemValue="D" itemLabel="Day" />
+								</h:selectOneMenu>
+								<rich:message for="stypeds" rendered="#{appOptions.school.op_type_id == 1}" style="color: red;"/>
+							</h:panelGrid>
+						</div>
+						
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<h:commandButton value="Search for Students" action="#{studentBean.SearchStudents}" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+					</rich:panel>
+					</c:if>
+					</a4j:outputPanel>
+				</td>
+			</tr>
+			</table>
+		</div>
+	</h:form>
+</ui:composition>

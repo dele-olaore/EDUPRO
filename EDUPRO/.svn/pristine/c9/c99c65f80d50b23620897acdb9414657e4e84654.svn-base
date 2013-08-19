@@ -1,0 +1,16 @@
+<p:document xmlns:ui="http://java.sun.com/jsf/facelets"
+            xmlns:s="http://jboss.com/products/seam/taglib"
+            xmlns:p="http://jboss.com/products/seam/pdf"
+            title="Report Card"
+            keywords="report card,performance"
+            subject="Student Academic Performance Report"
+            author="Bradawl"
+            creator="Bradawl"
+            type="pdf">
+
+	 <p:chapter number="1">
+		<p:title>
+       		<p:font size="24"><p:paragraph spacingBefore="10" spacingAfter="15">AR1</p:paragraph></p:font>
+       	</p:title>
+	</p:chapter>
+</p:document>

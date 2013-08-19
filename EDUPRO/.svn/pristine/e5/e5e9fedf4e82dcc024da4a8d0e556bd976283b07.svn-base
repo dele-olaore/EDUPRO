@@ -1,0 +1,29 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    template="WEB-INF/layout/basic_layout_1.xhtml">
+    
+<ui:define name="pageTitle"> Sign Out Successful!</ui:define>
+<ui:param name="showGlobalMessages" value="false"/>
+<f:loadBundle basename="resources.messages" var="bundle"/>
+<ui:define name="body">
+	<h:form id="logoutForm">
+		<rich:panel style="width: 450px">
+		      <f:facet name="header">
+				<h:outputText value="#{bundle['panelheader']}"/>
+		      </f:facet>
+		      
+		      <h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		      
+		      <rich:spacer height="20" />
+		      
+		      <s:link value="Click here to sign in for a new connection" view="/index.xhtml" />
+		</rich:panel>
+	</h:form>
+</ui:define>
+</ui:composition>

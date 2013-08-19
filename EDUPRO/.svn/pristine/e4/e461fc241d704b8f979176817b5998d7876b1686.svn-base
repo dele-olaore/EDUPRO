@@ -1,0 +1,136 @@
+package com.dexter.bradawl.dto;
+
+import java.io.File;
+import java.util.ArrayList;
+
+import javax.faces.context.FacesContext;
+
+import com.dexter.bradawl.util.AppOptions;
+import com.sun.faces.context.FacesContextImpl;
+
+public class Result
+{
+	Student student;
+	private ArrayList<TermResult> results;
+	
+	private String student_pic_str;
+	
+	private ArrayList<String[]> subjects;
+	
+	private String result_str;
+	
+	public Result()
+	{}
+	
+	public Student getStudent()
+	{
+		return student;
+	}
+
+	public void setStudent(Student student)
+	{
+		this.student = student;
+	}
+
+	public ArrayList<TermResult> getResults()
+	{
+		if(results == null)
+			results = new ArrayList<TermResult>();
+		return results;
+	}
+
+	public void setResults(ArrayList<TermResult> results)
+	{
+		this.results = results;
+	}
+
+	public String getStudent_pic_str() {
+		if(student != null)
+		{
+			FacesContext curContext = FacesContextImpl.getCurrentInstance();
+			AppOptions appOptions = (AppOptions)curContext.getExternalContext().getApplicationMap().get("appOptions");
+			if(appOptions != null)
+			{
+				File pic_file = new File(appOptions.getFileSavePath() + "students/" + student.getStudent_id());
+				if(pic_file.exists())
+					student_pic_str = "/uploads/school/students/" + student.getStudent_id();
+				else
+					student_pic_str = null;
+			}
+		}
+		return student_pic_str;
+	}
+
+	public void setStudent_pic_str(String student_pic_str) {
+		this.student_pic_str = student_pic_str;
+	}
+
+	public ArrayList<String[]> getSubjects() {
+		if(subjects == null)
+		{
+			subjects = new ArrayList<String[]>();
+			
+			for(TermResult tr : getResults())
+			{
+				ArrayList<Score> tr_scores = tr.getDetails();
+				
+				for(Score score : tr_scores)
+				{
+					boolean exists = false;
+					for(String[] sub : subjects)
+					{
+						if(sub[0].equalsIgnoreCase(""+score.getSub_id()))
+						{
+							exists = true;
+							break;
+						}
+					}
+					if(!exists)
+					{
+						subjects.add(new String[] {""+score.getSub_id(), score.getSub_nm()});
+					}
+				}
+			}
+		}
+		return subjects;
+	}
+
+	public void setSubjects(ArrayList<String[]> subjects) {
+		this.subjects = subjects;
+	}
+
+	public String getResult_str() {
+		result_str = "";
+		
+		try
+		{
+			int cnt = getResults().size();
+			
+			TermResult tr = getResults().get(cnt-1);
+			if(cnt < 3)
+			{
+				result_str = (tr.getResult().equalsIgnoreCase("p")) ? "PASS" : "FAIL";
+			}
+			else
+			{
+				if(student.getClass_nm().indexOf("3") >= 0) // jss or sss 3
+				{
+					result_str = (tr.getResult().equalsIgnoreCase("p")) ? "PASS" : "FAIL";
+				}
+				else
+				{
+					result_str = (tr.getResult().equalsIgnoreCase("p")) ? "PROMOTED" : "FAIL";
+				}
+			}
+		}
+		catch(Exception ex)
+		{}
+		
+		return result_str;
+	}
+
+	public void setResult_str(String result_str) {
+		this.result_str = result_str;
+	}
+	
+}

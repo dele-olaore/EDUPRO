@@ -1,0 +1,140 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="genForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">General Settings</span><br/>
+							<span style="font-size:16px;">Manage br@dawl setup settings</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<!-- <li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									
+								</li> -->
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<table width="100%">
+			<tr>
+			<td>
+			<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+				<h:outputLabel for="schnm">School name</h:outputLabel>
+				<h:inputText id="schnm" value="#{appOptions.school.sch_nm}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="schnm" style="color: red;"/>
+				
+				<h:outputLabel for="sch_motto">School motto</h:outputLabel>
+				<h:inputText id="sch_motto" value="#{appOptions.school.sch_motto}" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="sch_motto" style="color: red;"/>
+				
+				<h:outputLabel for="year_founded">Year founded</h:outputLabel>
+				<h:inputText id="year_founded" value="#{appOptions.school.year_founded}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="year_founded" style="color: red;"/>
+				
+				<h:outputLabel for="rc_no">RC no</h:outputLabel>
+				<h:inputText id="rc_no" value="#{appOptions.school.rc_no}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="rc_no" style="color: red;"/>
+				
+				<h:outputLabel for="addr1">Address line 1</h:outputLabel>
+				<h:inputText id="addr1" value="#{appOptions.school.address.addr1}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="addr1" style="color: red;"/>
+				
+				<h:outputLabel for="addr2">Address line 2</h:outputLabel>
+				<h:inputText id="addr2" value="#{appOptions.school.address.addr2}" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="addr2" style="color: red;"/>
+				
+				<h:outputLabel for="phone1">Phone 1</h:outputLabel>
+				<h:inputText id="phone1" value="#{appOptions.school.address.phone1}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="phone1" style="color: red;"/>
+				
+				<h:outputLabel for="phone2">Phone 2</h:outputLabel>
+				<h:inputText id="phone2" value="#{appOptions.school.address.phone2}" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="phone2" style="color: red;"/>
+				
+				<h:outputLabel for="email">Email</h:outputLabel>
+				<h:inputText id="email" value="#{appOptions.school.address.email}" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="email" style="color: red;"/>
+			</h:panelGrid>
+			
+			<div class="actionButtons">
+				<rich:toolBar>
+					<rich:toolBarGroup>
+					<h:commandButton value="Save Changes" action="#{setupBean.UpdateSchool}" />
+					</rich:toolBarGroup>
+				</rich:toolBar>
+			</div>
+			</td>
+			<td valign="middle" align="center">
+				<a4j:outputPanel id="logoPanel">
+				<h:graphicImage url="/uploads/school/logo?ranNum=#{appOptions.ranNum}" height="120" width="120" rendered="#{appOptions.appSetup}" />
+				<br/>
+				<fieldset>
+					<legend>Change Logo</legend>
+					<rich:fileUpload id="sch_logo" acceptedTypes="gif,jpg,png" allowFlash="auto" autoclear="false" maxFilesQuantity="1" immediateUpload="true" 
+						fileUploadListener="#{setupBean.schlistener}">
+						<a:support event="onuploadcomplete" ajaxSingle="true" reRender="logoPanel" />
+					</rich:fileUpload>
+				</fieldset>
+				</a4j:outputPanel>
+			</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+</ui:composition>

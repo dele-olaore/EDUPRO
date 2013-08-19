@@ -1,0 +1,260 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    template="WEB-INF/layout/basic_layout_1.xhtml">
+    
+<ui:define name="pageTitle"> Home</ui:define>
+<ui:param name="showGlobalMessages" value="false"/>
+<f:loadBundle basename="resources.messages" var="bundle"/>
+<ui:define name="body">
+	<h:form id="loginForm" rendered="#{appOptions.appSetup}">
+		<div style="width: 450px" align="right">
+			<s:link value="Help!" onclick="return false;" />
+		</div>
+		<rich:spacer height="5" />
+		<rich:panel style="width: 450px">
+		      <f:facet name="header">
+				<h:outputText value="#{bundle['panelheader']}"/>
+		      </f:facet>
+		      
+		      <h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		      
+				<div class="dialog">
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+					<h:outputLabel for="username" style="font-size:24px">Username </h:outputLabel>
+					<h:inputText id="username" value="#{authenticator.username}" required="true" style="height:40px;font-size:24px;">
+						<rich:beanValidator/>
+					</h:inputText>
+					<rich:message for="username" style="color: red;"/>
+					<h:outputLabel for="password" style="font-size:24px">Password </h:outputLabel>
+					<h:inputSecret id="password" value="#{authenticator.user_password}" required="true" style="height:40px;font-size:24px;">
+						<rich:beanValidator/>
+					</h:inputSecret>
+					<rich:message for="password" style="color: red;"/>
+					
+					</h:panelGrid>
+				</div>
+			  <p>
+			  	<s:link value="Forgot my password!" onclick="alert('Under Construction!');return false;" />
+			  </p>
+			  <p>
+			  <i>Note - </i>You may sign in with the authentication details provided to you by your administrator.
+			  </p>
+			  <div class="actionButtons">
+					<h:commandButton value="Sign In" action="#{authenticator.authenticate}" style="height:40px;width:70px;" />
+			  </div>
+		</rich:panel>
+	</h:form>
+	<h:form id="setupForm" rendered="#{not appOptions.appSetup}">
+		<div style="width: 600px" align="right">
+			<s:link value="Help!" onclick="return false;" />
+		</div>
+		<rich:spacer height="5" />
+		<rich:panel style="width: 600px">
+		      <f:facet name="header">
+				<h:outputText value="#{bundle['setupheader']}"/>
+		      </f:facet>
+		      
+		      <h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		      
+				<div class="dialog" style="width: 600px" align="left">
+					<p>
+						School details
+					</p>
+					
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="sch_name">School name</h:outputLabel>
+						<h:inputText id="sch_name" value="#{setupBean.school.sch_nm}" required="true" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="sch_name" style="color: red;"/>
+						
+						<h:outputLabel for="sch_motto">School motto</h:outputLabel>
+						<h:inputText id="sch_motto" value="#{setupBean.school.sch_motto}" required="true" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="sch_motto" style="color: red;"/>
+						
+						<h:outputLabel for="year_founded">Year founded</h:outputLabel>
+						<h:inputText id="year_founded" value="#{setupBean.school.year_founded}" size="4">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="year_founded" style="color: red;"/>
+						
+						<h:outputLabel for="rc_no">RC No.</h:outputLabel>
+						<h:inputText id="rc_no" value="#{setupBean.school.rc_no}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="rc_no" style="color: red;"/>
+						
+						<h:outputLabel for="sch_op_type">Operation Type</h:outputLabel>
+						<h:selectOneMenu id="sch_op_type" value="#{setupBean.school.op_type_id}" defaultLabel="Select operation type...">
+							<f:selectItem itemLabel="Day" itemValue="1" />
+							<f:selectItem itemLabel="Boarding" itemValue="2" />
+							<f:selectItem itemLabel="Day and Boarding" itemValue="3" />
+							<rich:beanValidator/>
+						</h:selectOneMenu>
+						<rich:message for="sch_op_type" style="color: red;"/>
+						
+						<h:outputLabel for="sch_logo">School logo</h:outputLabel>
+						<rich:fileUpload id="sch_logo" acceptedTypes="gif,jpg,png" allowFlash="auto" autoclear="false" maxFilesQuantity="1" immediateUpload="true" 
+							fileUploadListener="#{setupBean.schlistener}">
+							<a:support event="onuploadcomplete" ajaxSingle="true" />
+						</rich:fileUpload>
+						<rich:message for="sch_logo" style="color: red;"/>
+						
+						<h:outputLabel for="addr1">Address line 1.</h:outputLabel>
+						<h:inputText id="addr1" value="#{setupBean.school.address.addr1}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="addr1" style="color: red;"/>
+						
+						<h:outputLabel for="addr2">Address line 2.</h:outputLabel>
+						<h:inputText id="addr2" value="#{setupBean.school.address.addr2}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="addr2" style="color: red;"/>
+						
+						<h:outputLabel for="phone1">Phone 1.</h:outputLabel>
+						<h:inputText id="phone1" value="#{setupBean.school.address.phone1}" size="20">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="phone1" style="color: red;"/>
+						
+						<h:outputLabel for="phone2">Phone 2.</h:outputLabel>
+						<h:inputText id="phone2" value="#{setupBean.school.address.phone2}" size="20">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="phone2" style="color: red;"/>
+						
+						<h:outputLabel for="email">Email</h:outputLabel>
+						<h:inputText id="email" value="#{setupBean.school.address.email}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="email" style="color: red;"/>
+						
+						<h:outputLabel for="fax">Fax</h:outputLabel>
+						<h:inputText id="fax" value="#{setupBean.school.address.fax}" size="20">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="fax" style="color: red;"/>
+						
+						<h:outputLabel for="website">Website address</h:outputLabel>
+						<h:inputText id="website" value="#{setupBean.school.address.website}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="website" style="color: red;"/>
+					</h:panelGrid>
+					
+					<p>
+						Administrator details
+					</p>
+					
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="staff_fn">First name</h:outputLabel>
+						<h:inputText id="staff_fn" value="#{setupBean.staff.staff_fn}" required="true" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="staff_fn" style="color: red;"/>
+						
+						<h:outputLabel for="staff_mn">Middle name</h:outputLabel>
+						<h:inputText id="staff_mn" value="#{setupBean.staff.staff_mn}" required="true" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="staff_mn" style="color: red;"/>
+						
+						<h:outputLabel for="staff_ln">Last name</h:outputLabel>
+						<h:inputText id="staff_ln" value="#{setupBean.staff.staff_ln}" required="true" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="staff_ln" style="color: red;"/>
+						
+						<h:outputLabel for="staff_cat_id">Category</h:outputLabel>
+						<h:selectOneMenu id="staff_cat_id" value="#{setupBean.staff.staff_cat_id}" defaultLabel="Select a category...">
+							<f:selectItems value="#{setupBean.catList}"/>
+							<rich:beanValidator/>
+						</h:selectOneMenu>
+						<rich:message for="staff_cat_id" style="color: red;"/>
+						
+						<h:outputLabel for="department_id">Department</h:outputLabel>
+						<h:selectOneMenu id="department_id" value="#{setupBean.staff.department_id}" defaultLabel="Select a department...">
+							<f:selectItems value="#{setupBean.deptList}"/>
+							<rich:beanValidator/>
+						</h:selectOneMenu>
+						<rich:message for="department_id" style="color: red;"/>
+						
+						<h:outputLabel for="adm_photo">Admin photo</h:outputLabel>
+						<rich:fileUpload id="adm_photo" acceptedTypes="gif,jpg,png" allowFlash="auto" autoclear="false" maxFilesQuantity="1" immediateUpload="true" 
+							fileUploadListener="#{setupBean.admlistener}">
+							<a:support event="onuploadcomplete" ajaxSingle="true" />
+						</rich:fileUpload>
+						<rich:message for="adm_photo" style="color: red;"/>
+						
+						<h:outputLabel for="adm_addr1">Address line 1.</h:outputLabel>
+						<h:inputText id="adm_addr1" value="#{setupBean.staff.address.addr1}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="adm_addr1" style="color: red;"/>
+						
+						<h:outputLabel for="adm_addr2">Address line 2.</h:outputLabel>
+						<h:inputText id="adm_addr2" value="#{setupBean.staff.address.addr2}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="adm_addr2" style="color: red;"/>
+						
+						<h:outputLabel for="adm_phone1">Phone 1.</h:outputLabel>
+						<h:inputText id="adm_phone1" value="#{setupBean.staff.address.phone1}" size="20">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="adm_phone1" style="color: red;"/>
+						
+						<h:outputLabel for="adm_phone2">Phone 2.</h:outputLabel>
+						<h:inputText id="adm_phone2" value="#{setupBean.staff.address.phone2}" size="20">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="adm_phone2" style="color: red;"/>
+						
+						<h:outputLabel for="adm_email">Email</h:outputLabel>
+						<h:inputText id="adm_email" value="#{setupBean.staff.address.email}" size="40">
+							<rich:beanValidator/>
+						</h:inputText>
+						<rich:message for="adm_email" style="color: red;"/>
+						
+					</h:panelGrid>
+					
+					<p>
+						Administrator user details
+					</p>
+					
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="username">Username</h:outputLabel>
+						<h:outputText id="username" value="S1" />
+						<rich:message for="username" style="color: red;"/>
+						
+						<h:outputLabel for="password">Password</h:outputLabel>
+						<h:inputSecret id="password" value="#{setupBean.staff.user.user_password}" required="true" size="40">
+							<rich:beanValidator/>
+						</h:inputSecret>
+						<rich:message for="password" style="color: red;"/>
+						
+						<h:outputLabel for="repassword">Re-type password</h:outputLabel>
+						<h:inputSecret id="repassword" value="#{setupBean.staff.user.re_password}" required="true" size="40">
+							<rich:beanValidator/>
+						</h:inputSecret>
+						<rich:message for="repassword" style="color: red;"/>
+					</h:panelGrid>
+					
+				</div>
+			  <div class="actionButtons">
+					<h:commandButton value="SAVE" action="#{setupBean.setup}" />
+			  </div>
+		</rich:panel>
+	</h:form>
+</ui:define>
+
+</ui:composition>

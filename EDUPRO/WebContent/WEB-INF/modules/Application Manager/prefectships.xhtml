@@ -1,0 +1,225 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="refsForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Prefectships</span><br/>
+							<span style="font-size:16px;">Create and manage prefectships issued to selected senior students</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newRefMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Add new</a:commandLink>
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:tabPanel id="prefectsTab">
+				<rich:tab id="prefectTab" label="Manage Prefectships" immediate="true">
+					<a4j:outputPanel id="mypanel">
+					<rich:dataTable id="refs" value="#{settingsBean.prefectships}" var="obj" rows="20" width="100%" rendered="#{settingsBean.prefectships.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying available prefectships" />
+					</f:facet>
+					<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}">
+						<f:facet name="header">Prefectship</f:facet>
+						<h:outputText value="#{obj.name}" rendered="#{obj.id != settingsBean.refOBJ.id}" />
+						<h:inputText value="#{obj.name}" size="40" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+					</rich:column>
+					<rich:column>
+						<f:facet name="header">Description</f:facet>
+						<h:outputText value="#{obj.desc}" rendered="#{obj.id != settingsBean.refOBJ.id}" />
+						<h:inputText value="#{obj.desc}" size="40" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+					</rich:column>
+					<rich:column align="center">
+						<f:facet name="header">Update</f:facet>
+						<a4j:commandLink reRender="refs" value="Update" rendered="#{obj.id != settingsBean.refOBJ.id}">
+							<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.refOBJ}"/>
+						</a4j:commandLink>
+						
+						<a4j:commandLink reRender="refs,messagepanel" action="#{settingsBean.UpdateRefObject(10)}" value="SAVE" rendered="#{obj.id == settingsBean.refOBJ.id}">
+							<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.refOBJ}"/>
+						</a4j:commandLink>
+						
+						<h:outputText value=" - " rendered="#{obj.id == settingsBean.refOBJ.id}" />
+						
+						<a4j:commandLink reRender="refs" action="#{settingsBean.reset}" value="CANCEL" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+						
+					</rich:column>
+					</rich:dataTable>
+					<h:outputText value="No prefectship found" rendered="#{empty settingsBean.prefectships}"/>
+					<rich:datascroller id="dsrefs" for="refs" renderIfSinglePage="false" reRender="mypanel" />
+					</a4j:outputPanel>
+				</rich:tab>
+				<rich:tab id="assignPrefectTab" label="Present Prefectships" immediate="true">
+					<a4j:outputPanel id="cprefectsPanel">
+					<rich:dataTable id="cprefects" value="#{settingsBean.currentPrefects}" var="obj" rows="20" width="100%" rendered="#{settingsBean.currentPrefects.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying current prefects" />
+					</f:facet>
+					<rich:column sortBy="#{obj.prefect_nm}" filterBy="#{obj.prefect_nm}">
+						<f:facet name="header">Prefectship</f:facet>
+						<h:outputText value="#{obj.prefect_nm}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.student.student_fn}" filterBy="#{obj.student.student_fn}">
+						<f:facet name="header">Student</f:facet>
+						<h:outputText value="#{obj.student.student_fn} #{obj.student.student_mn} #{obj.student.student_ln}" />
+					</rich:column>
+					<rich:column>
+						<f:facet name="header">Status</f:facet>
+						<h:outputText value="#{(obj.type == 'A') ? 'Acting' : 'Confirmed'}" />
+					</rich:column>
+					<rich:column align="center">
+						<f:facet name="header">Remove</f:facet>
+						<a4j:commandLink reRender="messagepanel,cprefectsPanel,cprefects" value="Remove" action="#{settingsBean.RemovePrefectshipAssignment}">
+							<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.prefect}"/>
+						</a4j:commandLink>
+					</rich:column>
+					</rich:dataTable>
+					<h:outputText value="No prefects found" rendered="#{empty settingsBean.currentPrefects}"/>
+					<rich:datascroller id="dscprefects" for="cprefects" renderIfSinglePage="false" reRender="cprefectsPanel,cprefects" />
+					<br/><br/>
+					</a4j:outputPanel>
+					<rich:panel>
+						<f:facet name="header">
+						<h:outputText value="Assign Prefectship"/>
+						</f:facet>
+						
+						<div class="dialog">
+							<a4j:outputPanel id="newprefectPanel">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="pship">Prefectship</h:outputLabel>
+								<h:selectOneMenu id="pship" value="#{settingsBean.prefect.prefect_id}" defaultLabel="Select a prefectship...">
+									<f:selectItems value="#{settingsBean.prefectships}" var="pship" itemValue="#{pship.id}" itemLabel="#{pship.name}" />
+								</h:selectOneMenu>
+								<rich:message for="pship" style="color: red;"/>
+								
+								<h:outputLabel for="cls2">Class</h:outputLabel>
+								<h:selectOneMenu id="cls2" value="#{dropdownBean.class_id}" defaultLabel="Select a class...">
+									<f:selectItem itemValue="-1" itemLabel="" />
+									<f:selectItems value="#{dropdownBean.classes}"/>
+									<a4j:support event="onchange" reRender="pstud" ajaxSingle="true" />
+								</h:selectOneMenu>
+								<rich:message for="cls2" style="color: red;"/>
+								
+								<h:outputLabel for="pstud">Student</h:outputLabel>
+								<h:selectOneMenu id="pstud" value="#{settingsBean.prefect.student_id}" defaultLabel="Select a student...">
+									<f:selectItems value="#{dropdownBean.students}" var="stud" itemValue="#{stud.student_id}" itemLabel="#{stud.student_fn} #{stud.student_mn} #{stud.student_ln} (#{stud.rollNumber})" />
+								</h:selectOneMenu>
+								<rich:message for="pstud" style="color: red;"/>
+								
+								<h:outputLabel for="pstat">Status</h:outputLabel>
+								<h:selectOneMenu id="pstat" value="#{settingsBean.prefect.type}" defaultLabel="Select a status...">
+									<f:selectItem itemValue="A" itemLabel="Acting" />
+									<f:selectItem itemValue="C" itemLabel="Confirmed" />
+								</h:selectOneMenu>
+								<rich:message for="pstat" style="color: red;"/>
+							</h:panelGrid>
+							</a4j:outputPanel>
+						</div>
+						
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<a4j:commandButton value="Assign Prefectship" action="#{settingsBean.AssignPrefectShip}" reRender="messagepanel,cprefectsPanel,cprefects,newprefectPanel" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+					</rich:panel>
+				</rich:tab>
+				<rich:tab id="oldPrefectTab" label="Old Prefectships" immediate="true">
+					<h:outputText value="Under Construction!" style="font-size: 18px;align:center" />
+				</rich:tab>
+			</rich:tabPanel>
+		</td>
+	</tr>
+	</table>
+</div>
+</h:form>
+
+<rich:modalPanel id="newRefMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Create new Prefectship"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newRefMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:350px;overflow:auto;">
+<h:form id="newRefForm">
+<rich:panel>
+	<f:facet name="header">
+	<h:outputText value="Prefectship details"/>
+	</f:facet>
+	
+	<div class="dialog">
+		<a4j:outputPanel id="messagepanel2">
+			<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		</a4j:outputPanel>
+	
+		<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+			<h:outputLabel for="trname">Prefectship</h:outputLabel>
+			<h:inputText id="rname" value="#{settingsBean.refOBJ.name}" required="true" size="35">
+				<rich:beanValidator/>
+			</h:inputText>
+			<rich:message for="rname" style="color: red;"/>
+			
+			<h:outputLabel for="rdesc">Prefectship description</h:outputLabel>
+			<h:inputTextarea id="rdesc" value="#{settingsBean.refOBJ.desc}" required="true" style="width: 300px; height: 100px;">
+				<rich:beanValidator/>
+			</h:inputTextarea>
+			<rich:message for="rdesc" style="color: red;"/>
+		</h:panelGrid>
+		
+		<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+				<a4j:commandButton value="Save" action="#{settingsBean.CreateRefObject(10)}" reRender="mypanel,newRefForm" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+				<a:commandLink onclick="#{rich:component('newRefMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+	</div>
+</rich:panel>
+</h:form>
+</div>
+</rich:modalPanel>
+
+</ui:composition>

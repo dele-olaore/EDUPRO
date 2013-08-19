@@ -1,0 +1,1740 @@
+package com.dexter.bradawl.model;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+
+import com.dexter.bradawl.dto.Action;
+import com.dexter.bradawl.dto.Award;
+import com.dexter.bradawl.dto.ClassSubject;
+import com.dexter.bradawl.dto.Grade;
+import com.dexter.bradawl.dto.Grading;
+import com.dexter.bradawl.dto.NewsComment;
+import com.dexter.bradawl.dto.Ref;
+import com.dexter.bradawl.dto.Staff;
+import com.dexter.bradawl.util.Env;
+
+public class RefModel
+{
+	/*
+	 * Private members for database access, retrieval and manipulation.
+	 * */
+	private Connection con;
+	private CallableStatement stored_procedure;
+	private ResultSet result;
+	
+	// private int output = -1;
+	// private String empty = "";
+	
+	public RefModel()
+	{}
+	
+	/**
+	 * Used internally to connect to the bradawlnew database.
+	 * */
+	private void connectToDB() throws Exception
+	{
+		closeConnection();
+		
+		con = Env.getConnectionBradawl();
+	}
+	
+	/**
+	 * Used internally to close the connection after use. 
+	 * */
+	private void closeConnection()
+	{
+		if(result != null)
+		{
+			try
+			{
+				result.close();
+				result = null;
+			}
+			catch(Exception ignore){}
+		}
+		if(con != null)
+		{
+			try
+			{
+				con.close();
+				con = null;
+			}
+			catch(Exception ignore){}
+		}
+	}
+	
+	/**
+	 * Creates similar ref objects
+	 * */
+	public int createRefObjects(int type, Ref e)
+	{
+		int output = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			switch(type)
+			{
+				case 1: // title
+				{
+					stored_procedure = con.prepareCall("{call crt_title_sp(?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, -1);
+					stored_procedure.registerOutParameter(2, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(2);
+					break;
+				}
+				case 2: // relationships
+				{
+					stored_procedure = con.prepareCall("{call crt_relationship_sp(?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, -1);
+					stored_procedure.registerOutParameter(2, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(2);
+					break;
+				}
+				case 3: // medical tests
+				{
+					stored_procedure = con.prepareCall("{call crt_medical_test_sp(?,?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setString(2, e.getDesc());
+					stored_procedure.setInt(3, -1);
+					stored_procedure.registerOutParameter(3, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(3);
+					break;
+				}
+				case 4: // medical results
+				{
+					stored_procedure = con.prepareCall("{call crt_medical_result_sp(?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, -1);
+					stored_procedure.registerOutParameter(2, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(2);
+					break;
+				}
+				case 5: // blocks
+				{
+					stored_procedure = con.prepareCall("{call crt_block_sp(?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, -1);
+					stored_procedure.registerOutParameter(2, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(2);
+					break;
+				}
+				case 6: // clubs
+				{
+					stored_procedure = con.prepareCall("{call crt_club_sp(?,?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setString(2, e.getDesc());
+					stored_procedure.setInt(3, -1);
+					stored_procedure.registerOutParameter(3, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(3);
+					break;
+				}
+				case 7: // house
+				{
+					stored_procedure = con.prepareCall("{call crt_house_sp(?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, -1);
+					stored_procedure.registerOutParameter(2, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(2);
+					break;
+				}
+				case 8: // hostel
+				{
+					stored_procedure = con.prepareCall("{call crt_hostel_sp(?,?,?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, e.getId2()); // house id
+					stored_procedure.setInt(3, e.getId3()); // block id
+					stored_procedure.setInt(4, -1);
+					stored_procedure.registerOutParameter(4, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(4);
+					break;
+				}
+				case 9: // awards
+				{
+					stored_procedure = con.prepareCall("{call crt_award_sp(?,?,?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setString(2, e.getDesc());
+					stored_procedure.setString(3, e.getType());
+					stored_procedure.setInt(4, -1);
+					stored_procedure.registerOutParameter(4, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(4);
+					break;
+				}
+				case 10: // prefectships
+				{
+					stored_procedure = con.prepareCall("{call crt_prefect_sp(?,?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setString(2, e.getDesc());
+					stored_procedure.setInt(3, -1);
+					stored_procedure.registerOutParameter(3, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(3);
+					break;
+				}
+				case 11: // news
+				{
+					stored_procedure = con.prepareCall("{call crt_news_sp(?,?,?,?)}");
+					stored_procedure.setString(1, e.getNews_headline());
+					stored_procedure.setString(2, e.getNews_body());
+					stored_procedure.setInt(3, e.getUser_id());
+					stored_procedure.setInt(4, -1);
+					stored_procedure.registerOutParameter(4, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(4);
+					break;
+				}
+				case 12: // events
+				{
+					stored_procedure = con.prepareCall("{call crt_event_sp(?,?,?,?,?)}");
+					stored_procedure.setString(1, e.getTitle());
+					stored_procedure.setString(2, e.getBody());
+					stored_procedure.setDate(3, new java.sql.Date(e.getDate().getTime()));
+					stored_procedure.setInt(4, e.getUser_id());
+					stored_procedure.setInt(5, -1);
+					stored_procedure.registerOutParameter(5, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(5);
+					break;
+				}
+				case 13: // bank
+				{
+					stored_procedure = con.prepareCall("{call crt_bank_sp(?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, -1);
+					stored_procedure.registerOutParameter(2, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(2);
+					break;
+				}
+				case 14: // document types
+				{
+					stored_procedure = con.prepareCall("{call crt_documenttype_sp(?,?)}");
+					stored_procedure.setString(1, e.getName());
+					stored_procedure.setInt(2, -1);
+					stored_procedure.registerOutParameter(2, Types.INTEGER);
+					stored_procedure.execute();
+					output = stored_procedure.getInt(2);
+					break;
+				}
+			}
+			
+			if(output == 0)
+			{
+				con.commit();
+			}
+			else
+			{
+				con.rollback();
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig) {}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return output;
+	}
+	
+	/**
+	 * Gets available ref objects based on the supplied type.
+	 * */
+	public ArrayList<Ref> getRefObjects(int type)
+	{
+		ArrayList<Ref> list = new ArrayList<Ref>();
+		
+		try
+		{
+			connectToDB();
+			
+			switch(type)
+			{
+				case 1: // departments
+				{
+					/**
+					 * Gets available departments.
+					 * */
+					stored_procedure = con.prepareCall("{call get_departments_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 2: // staff categories
+				{
+					/**
+					 * Gets available staff categories.
+					 * */
+					stored_procedure = con.prepareCall("{call get_staff_cats_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 3: // user roles
+				{
+					/**
+					 * Gets various user roles.
+					 * */
+					stored_procedure = con.prepareCall("{call get_roles_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 4: // subjects
+				{
+					/**
+					 * Gets available subjects.
+					 * */
+					stored_procedure = con.prepareCall("{call get_subjects_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 5: // fee categories
+				{
+					stored_procedure = con.prepareCall("{call get_feecats_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 6: // titles
+				{
+					stored_procedure = con.prepareCall("{call get_titles_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 7: // relationships
+				{
+					stored_procedure = con.prepareCall("{call get_relationships_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 8: // medical tests
+				{
+					stored_procedure = con.prepareCall("{call get_medical_tests_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 9: // medical results
+				{
+					stored_procedure = con.prepareCall("{call get_medical_results_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 10: // blocks
+				{
+					stored_procedure = con.prepareCall("{call get_blocks_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 11: // clubs
+				{
+					stored_procedure = con.prepareCall("{call get_clubs_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 12: // house
+				{
+					stored_procedure = con.prepareCall("{call get_houses_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 13: // hostels
+				{
+					stored_procedure = con.prepareCall("{call get_hostels_sp}");
+					// a.hostel_id, a.hostel_nm, a.house_id, h.house_nm, a.block_id, b.block_nm
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setId2(result.getInt(3)); // house
+						e.setName2(result.getString(4));
+						e.setId3(result.getInt(5)); // block
+						e.setName3(result.getString(6));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 14: // awards
+				{
+					stored_procedure = con.prepareCall("{call get_awards_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						e.setType(result.getString(4));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 15: // prefectship
+				{
+					stored_procedure = con.prepareCall("{call get_prefects_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						e.setDesc(result.getString(3));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 16: // banks
+				{
+					stored_procedure = con.prepareCall("{call get_banks_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					
+					break;
+				}
+				case 17: // document types
+				{
+					stored_procedure = con.prepareCall("{call get_documenttypes_sp}");
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Ref e = new Ref();
+						
+						e.setId(result.getInt(1));
+						e.setName(result.getString(2));
+						
+						list.add(e);
+					}
+					break;
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets hostels by house.
+	 * */
+	public ArrayList<Ref> getHostelsByHouse(int house_id)
+	{
+		ArrayList<Ref> list = new ArrayList<Ref>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_hostelsbyhouse_sp(?)}");
+			stored_procedure.setInt(1, house_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Ref e = new Ref();
+				
+				e.setId(result.getInt(1));
+				e.setName(result.getString(2));
+				e.setId2(result.getInt(3)); // house
+				e.setName2(result.getString(4));
+				e.setId3(result.getInt(5)); // block
+				e.setName3(result.getString(6));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets all the grading for a session.
+	 * */
+	public ArrayList<Grading> getGradings(int session_id)
+	{
+		ArrayList<Grading> list = new ArrayList<Grading>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_sch_grading_sp(?)}");
+			stored_procedure.setInt(1, session_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Grading e = new Grading();
+				// attendance_percent, test_percent, exam_percent, session_id, [user_id], crt_dt
+				e.setAttendance(result.getDouble(1));
+				e.setTest(result.getDouble(2));
+				e.setExam(result.getDouble(3));
+				e.setUser_id(result.getInt(5));
+				e.setCrt_dt(result.getDate(6));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets all grades in the system.
+	 * */
+	public ArrayList<Grade> getGrades()
+	{
+		ArrayList<Grade> list = new ArrayList<Grade>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_grades_sp}");
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Grade e = new Grade();
+				
+				e.setGrade_id(result.getInt(1));
+				e.setGrade_start(result.getInt(2));
+				e.setGrade_end(result.getInt(3));
+				e.setGrade_letter(result.getString(4));
+				e.setGrade_remark(result.getString(5));
+				
+				list.add(e);
+			}
+			
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	public int ResetGrades()
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call reset_grade_sp(?)}");
+			stored_procedure.setInt(1, -99);
+			stored_procedure.registerOutParameter(1, Types.INTEGER);
+			
+			stored_procedure.execute();
+			
+			ret = stored_procedure.getInt(1);
+			
+			if(ret == 0)
+			{
+				con.commit();
+			}
+			else
+			{
+				con.rollback();
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			ret = -1;
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Creates or updates a subject
+	 * */
+	public int CUSubject(Ref e, boolean update)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			if(!update) // create here
+			{
+				stored_procedure = con.prepareCall("{call crt_subject_sp(?,?,?)}");
+				stored_procedure.setString(1, e.getName());
+				stored_procedure.setString(2, e.getDesc());
+				stored_procedure.setInt(3, -1);
+				
+				stored_procedure.registerOutParameter(3, Types.INTEGER);
+				
+				stored_procedure.execute();
+				
+				ret = stored_procedure.getInt(3);
+				switch(ret)
+				{
+					case 0:
+					{
+						con.commit();
+						break;
+					}
+				}
+			}
+			else // update here
+			{
+				stored_procedure = con.prepareCall("{call upd_subject_sp(?,?,?,?)}");
+				stored_procedure.setInt(1, e.getId());
+				stored_procedure.setString(2, e.getName());
+				stored_procedure.setString(3, e.getDesc());
+				stored_procedure.setInt(4, -1);
+				
+				stored_procedure.registerOutParameter(4, Types.INTEGER);
+				
+				stored_procedure.execute();
+				
+				ret = stored_procedure.getInt(4);
+				switch(ret)
+				{
+					case 0:
+					{
+						con.commit();
+						break;
+					}
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Get all available classes
+	 * */
+	public ArrayList<com.dexter.bradawl.dto.Class> getClasses()
+	{
+		ArrayList<com.dexter.bradawl.dto.Class> list = new ArrayList<com.dexter.bradawl.dto.Class>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_allclasses_sp}");
+			result = stored_procedure.executeQuery();
+			
+			while(result.next())
+			{
+				com.dexter.bradawl.dto.Class e = new com.dexter.bradawl.dto.Class();
+				
+				e.setClass_id(result.getInt(1));
+				e.setStaff_id(result.getInt(2));
+				e.setClass_level(result.getString(3));
+				e.setLevel_num(result.getInt(4));
+				e.setClass_group(result.getString(5));
+				// e.setFee_cat_id(result.getInt(6));
+				e.setUser_id(result.getInt(7));
+				
+				java.sql.Date dbDt = result.getDate(8);
+				e.setCrt_dt(new java.util.Date(dbDt.getTime()));
+				
+				e.setBlock_id(result.getInt(9));
+				e.setBlock_nm(result.getString(10));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets a staff's class list
+	 * */
+	public ArrayList<com.dexter.bradawl.dto.Class> getStaffClasses(int staff_id)
+	{
+		ArrayList<com.dexter.bradawl.dto.Class> list = new ArrayList<com.dexter.bradawl.dto.Class>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_staff_classes_sp(?)}");
+			stored_procedure.setInt(1, staff_id);
+			result = stored_procedure.executeQuery();
+			
+			while(result.next())
+			{
+				com.dexter.bradawl.dto.Class e = new com.dexter.bradawl.dto.Class();
+				// cs.class_id, cs.staff_id, class_level, level_no, class_grp, block_id, cs.[user_id], cs.crt_dt
+				e.setClass_id(result.getInt(1));
+				e.setStaff_id(result.getInt(2));
+				e.setClass_level(result.getString(3));
+				e.setLevel_num(result.getInt(4));
+				e.setClass_group(result.getString(5));
+				e.setBlock_id(result.getInt(6));
+				e.setUser_id(result.getInt(7));
+				
+				java.sql.Date dbDt = result.getDate(8);
+				e.setCrt_dt(new java.util.Date(dbDt.getTime()));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Creates or updates a department
+	 * */
+	public int CUDepartment(Ref e, boolean update)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			if(!update) // create here
+			{
+				stored_procedure = con.prepareCall("{call crt_department_sp(?,?)}");
+				stored_procedure.setString(1, e.getName());
+				stored_procedure.setInt(2, -1);
+				
+				stored_procedure.registerOutParameter(2, Types.INTEGER);
+				
+				stored_procedure.execute();
+				
+				ret = stored_procedure.getInt(2);
+				switch(ret)
+				{
+					case 0:
+					{
+						con.commit();
+						break;
+					}
+				}
+			}
+			else // update here
+			{
+				stored_procedure = con.prepareCall("{call upd_department_sp(?,?,?)}");
+				stored_procedure.setInt(1, e.getId());
+				stored_procedure.setString(2, e.getName());
+				stored_procedure.setInt(3, -1);
+				
+				stored_procedure.registerOutParameter(3, Types.INTEGER);
+				
+				stored_procedure.execute();
+				
+				ret = stored_procedure.getInt(3);
+				switch(ret)
+				{
+					case 0:
+					{
+						con.commit();
+						break;
+					}
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Maps a class to a subject.
+	 * */
+	public int MapSubjectToClass(ClassSubject cs)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_class_subject_sp(?,?,?,?,?)}");
+			stored_procedure.setInt(1, cs.getClass_id());
+			stored_procedure.setInt(2, cs.getSub_id());
+			stored_procedure.setInt(3, cs.getGrade_id());
+			stored_procedure.setInt(4, cs.getCore());
+			stored_procedure.setInt(5, -1);
+			stored_procedure.registerOutParameter(5, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(5);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig){}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets subjects mapped to a class
+	 * */
+	public ArrayList<ClassSubject> GetClassSubjects(int class_id)
+	{
+		ArrayList<ClassSubject> list = new ArrayList<ClassSubject>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_class_subjects_sp(?)}");
+			stored_procedure.setInt(1, class_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				ClassSubject e = new ClassSubject();
+				
+				// cs.sub_id, sub_nm, sub_desc, cs.grade_id, grade_start, grade_end, grade_letter, grade_remark, coreStat
+				e.setSub_id(result.getInt(1));
+				e.setSub_nm(result.getString(2));
+				e.setSub_desc(result.getString(3));
+				e.setGrade_id(result.getInt(4));
+				e.setGrade_start(result.getDouble(5));
+				e.setGrade_end(result.getDouble(6));
+				e.setGrade_letter(result.getString(7));
+				e.setGrade_remark(result.getString(8));
+				e.setCore(result.getInt(9));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Maps a subject teacher for a class.
+	 * */
+	public int MapSubjectTeacherToClass(Ref e)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_class_staff_subject_sp(?,?,?,?)}");
+			stored_procedure.setInt(1, e.getId());
+			stored_procedure.setInt(2, e.getId2());
+			stored_procedure.setInt(3, e.getId3());
+			stored_procedure.setInt(4, -1);
+			stored_procedure.registerOutParameter(4, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(4);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig){}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets subject teachers for a subject in a class
+	 * */
+	public ArrayList<Staff> GetSubjectStaffsForClass(int class_id, int sub_id)
+	{
+		ArrayList<Staff> list = new ArrayList<Staff>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_class_subject_staffs_sp(?,?)}");
+			stored_procedure.setInt(1, class_id);
+			stored_procedure.setInt(2, sub_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Staff e = new Staff();
+				
+				// staff_id, staff_fn, staff_mn, staff_ln
+				e.setStaff_id(result.getInt(1));
+				e.setStaff_fn(result.getString(2));
+				e.setStaff_mn(result.getString(3));
+				e.setStaff_ln(result.getString(4));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets classes that are mapped to a subject.
+	 * */
+	public ArrayList<com.dexter.bradawl.dto.Class> GetSubjectClasses(int sub_id)
+	{
+		ArrayList<com.dexter.bradawl.dto.Class> list = new ArrayList<com.dexter.bradawl.dto.Class>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_subject_classes_sp(?)}");
+			stored_procedure.setInt(1, sub_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				com.dexter.bradawl.dto.Class e = new com.dexter.bradawl.dto.Class();
+				// class_id, staff_id, class_level, level_no, class_grp, block_id, [user_id], crt_dt
+				e.setClass_id(result.getInt(1));
+				e.setStaff_id(result.getInt(2));
+				e.setClass_level(result.getString(3));
+				e.setLevel_num(result.getInt(4));
+				e.setClass_group(result.getString(5));
+				e.setBlock_id(result.getInt(6));
+				e.setUser_id(result.getInt(7));
+				e.setCrt_dt(result.getDate(8));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets awards presented to students or staffs for a session.
+	 * */
+	public ArrayList<Award> GetSessionAwards(int session_id)
+	{
+		ArrayList<Award> list = new ArrayList<Award>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_students_session_awards_sp(?)}");
+			stored_procedure.setInt(1, session_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Award e = new Award();
+				
+				e.setEntity_id(result.getInt(3));
+				e.setEntity_fn(result.getString(4));
+				e.setEntity_mn(result.getString(5));
+				e.setEntity_ln(result.getString(6));
+				// e.setEntity_no(result.getInt(7));
+				e.setId(result.getInt(8));
+				e.setName(result.getString(9));
+				e.setDesc(result.getString(10));
+				e.setComment(result.getString(11));
+				e.setType(1);
+				
+				list.add(e);
+			}
+			
+			stored_procedure = con.prepareCall("{call get_staff_session_awards_sp(?)}");
+			stored_procedure.setInt(1, session_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Award e = new Award();
+				
+				e.setEntity_id(result.getInt(3));
+				e.setEntity_fn(result.getString(4));
+				e.setEntity_mn(result.getString(5));
+				e.setEntity_ln(result.getString(6));
+				// e.setEntity_no(result.getInt(7));
+				e.setId(result.getInt(8));
+				e.setName(result.getString(9));
+				e.setDesc(result.getString(10));
+				e.setComment(result.getString(11));
+				e.setType(2);
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Assign award to an entity in a session.
+	 * */
+	public int PresentAward(Award e, int session_id)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			if(e.getTypeStr().equalsIgnoreCase("ST")) // student
+				stored_procedure = con.prepareCall("{call crt_student_session_award_sp(?,?,?,?,?,?)}");
+			else
+				stored_procedure = con.prepareCall("{call crt_staff_session_award_sp(?,?,?,?,?,?)}");
+			
+			stored_procedure.setInt(1, session_id);
+			stored_procedure.setInt(2, e.getEntity_id());
+			stored_procedure.setInt(3, e.getId());
+			stored_procedure.setString(4, e.getComment());
+			stored_procedure.setInt(5, e.getUser_id());
+			stored_procedure.setInt(6, -1);
+			stored_procedure.registerOutParameter(6, Types.INTEGER);
+			
+			stored_procedure.execute();
+			
+			ret = stored_procedure.getInt(6);
+			
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+			
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig) {}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets news by count.
+	 * */
+	public ArrayList<Ref> GetNews(int count)
+	{
+		ArrayList<Ref> list = new ArrayList<Ref>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_newsbycount_sp(?)}");
+			stored_procedure.setInt(1, count);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Ref e = new Ref();
+				
+				e.setId(result.getInt(1));
+				e.setNews_headline(result.getString(2));
+				e.setNews_body(result.getString(3));
+				e.setUser_id(result.getInt(4));
+				e.setDate(result.getDate(5));
+				
+				list.add(e);
+			}
+			
+			for(Ref e : list) // get each news comments
+			{
+				ArrayList<NewsComment> comList = new ArrayList<NewsComment>();
+				stored_procedure = con.prepareCall("{call get_news_comments_sp(?)}");
+				stored_procedure.setInt(1, e.getId());
+				
+				result = stored_procedure.executeQuery();
+				while(result.next())
+				{
+					// news_comment_id, news_id, comment, nc.[user_id], username, nc.crt_dt
+					NewsComment comment = new NewsComment();
+					
+					comment.setId(result.getInt(1));
+					comment.setNews_id(result.getInt(2));
+					comment.setComment(result.getString(3));
+					comment.setUser_id(result.getInt(4));
+					comment.setUsername(result.getString(5));
+					comment.setCrt_dt(result.getDate(6));
+					
+					comList.add(comment);
+					//comList.add(comment);
+				}
+				
+				e.setNewsComments(comList);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets news by search.
+	 * */
+	public ArrayList<Ref> GetNews(Ref searchDet)
+	{
+		ArrayList<Ref> list = new ArrayList<Ref>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call search_news_sp(?,?,?)}");
+			
+			if(searchDet.getDate_created() == null)
+			{
+				stored_procedure.setNull(1, Types.DATE);
+				stored_procedure.setNull(2, Types.DATE);
+			}
+			else
+			{
+				stored_procedure.setDate(1, new java.sql.Date(searchDet.getDate_created().getTime()));
+				stored_procedure.setDate(2, new java.sql.Date(searchDet.getDate().getTime()));
+			}
+			
+			if(searchDet.getNews_headline() != null && searchDet.getNews_headline().trim().length() > 0)
+			{
+				stored_procedure.setString(3, searchDet.getNews_headline());
+			}
+			else
+			{
+				stored_procedure.setNull(3, Types.VARCHAR);
+			}
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Ref e = new Ref();
+				
+				e.setId(result.getInt(1));
+				e.setNews_headline(result.getString(2));
+				e.setNews_body(result.getString(3));
+				e.setUser_id(result.getInt(4));
+				e.setDate(result.getDate(5));
+				
+				list.add(e);
+			}
+			
+			for(Ref e : list) // get each news comments
+			{
+				ArrayList<NewsComment> comList = new ArrayList<NewsComment>();
+				stored_procedure = con.prepareCall("{call get_news_comments_sp(?)}");
+				stored_procedure.setInt(1, e.getId());
+				
+				result = stored_procedure.executeQuery();
+				while(result.next())
+				{
+					// news_comment_id, news_id, comment, nc.[user_id], username, nc.crt_dt
+					NewsComment comment = new NewsComment();
+					
+					comment.setId(result.getInt(1));
+					comment.setNews_id(result.getInt(2));
+					comment.setComment(result.getString(3));
+					comment.setUser_id(result.getInt(4));
+					comment.setUsername(result.getString(5));
+					comment.setCrt_dt(result.getDate(6));
+					
+					comList.add(comment);
+				}
+				
+				e.setNewsComments(comList);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Post a comment for a news.
+	 * */
+	public int PostNewsComment(Ref news)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_news_comment_sp(?,?,?,?)}");
+			stored_procedure.setInt(1, news.getId());
+			stored_procedure.setString(2, news.getDesc());
+			stored_procedure.setInt(3, news.getUser_id());
+			stored_procedure.setInt(4, -1);
+			stored_procedure.registerOutParameter(4, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(4);
+			
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets a news comments list.
+	 * */
+	public ArrayList<NewsComment> GetNewsComments(int id)
+	{
+		ArrayList<NewsComment> list = new ArrayList<NewsComment>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_news_comments_sp(?)}");
+			stored_procedure.setInt(1, id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				// news_comment_id, news_id, comment, nc.[user_id], username, nc.crt_dt
+				NewsComment comment = new NewsComment();
+				
+				comment.setId(result.getInt(1));
+				comment.setNews_id(result.getInt(2));
+				comment.setComment(result.getString(3));
+				comment.setUser_id(result.getInt(4));
+				comment.setUsername(result.getString(5));
+				comment.setCrt_dt(result.getDate(6));
+				
+				list.add(comment);
+			}
+		}
+		catch(Exception ex)
+		{}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets events by count.
+	 * */
+	public ArrayList<Ref> GetEvents(int count, int type)
+	{
+		ArrayList<Ref> list = new ArrayList<Ref>();
+		
+		try
+		{
+			connectToDB();
+			
+			if(type == 0)
+			{
+				stored_procedure = con.prepareCall("{call get_eventsbycount_sp(?)}");
+			}
+			else if(type == 1)
+			{
+				stored_procedure = con.prepareCall("{call get_upcomingevents_sp(?)}");
+			}
+			stored_procedure.setInt(1, count);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Ref e = new Ref();
+				
+				e.setId(result.getInt(1));
+				e.setTitle(result.getString(2));
+				e.setBody(result.getString(3));
+				e.setDate(result.getDate(4));
+				e.setUser_id(result.getInt(5));
+				e.setDate_created(result.getDate(6));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Get event by date.
+	 * */
+	public Ref GetEventByDate(Date dt)
+	{
+		Ref e = null;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_eventbydate_sp(?)}");
+			stored_procedure.setDate(1, new java.sql.Date(dt.getTime()));
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				e = new Ref();
+				
+				e.setId(result.getInt(1));
+				e.setTitle(result.getString(2));
+				e.setBody(result.getString(3));
+				e.setDate(result.getDate(4));
+				e.setUser_id(result.getInt(5));
+				e.setDate_created(result.getDate(6));
+			}
+		}
+		catch(Exception ex)
+		{}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return e;
+	}
+	
+	/**
+	 * Get event by date.
+	 * */
+	public Ref GetEventByID(int id)
+	{
+		Ref e = null;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_eventbyid_sp(?)}");
+			stored_procedure.setInt(1, id);
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				e = new Ref();
+				
+				e.setId(result.getInt(1));
+				e.setTitle(result.getString(2));
+				e.setBody(result.getString(3));
+				e.setDate(result.getDate(4));
+				e.setUser_id(result.getInt(5));
+				e.setDate_created(result.getDate(6));
+			}
+		}
+		catch(Exception ex)
+		{}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return e;
+	}
+	
+	/**
+	 * Registers an action performed.
+	 * */
+	public void registerActionPerformed(Action action)
+	{
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_action_sp(?,?,?,?,?,?)}");
+			stored_procedure.setString(1, action.getAction());
+			stored_procedure.setString(2, action.getReason());
+			stored_procedure.setString(3, action.getObject());
+			stored_procedure.setInt(4, action.getObject_id());
+			stored_procedure.setInt(5, action.getUser_id());
+			stored_procedure.setInt(6, -1);
+			stored_procedure.registerOutParameter(6, Types.INTEGER);
+			
+			stored_procedure.execute();
+			
+			int ret = stored_procedure.getInt(6);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+	}
+	
+	/**
+	 * Gets registered actions.
+	 * */
+	public ArrayList<Action> getActions(Date dt1, Date dt2)
+	{
+		ArrayList<Action> list = new ArrayList<Action>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_actions_sp(?,?)}");
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Action e = new Action();
+				
+				e.setAction_id(result.getInt(1));
+				e.setAction(result.getString(2));
+				e.setReason(result.getString(3));
+				e.setObject(result.getString(4));
+				e.setObject_id(result.getInt(5));
+				e.setUser_id(result.getInt(6));
+				e.setDate(result.getDate(7));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+}

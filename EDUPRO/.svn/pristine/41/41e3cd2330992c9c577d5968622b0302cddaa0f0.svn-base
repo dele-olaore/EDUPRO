@@ -1,0 +1,106 @@
+package com.dexter.bradawl.dto;
+
+import java.util.Date;
+
+public class ClassSubjectDayTiming
+{
+	private int id;
+	private int class_id;
+	private int subject_id;
+	private int day;
+	private int start_time_in_minutes;
+	private int user_id;
+	private Date crt_dt;
+	
+	private int start_time_hr, start_time_min;
+	private boolean brk = false;
+	
+	public ClassSubjectDayTiming()
+	{}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getClass_id() {
+		return class_id;
+	}
+
+	public void setClass_id(int class_id) {
+		this.class_id = class_id;
+	}
+
+	public int getSubject_id() {
+		return subject_id;
+	}
+
+	public void setSubject_id(int subject_id) {
+		this.subject_id = subject_id;
+	}
+
+	public int getDay() {
+		return day;
+	}
+
+	public void setDay(int day) {
+		this.day = day;
+	}
+
+	public int getStart_time_in_minutes() {
+		return start_time_in_minutes;
+	}
+
+	public void setStart_time_in_minutes(int start_time_in_minutes) {
+		if(start_time_in_minutes > 0)
+		{
+			setStart_time_hr(start_time_in_minutes/60);
+			setStart_time_min(start_time_in_minutes%60);
+		}
+		this.start_time_in_minutes = start_time_in_minutes;
+	}
+
+	public int getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
+	}
+
+	public Date getCrt_dt() {
+		return crt_dt;
+	}
+
+	public void setCrt_dt(Date crt_dt) {
+		this.crt_dt = crt_dt;
+	}
+
+	public int getStart_time_hr() {
+		return start_time_hr;
+	}
+
+	public void setStart_time_hr(int start_time_hr) {
+		this.start_time_hr = start_time_hr;
+	}
+
+	public int getStart_time_min() {
+		return start_time_min;
+	}
+
+	public void setStart_time_min(int start_time_min) {
+		this.start_time_min = start_time_min;
+	}
+
+	public boolean getBrk() {
+		return brk;
+	}
+
+	public void setBrk(boolean brk) {
+		this.brk = brk;
+	}
+	
+}

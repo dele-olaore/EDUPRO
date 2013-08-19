@@ -1,0 +1,643 @@
+package com.dexter.bradawl.model;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+
+import com.dexter.bradawl.dto.ClassFee;
+import com.dexter.bradawl.dto.Fee;
+import com.dexter.bradawl.dto.FeeAmount;
+import com.dexter.bradawl.dto.FeePayment;
+import com.dexter.bradawl.dto.Ref;
+import com.dexter.bradawl.dto.StudentDamageFee;
+import com.dexter.bradawl.util.Env;
+
+public class BursaryModel
+{
+	/*
+	 * Private members for database access, retrieval and manipulation.
+	 * */
+	private Connection con;
+	private CallableStatement stored_procedure;
+	private ResultSet result;
+	
+	// private int output = -1;
+	// private String empty = "";
+	
+	public BursaryModel()
+	{}
+	
+	/**
+	 * Used internally to connect to the bradawlnew database.
+	 * */
+	private void connectToDB() throws Exception
+	{
+		closeConnection();
+		
+		con = Env.getConnectionBradawl();
+	}
+	
+	/**
+	 * Used internally to close the connection after use. 
+	 * */
+	private void closeConnection()
+	{
+		if(result != null)
+		{
+			try
+			{
+				result.close();
+				result = null;
+			}
+			catch(Exception ignore){}
+		}
+		if(con != null)
+		{
+			try
+			{
+				con.close();
+				con = null;
+			}
+			catch(Exception ignore){}
+		}
+	}
+	
+	/**
+	 * Creates a new fee category.
+	 * */
+	public int CreateFeeCategory(Ref feeCat)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_fee_category_sp(?,?,?)}");
+			stored_procedure.setString(1, feeCat.getName());
+			stored_procedure.setString(2, feeCat.getDesc());
+			stored_procedure.setInt(3, -1);
+			stored_procedure.registerOutParameter(3, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(3);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig){}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Updates changes to a fee category
+	 * */
+	public int UpdateFeeCategory(Ref feeCat)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call up_fee_category_sp(?,?,?,?)}");
+			stored_procedure.setInt(1, feeCat.getId());
+			stored_procedure.setString(2, feeCat.getName());
+			stored_procedure.setString(3, feeCat.getDesc());
+			stored_procedure.setInt(4, -1);
+			stored_procedure.registerOutParameter(4, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(4);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig){}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	public ArrayList<Ref> GetFeeCategories()
+	{
+		ArrayList<Ref> list = new ArrayList<Ref>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_fee_categories_sp}");
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Ref e = new Ref();
+				e.setId(result.getInt(1));
+				e.setName(result.getString(2));
+				e.setDesc(result.getString(3));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	public int CreateFee(Fee fee)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_fee_sp(?,?,?,?,?)}");
+			stored_procedure.setInt(1, fee.getFee_cat_id());
+			stored_procedure.setString(2, fee.getFee_nm());
+			stored_procedure.setString(3, fee.getFee_desc());
+			stored_procedure.setInt(4, fee.getUser_id());
+			stored_procedure.setInt(5, -1);
+			stored_procedure.registerOutParameter(5, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(5);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig){}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets fees by category.
+	 * */
+	public ArrayList<Fee> GetFeeByCat(int fee_cat_id)
+	{
+		ArrayList<Fee> list = new ArrayList<Fee>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_fees_bycatid_sp(?)}");
+			stored_procedure.setInt(1, fee_cat_id);
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Fee e = new Fee();
+				
+				e.setFee_id(result.getInt(1));
+				e.setFee_cat_id(result.getInt(2));
+				e.setFee_nm(result.getString(3));
+				e.setFee_desc(result.getString(4));
+				e.setUser_id(result.getInt(5));
+				e.setCrt_dt(result.getDate(6));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Create fee amount for the current term.
+	 * */
+	public int CreateFeeTermAmount(FeeAmount famt)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_fee_amount_sp(?,?,?,?,?)}");
+			stored_procedure.setInt(1, famt.getFee_id());
+			stored_procedure.setInt(2, famt.getTerm_id());
+			stored_procedure.setDouble(3, famt.getFee_amount());
+			stored_procedure.setInt(4, famt.getUser_id());
+			stored_procedure.setInt(5, -1);
+			stored_procedure.registerOutParameter(5, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(5);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets fee amount for a term.
+	 * */
+	public ArrayList<FeeAmount> GetFeesAmounts(int term_id, int fee_cat_id)
+	{
+		ArrayList<FeeAmount> list = new ArrayList<FeeAmount>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_fee_amountbyterm_sp(?,?)}");
+			stored_procedure.setInt(1, term_id);
+			stored_procedure.setInt(2, fee_cat_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				FeeAmount fa = new FeeAmount();
+				
+				fa.setFee_amount_id(result.getInt(1));
+				fa.setFee_id(result.getInt(2));
+				fa.setFee_nm(result.getString(3));
+				fa.setTerm_id(result.getInt(4));
+				fa.setTerm_nm(result.getString(5));
+				fa.setFee_amount(result.getDouble(6));
+				fa.setUser_id(result.getInt(7));
+				fa.setCrt_dt(result.getDate(8));
+				fa.setFee_cat_nm(result.getString(9));
+				
+				list.add(fa);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	public int MapClassToFeeCat(ClassFee cf)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_class_feecat_sp(?,?,?,?)}");
+			stored_procedure.setInt(1, cf.getClass_id());
+			stored_procedure.setInt(2, cf.getFee_cat_id());
+			stored_procedure.setInt(3, cf.getUser_id());
+			stored_procedure.setInt(4, -1);
+			stored_procedure.registerOutParameter(4, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(4);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig){}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	public ArrayList<ClassFee> GetClassFeeMapping(int class_id)
+	{
+		ArrayList<ClassFee> list = new ArrayList<ClassFee>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_class_feecats_sp(?)}");
+			stored_procedure.setInt(1, class_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				ClassFee e = new ClassFee();
+				
+				// class_fee_id, class_id, fee_cat_id, [user_id], crt_dt
+				e.setClass_id(result.getInt(2));
+				e.setFee_cat_id(result.getInt(3));
+				e.setUser_id(result.getInt(4));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets a students payable fees.
+	 * */
+	public ArrayList<Fee> GetStudentPayableFees(int term_id, int student_id)
+	{
+		ArrayList<Fee> list = new ArrayList<Fee>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_student_payable_fess_sp(?,?)}");
+			stored_procedure.setInt(1, term_id);
+			stored_procedure.setInt(2, student_id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Fee e = new Fee();
+				
+				e.setFee_id(result.getInt(1));
+				e.setFee_cat_id(result.getInt(2));
+				e.setFee_nm(result.getString(3));
+				e.setFee_desc(result.getString(4));
+				e.setAmount(result.getDouble(5));
+				e.setBalance(result.getDouble(6));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Inserts a student's fee payment.
+	 * */
+	public int InsertStudentFeePayment(FeePayment fp)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_student_fee_payment_sp(?,?,?,?,?,?,?,?)}");
+			stored_procedure.setInt(1, fp.getFee_id());
+			stored_procedure.setInt(2, fp.getTerm_id());
+			stored_procedure.setInt(3, fp.getStudent_id());
+			stored_procedure.setDouble(4, fp.getAmount_paid());
+			stored_procedure.setDate(5, new java.sql.Date(fp.getDate_paid().getTime()));
+			stored_procedure.setInt(6, fp.getUser_id());
+			stored_procedure.setDouble(7, 0);
+			stored_procedure.setInt(8, -1);
+			stored_procedure.registerOutParameter(8, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(8);
+			
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets student fee payments
+	 * */
+	public ArrayList<FeePayment> GetStudentFeePayments(FeePayment fp)
+	{
+		ArrayList<FeePayment> list = new ArrayList<FeePayment>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_student_fee_payments_sp(?,?,?)}");
+			stored_procedure.setInt(1, fp.getTerm_id());
+			stored_procedure.setInt(2, fp.getStudent_id());
+			stored_procedure.setInt(3, fp.getFee_id());
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				FeePayment e = new FeePayment();
+				// student_fee_payment_id, sfp.fee_amount_id, fa.fee_id, f.fee_nm, f.fee_desc, student_id, sfp.term_id, amt_paid, balance, dt_paid, sfp.user_id, sfp.crt_dt
+				e.setType(1); // viewing
+				e.setPayment_id(result.getInt(1));
+				e.setFee_amount_id(result.getInt(2));
+				e.setFee_id(result.getInt(3));
+				e.setFee_nm(result.getString(4));
+				e.setFee_desc(result.getString(5));
+				e.setStudent_id(result.getInt(6));
+				e.setTerm_id(result.getInt(7));
+				e.setAmount_paid(result.getDouble(8));
+				e.setBalance(result.getDouble(9));
+				e.setDate_paid(result.getDate(10));
+				e.setUser_id(result.getInt(11));
+				e.setCrt_dt(result.getDate(12));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Inserts student damages/charges
+	 * */
+	public int InsertStudentDamages(StudentDamageFee sdf)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_student_damage_fee_sp(?,?,?,?,?,?,?)}");
+			stored_procedure.setString(1, sdf.getDamage_fee_desc());
+			stored_procedure.setDouble(2, sdf.getDamage_fee_amount());
+			stored_procedure.setInt(3, sdf.getStudent_id());
+			stored_procedure.setInt(4, sdf.getTerm_id());
+			stored_procedure.setDate(5, new java.sql.Date(sdf.getDate_damaged().getTime()));
+			stored_procedure.setInt(6, sdf.getUser_id());
+			stored_procedure.setInt(7, -1);
+			stored_procedure.registerOutParameter(7, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(7);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets student damages or charges by date range.
+	 * */
+	public ArrayList<StudentDamageFee> GetDamages(Date st, Date ed)
+	{
+		ArrayList<StudentDamageFee> list = new ArrayList<StudentDamageFee>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_students_damages_fee_sp(?,?)}");
+			stored_procedure.setDate(1, new java.sql.Date(st.getTime()));
+			stored_procedure.setDate(2, new java.sql.Date(ed.getTime()));
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				StudentDamageFee e = new StudentDamageFee();
+				// student_damage_fee_id, damage_fee_desc, damage_fee_amount, student_id, term_id, date_damaged, user_id, crt_dt
+				e.setStudent_damage_fee_id(result.getInt(1));
+				e.setDamage_fee_desc(result.getString(2));
+				e.setDamage_fee_amount(result.getDouble(3));
+				e.setStudent_id(result.getInt(4));
+				e.setTerm_id(result.getInt(5));
+				e.setDate_damaged(result.getDate(6));
+				e.setUser_id(result.getInt(7));
+				e.setCrt_dt(result.getDate(8));
+				
+				e.setStudent_nm(result.getString(9));
+				e.setAmt_paid(result.getDouble(10));
+				e.setAmt_bal(result.getDouble(11));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+		
+	}
+}

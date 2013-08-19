@@ -1,0 +1,627 @@
+package com.dexter.bradawl.model;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.ArrayList;
+
+import com.dexter.bradawl.dto.Address;
+import com.dexter.bradawl.dto.Attendance;
+import com.dexter.bradawl.dto.ClassSubject;
+import com.dexter.bradawl.dto.Guardian;
+import com.dexter.bradawl.dto.Ref;
+import com.dexter.bradawl.dto.Student;
+import com.dexter.bradawl.dto.StudentMedical;
+import com.dexter.bradawl.security.Encrypter;
+import com.dexter.bradawl.util.Env;
+
+public class StudentModel
+{
+	/*
+	 * Private members for database access, retrieval and manipulation.
+	 * */
+	private Connection con;
+	private CallableStatement stored_procedure;
+	private ResultSet result;
+	
+	// private int output = -1;
+	// private String empty = "";
+	
+	public StudentModel()
+	{}
+	
+	/**
+	 * Used internally to connect to the bradawlnew database.
+	 * */
+	private void connectToDB() throws Exception
+	{
+		closeConnection();
+		
+		con = Env.getConnectionBradawl();
+	}
+	
+	/**
+	 * Used internally to close the connection after use. 
+	 * */
+	private void closeConnection()
+	{
+		if(result != null)
+		{
+			try
+			{
+				result.close();
+				result = null;
+			}
+			catch(Exception ignore){}
+		}
+		if(con != null)
+		{
+			try
+			{
+				con.close();
+				con = null;
+			}
+			catch(Exception ignore){}
+		}
+	}
+	
+	/**
+	 * Creates a new student through the admission module.
+	 * */
+	public int admitStudent(Student s)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			// address
+			stored_procedure = con.prepareCall("{call crt_address_sp(?,?,?,?,?,?,?,?,?)}");
+			stored_procedure.setString(1, s.getAddress().getAddr1());
+			stored_procedure.setString(2, s.getAddress().getAddr2());
+			stored_procedure.setString(3, s.getAddress().getPhone1());
+			stored_procedure.setString(4, s.getAddress().getPhone2());
+			stored_procedure.setString(5, s.getAddress().getEmail());
+			stored_procedure.setString(6, s.getAddress().getFax());
+			stored_procedure.setString(7, s.getAddress().getWebsite());
+			stored_procedure.setInt(8, -1); // addr_id
+			stored_procedure.setInt(9, -1); // output code
+			stored_procedure.registerOutParameter(8, Types.INTEGER);
+			stored_procedure.registerOutParameter(9, Types.INTEGER);
+			
+			stored_procedure.execute();
+			
+			ret = stored_procedure.getInt(9);
+			if(ret == 0)
+			{
+				int addr_id = stored_procedure.getInt(8);
+				
+				// student
+				stored_procedure = con.prepareCall("{call crt_student_sp(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
+				stored_procedure.setString(1, s.getStudent_fn());
+				stored_procedure.setString(2, s.getStudent_mn());
+				stored_procedure.setString(3, s.getStudent_ln());
+				stored_procedure.setInt(4, addr_id);
+				stored_procedure.setString(5, s.getGender());
+				stored_procedure.setDate(6, new java.sql.Date(s.getDob().getTime()));
+				stored_procedure.setInt(7, s.getClass_id());
+				stored_procedure.setString(8, s.getDisability());
+				stored_procedure.setString(9, s.getPrecaution());
+				stored_procedure.setString(10, s.getBlood_grp());
+				stored_procedure.setString(11, s.getGenotype());
+				stored_procedure.setDate(12, new java.sql.Date(s.getDate_enrolled().getTime()));
+				stored_procedure.setInt(13, s.getRollNumber());
+				stored_procedure.setInt(14, s.getHouse_id());
+				stored_procedure.setString(15, s.getStudent_type());
+				stored_procedure.setInt(16, s.getHostel_id());
+				stored_procedure.setInt(17, s.getUser_id());
+				stored_procedure.setInt(18, -1);
+				stored_procedure.setInt(19, -1);
+				stored_procedure.registerOutParameter(18, Types.INTEGER);
+				stored_procedure.registerOutParameter(19, Types.INTEGER);
+				stored_procedure.execute();
+				
+				ret = stored_procedure.getInt(19);
+				if(ret == 0)
+				{
+					int student_id = stored_procedure.getInt(18);
+					s.setStudent_id(student_id);
+					
+					// insert the student user account
+					String username = "ST"+student_id;
+					String u_pass = "password";
+					u_pass = Encrypter.Encrypt(u_pass); // encrypt the password
+					int role_id = 8; // student role
+					
+					stored_procedure = con.prepareCall("{call crt_user_sp(?,?,?,?,?,?,?)}");
+					stored_procedure.setString(1, username);
+					stored_procedure.setString(2, u_pass);
+					stored_procedure.setInt(3, role_id);
+					stored_procedure.setInt(4, student_id);
+					stored_procedure.setString(5, "Y");
+					stored_procedure.setInt(6, -1); // user_id
+					stored_procedure.setInt(7, -1); // output
+					stored_procedure.registerOutParameter(6, Types.INTEGER);
+					stored_procedure.registerOutParameter(7, Types.INTEGER);
+					
+					stored_procedure.execute();
+					
+					// guardians
+					for(Guardian g : s.getGuardians())
+					{
+						Address ga = g.getAddress();
+						
+						// address
+						stored_procedure = con.prepareCall("{call crt_address_sp(?,?,?,?,?,?,?,?,?)}");
+						stored_procedure.setString(1, ga.getAddr1());
+						stored_procedure.setString(2, ga.getAddr2());
+						stored_procedure.setString(3, ga.getPhone1());
+						stored_procedure.setString(4, ga.getPhone2());
+						stored_procedure.setString(5, ga.getEmail());
+						stored_procedure.setString(6, ga.getFax());
+						stored_procedure.setString(7, ga.getWebsite());
+						stored_procedure.setInt(8, -1); // addr_id
+						stored_procedure.setInt(9, -1); // output code
+						stored_procedure.registerOutParameter(8, Types.INTEGER);
+						stored_procedure.registerOutParameter(9, Types.INTEGER);
+						
+						stored_procedure.execute();
+						
+						int output = stored_procedure.getInt(9);
+						if(output == 0)
+						{
+							int ga_id = stored_procedure.getInt(8);
+							
+							// guardian
+							stored_procedure = con.prepareCall("{call crt_guardian_sp(?,?,?,?,?,?)}");
+							stored_procedure.setInt(1, g.getTitle_id());
+							stored_procedure.setString(2, g.getName());
+							stored_procedure.setInt(3, ga_id);
+							stored_procedure.setInt(4, s.getUser_id());
+							stored_procedure.setInt(5, -1);
+							stored_procedure.setInt(6, -1);
+							stored_procedure.registerOutParameter(5, Types.INTEGER);
+							stored_procedure.registerOutParameter(6, Types.INTEGER);
+							
+							stored_procedure.execute();
+							
+							output = stored_procedure.getInt(6);
+							if(output == 0)
+							{
+								int g_id = stored_procedure.getInt(5);
+								// map to student
+								stored_procedure = con.prepareCall("{call crt_student_guardian_sp(?,?,?,?,?)}");
+								stored_procedure.setInt(1, student_id);
+								stored_procedure.setInt(2, g_id);
+								stored_procedure.setInt(3, g.getRelationship_id());
+								stored_procedure.setInt(4, s.getUser_id());
+								stored_procedure.setInt(5, -1);
+								stored_procedure.registerOutParameter(5, Types.INTEGER);
+								
+								stored_procedure.execute();
+							}
+						}
+					}
+					
+					// medicals
+					for(StudentMedical sm : s.getMedicals())
+					{
+						stored_procedure = con.prepareCall("{call crt_student_medical_sp(?,?,?,?,?,?)}");
+						stored_procedure.setInt(1, student_id);
+						stored_procedure.setInt(2, sm.getMedical_test_id());
+						stored_procedure.setInt(3, sm.getMedical_result_id());
+						stored_procedure.setString(4, sm.getResult_summary());
+						stored_procedure.setInt(5, s.getUser_id());
+						stored_procedure.setInt(6, -1);
+						stored_procedure.registerOutParameter(6, Types.INTEGER);
+						
+						stored_procedure.execute();
+					}
+					
+					// clubs
+					for(Ref c : s.getClubs())
+					{
+						stored_procedure = con.prepareCall("{call crt_student_club_sp(?,?,?,?)}");
+						stored_procedure.setInt(1, student_id);
+						stored_procedure.setInt(2, c.getId());
+						stored_procedure.setInt(3, s.getUser_id());
+						stored_procedure.setInt(4, -1);
+						stored_procedure.registerOutParameter(4, Types.INTEGER);
+						
+						stored_procedure.execute();
+					}
+					
+					con.commit();
+				}
+				else
+				{
+					con.rollback();
+				}
+			}
+			else
+			{
+				con.rollback();
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			try
+			{
+				con.rollback();
+			}
+			catch(Exception ig){}
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Gets students by search.
+	 * */
+	public ArrayList<Student> getStudentsBySearch(Student searchBy)
+	{
+		ArrayList<Student> list = new ArrayList<Student>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_studentbysearch_sp(?,?,?,?,?,?,?,?)}");
+			
+			if(searchBy.getClass_id() > 0)
+			{
+				stored_procedure.setInt(1, searchBy.getClass_id());
+			}
+			else
+			{
+				stored_procedure.setNull(1, Types.INTEGER);
+			}
+			
+			if(searchBy.getGender() != null && searchBy.getGender().trim().length() > 0)
+			{
+				stored_procedure.setString(2, searchBy.getGender());
+			}
+			else
+			{
+				stored_procedure.setNull(2, Types.CHAR);
+			}
+			
+			if(searchBy.getStudent_fn() != null && searchBy.getStudent_fn().trim().length() > 0)
+			{
+				stored_procedure.setString(3, searchBy.getStudent_fn());
+			}
+			else
+			{
+				stored_procedure.setNull(3, Types.VARCHAR);
+			}
+			
+			if(searchBy.getStudent_ln() != null && searchBy.getStudent_ln().trim().length() > 0)
+			{
+				stored_procedure.setString(4, searchBy.getStudent_ln());
+			}
+			else
+			{
+				stored_procedure.setNull(4, Types.VARCHAR);
+			}
+			
+			if(searchBy.getRollNumber() > 0)
+			{
+				stored_procedure.setInt(5, searchBy.getRollNumber());
+			}
+			else
+			{
+				stored_procedure.setNull(5, Types.INTEGER);
+			}
+			
+			if(searchBy.getHouse_id() > 0)
+			{
+				stored_procedure.setInt(6, searchBy.getHouse_id());
+			}
+			else
+			{
+				stored_procedure.setNull(6, Types.INTEGER);
+			}
+			
+			if(searchBy.getStudent_type() != null && searchBy.getStudent_type().trim().length() > 0)
+			{
+				stored_procedure.setString(7, searchBy.getStudent_type());
+			}
+			else
+			{
+				stored_procedure.setNull(7, Types.CHAR);
+			}
+			
+			if(searchBy.getStudent_year_enroll() != null && searchBy.getStudent_year_enroll().trim().length() > 0)
+			{
+				stored_procedure.setString(8, searchBy.getStudent_year_enroll());
+			}
+			else
+			{
+				stored_procedure.setNull(8, Types.CHAR);
+			}
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Student e = new Student();
+				
+				e.setStudent_id(result.getInt(1));
+				e.setStudent_fn(result.getString(2));
+				e.setStudent_mn(result.getString(3));
+				e.setStudent_ln(result.getString(4));
+				e.setAddr_id(result.getInt(5));
+				e.setGender(result.getString(6));
+				e.setDob(result.getDate(7));
+				e.setClass_id(result.getInt(8));
+				e.setDisability(result.getString(9));
+				e.setPrecaution(result.getString(10));
+				e.setBlood_grp(result.getString(11));
+				e.setGenotype(result.getString(12));
+				e.setDate_enrolled(result.getDate(13));
+				e.setUser_id(result.getInt(14));
+				e.setCrt_dt(result.getDate(15));
+				e.setStudent_status_id(result.getInt(16));
+				e.setYear_graduated(result.getInt(17));
+				e.setRollNumber(result.getInt(18));
+				e.setStudent_type(result.getString(19));
+				e.setHouse_id(result.getInt(20));
+				
+				list.add(e);
+			}
+			
+			// now we get other details, medicals, address, and so on
+			for(Student e : list)
+			{
+				// address
+				stored_procedure = con.prepareCall("{call get_addressbyid_sp(?)}");
+				stored_procedure.setInt(1, e.getAddr_id());
+				
+				result = stored_procedure.executeQuery();
+				while(result.next())
+				{
+					Address a = new Address();
+					
+					a.setAddr_id(result.getInt(1));
+					a.setAddr1(result.getString(2));
+					a.setAddr2(result.getString(3));
+					a.setPhone1(result.getString(4));
+					a.setPhone2(result.getString(5));
+					a.setEmail(result.getString(6));
+					a.setFax(result.getString(7));
+					a.setWebsite(result.getString(8));
+					
+					e.setAddress(a);
+				}
+				
+				stored_procedure = con.prepareCall("{call get_studentguardians_sp(?)}");
+				stored_procedure.setInt(1, e.getStudent_id());
+				
+				result = stored_procedure.executeQuery();
+				ArrayList<String[]> gs = new ArrayList<String[]>();
+				while(result.next())
+				{
+					String[] sg = new String[4];
+					sg[0] = result.getString(1); // student_guardian_id
+					sg[1] = result.getString(2); // student_id
+					sg[2] = result.getString(3); // guardian_id
+					sg[3] = result.getString(4); // relationship_id
+					
+					gs.add(sg);
+				}
+				
+				for(String[] sg : gs)
+				{
+					stored_procedure = con.prepareCall("{call get_guardianbyid_sp(?)}");
+					stored_procedure.setInt(1, Integer.parseInt(sg[2]));
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Guardian g = new Guardian();
+						
+						g.setGuardian_id(result.getInt(1));
+						g.setTitle_id(result.getInt(2));
+						g.setName(result.getString(3));
+						g.getAddress().setAddr_id(result.getInt(4));
+						g.setUser_id(result.getInt(5));
+						g.setCrt_dt(result.getDate(6));
+						g.setRelationship_id(Integer.parseInt(sg[3]));
+						
+						e.getGuardians().add(g);
+					}
+				}
+				
+				for(Guardian g : e.getGuardians())
+				{
+					// address
+					stored_procedure = con.prepareCall("{call get_addressbyid_sp(?)}");
+					stored_procedure.setInt(1, g.getAddress().getAddr_id());
+					
+					result = stored_procedure.executeQuery();
+					while(result.next())
+					{
+						Address a = new Address();
+						
+						a.setAddr_id(result.getInt(1));
+						a.setAddr1(result.getString(2));
+						a.setAddr2(result.getString(3));
+						a.setPhone1(result.getString(4));
+						a.setPhone2(result.getString(5));
+						a.setEmail(result.getString(6));
+						a.setFax(result.getString(7));
+						a.setWebsite(result.getString(8));
+						
+						g.setAddress(a);
+					}
+				}
+				
+				stored_procedure = con.prepareCall("{call get_student_medicals_sp(?)}");
+				stored_procedure.setInt(1, e.getStudent_id());
+				
+				result = stored_procedure.executeQuery();
+				while(result.next())
+				{
+					StudentMedical sm = new StudentMedical();
+					
+					sm.setId(result.getInt(1));
+					sm.setStudent_id(result.getInt(2));
+					sm.setMedical_test_id(result.getInt(3));
+					sm.setMedical_result_id(result.getInt(4));
+					sm.setResult_summary(result.getString(5));
+					sm.setUser_id(result.getInt(6));
+					sm.setCrt_dt(result.getDate(7));
+					
+					e.getMedicals().add(sm);
+				}
+				
+				stored_procedure = con.prepareCall("{call get_student_clubs_sp(?)}");
+				stored_procedure.setInt(1, e.getStudent_id());
+				
+				result = stored_procedure.executeQuery();
+				while(result.next())
+				{
+					Ref club = new Ref();
+					
+					club.setId(result.getInt(3));
+					club.setName(result.getString(4));
+					club.setDesc(result.getString(5));
+					
+					e.getClubs().add(club);
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Gets a student by its id.
+	 * */
+	public Student getStudentByID(int id)
+	{
+		Student e = null;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call getStudentByID(?)}");
+			stored_procedure.setInt(1, id);
+			
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				e = new Student();
+				
+				e.setStudent_id(result.getInt(1));
+				e.setStudent_fn(result.getString(2));
+				e.setStudent_mn(result.getString(3));
+				e.setStudent_ln(result.getString(4));
+				e.setAddr_id(result.getInt(5));
+				e.setGender(result.getString(6));
+				
+				java.sql.Date dt = result.getDate(7);
+				e.setDob(new java.util.Date(dt.getTime()));
+				
+				e.setClass_id(result.getInt(8));
+				e.setDisability(result.getString(9));
+				e.setPrecaution(result.getString(10));
+				e.setBlood_grp(result.getString(11));
+				e.setGenotype(result.getString(12));
+				
+				dt = result.getDate(13);
+				e.setDate_enrolled(new java.util.Date(dt.getTime()));
+				
+				e.setStudent_status_id(result.getInt(16));
+				e.setYear_graduated(result.getInt(17));
+				e.setRollNumber(result.getInt(18));
+			}
+			
+			if(e != null) // now get the address
+			{
+				stored_procedure = con.prepareCall("{call getAddressByID(?)}");
+				stored_procedure.setInt(1, e.getAddr_id());
+				
+				result = stored_procedure.executeQuery();
+				while(result.next())
+				{
+					Address a = new Address();
+					
+					a.setAddr_id(result.getInt(1));
+					a.setAddr1(result.getString(2));
+					a.setAddr2(result.getString(3));
+					a.setPhone1(result.getString(4));
+					a.setPhone2(result.getString(5));
+					a.setEmail(result.getString(6));
+					
+					e.setAddress(a);
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return e;
+	}
+	
+	/**
+	 * Gets all students mapped to a class.
+	 * */
+	public ArrayList<Attendance> GetClassStudents(int class_id, int session_id)
+	{
+		ArrayList<Attendance> list = new ArrayList<Attendance>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_class_students_sp(?,?)}");
+			stored_procedure.setInt(1, class_id);
+			stored_procedure.setInt(2, session_id);
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				Attendance e = new Attendance();
+				// cs.student_id, student_fn, student_mn, student_ln, rollNumber
+				e.setStudent_id(result.getInt(1));
+				e.setStudent_fn(result.getString(2));
+				e.setStudent_mn(result.getString(3));
+				e.setStudent_ln(result.getString(4));
+				e.setRollNumber(result.getInt(5));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+}

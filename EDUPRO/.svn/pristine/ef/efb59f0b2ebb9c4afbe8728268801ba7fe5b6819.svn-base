@@ -1,0 +1,202 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    template="WEB-INF/layout/basic_layout.xhtml">
+<ui:define name="pageTitle"> Dashboard</ui:define>
+<ui:define name="body">
+	<style type="text/css">
+        .pic-normal {
+            width: 120px;
+            height: 120px;
+            border: 1px solid #ACBECE;
+        }
+        .wrap1 {
+            width: 190px;
+            height: 130px;
+            float: left;            
+        }
+    </style>
+
+	<h:form id="dashboardForm">
+		<div style="width: 800px" align="center">
+		
+		<table width="100%" cellspacing="2" cellpadding="2">
+			<tr valign="top">
+				<td valign="top" align="left" width="125" rowspan="4">
+					<h:graphicImage url="/images/3d-bradawl-1.png" height="120" width="120" />
+					<br/>
+					<br/>
+					<h:graphicImage url="/uploads/school/logo?ranNum=#{appOptions.ranNum}" height="120" width="120" rendered="#{appOptions.appSetup}" />
+				</td>
+				<td align="left">
+					<table cellspacing="0" cellpadding="0">
+						<tr valign="top">
+							<td align="left" valign="bottom">
+								<p>
+									<span style="font-size:30px;font-weight:bold;color:#888;">Welcome</span><br/>
+									<span style="font-size:16px;">to br@dawl Dashboard</span>
+								</p>
+							</td>
+							<td valign="bottom" align="right">
+								<span style="font-size:16px;">
+								<rich:dropDownMenu style="font-size:16px;" value="#{authenticator.staff.staff_fn} #{authenticator.staff.staff_mn} #{authenticator.staff.staff_ln}" rendered="#{authenticator.staff != null}">
+									<rich:menuItem submitMode="none">
+										<s:link view="/myprofile.xhtml" value="My Profile" />
+									</rich:menuItem>
+									<rich:menuSeparator/>
+									<rich:menuItem submitMode="none">
+										<s:link view="/messages.xhtml" value="Messages (#{messagesBean.unread})" rendered="#{authenticator.user != null}" />
+									</rich:menuItem>
+									<rich:menuSeparator/>
+									<rich:menuItem submitMode="none">
+										<s:link value="Social Media" /> <!-- Should contain forum, gallery, friends, chats -->
+									</rich:menuItem>
+									<rich:menuSeparator/>
+									<rich:menuItem submitMode="none">
+										<h:commandLink id="logout" action="#{authenticator.signOut}" value="Sign Out" rendered="#{authenticator.user != null}"/>
+									</rich:menuItem>
+								</rich:dropDownMenu>
+								<rich:dropDownMenu style="font-size:16px;" value="#{authenticator.student.student_fn} #{authenticator.student.student_fn} #{authenticator.student.student_fn}" rendered="#{authenticator.student != null}">
+									<rich:menuItem submitMode="none">
+										<s:link view="/myprofile.xhtml" value="My Profile" />
+									</rich:menuItem>
+									<rich:menuSeparator/>
+									<rich:menuItem submitMode="none">
+										<s:link view="/messages.xhtml" value="Messages (#{messagesBean.unread})" rendered="#{authenticator.user != null}" />
+									</rich:menuItem>
+									<rich:menuSeparator/>
+									<rich:menuItem submitMode="none">
+										<s:link value="Social Media" /> <!-- Should contain forum, gallery, friends, chats -->
+									</rich:menuItem>
+									<rich:menuSeparator/>
+									<rich:menuItem submitMode="none">
+										<h:commandLink id="logout2" action="#{authenticator.signOut}" value="Sign Out" rendered="#{authenticator.user != null}"/>
+									</rich:menuItem>
+								</rich:dropDownMenu>
+								</span>
+							</td>
+						</tr>
+						<tr valign="top">
+							<td colspan="2">
+								<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr valign="top">
+				<td>
+					<rich:spacer height="2" />
+				</td>
+			</tr>
+			<tr valign="top" align="left">
+				<td>
+					<a4j:outputPanel id="function_icons">
+					<c:forEach items="${authenticator.modules}" var="obj">
+						<fieldset>
+							<legend><h:outputText value="#{obj.name} module"/></legend>
+							
+							<div> <!-- style="align:center" -->
+							<rich:dataGrid value="#{authenticator.functions.get(obj.id)}" var="func" columns="#{(authenticator.functions.get(obj.id).size()>=4) ? 4 : authenticator.functions.get(obj.id).size()}" width="100%"> <!-- style="border: 0px;text-align: center" -->
+								<s:link view="/#{func.func_page}">
+									<h:graphicImage url="/images/#{func.func_button}" alt="#{func.name}" />
+								</s:link>
+							</rich:dataGrid>
+							</div>
+						</fieldset>
+						<br/><br/>
+					</c:forEach>
+					</a4j:outputPanel>
+					<h:outputText rendered="#{authenticator.modules.size() == 0}" value="No modules or functions attached to this role!" />
+					
+					<rich:jQuery selector="#function_icons img" query="addClass('pic-normal')"/>
+				    <rich:jQuery selector="#function_icons img" query="wrap('&lt;div class=\'wrap1\'&gt;&lt;/div&gt;')" />
+				    <rich:jQuery selector="#function_icons img" query="mouseover(function(){enlargePic(this)})"/>
+				    <rich:jQuery selector="#function_icons img" query="mouseout(function(){normalPic(this)})"/>
+				    
+				    <rich:jQuery name="enlargePic" timing="onJScall" query="stop().animate({width:'180px'})" />
+    				<rich:jQuery name="normalPic" timing="onJScall" query="stop().animate({width:'120px'})" />
+				</td>
+			</tr>
+			<tr valign="top" align="left">
+				<td>
+					<div style="width:48%;float:left;">
+					<rich:panel>
+						<f:facet name="header">
+						<h:outputText value="Latest news"/>
+						</f:facet>
+						<div class="dialog">
+							<rich:dataTable id="news" value="#{settingsBean.newsArr}" var="obj" rows="3" width="100%" rendered="#{settingsBean.newsArr.size() > 0}">
+								<rich:column style="vertical-align: top">
+									<div style="height:64px;width:64px;background-image:url(images/calbk.png);float:left;text-align:center;vertical-align:top">
+										<h:outputText value="#{obj.date}" style="font-size:14px;font-weight:bold;color:#FFF">
+											<f:convertDateTime type="date" dateStyle="medium" pattern="MMMM"/>
+										</h:outputText>
+										<rich:spacer height="20" />
+										<h:outputText value="#{obj.date}" style="font-size:32px;font-weight:bold;">
+											<f:convertDateTime type="date" dateStyle="medium" pattern="dd"/>
+										</h:outputText>
+									</div>
+									<rich:spacer width="5" />
+									<div style="float:right;vertical-align:top;width:200px">
+									<h:commandLink view="/news.xhtml" action="#{settingsBean.setViewingNews(obj)}">
+										<h:outputText value="#{obj.news_headline}" style="font-size:14px;font-weight:bold;" />
+										<br/>
+										<h:outputText value="#{obj.newsComments.size()}" /> comments
+									</h:commandLink>
+									</div>
+								</rich:column>
+							</rich:dataTable>
+							<h:outputText value="No latest news found" rendered="#{empty settingsBean.newsArr}"/>
+						</div>
+						<br/>
+						<s:link view="/newsSearch.xhtml"><h:outputText value="All news" style="float:right"/></s:link>
+						<br/>
+					</rich:panel>
+					</div>
+					<div style="width:48%;float:right;">
+					<rich:panel>
+						<f:facet name="header">
+						<h:outputText value="Upcoming events"/>
+						</f:facet>
+						<div class="dialog">
+							<rich:dataTable id="events" value="#{settingsBean.upcomingEvents}" var="obj" rows="3" width="100%" rendered="#{settingsBean.upcomingEvents.size() > 0}">
+								<rich:column style="vertical-align: top">
+									<div style="height:64px;width:64px;background-image:url(images/calbk.png);float:left;text-align:center;vertical-align:top">
+										<h:outputText value="#{obj.date}" style="font-size:14px;font-weight:bold;color:#FFF">
+											<f:convertDateTime type="date" dateStyle="medium" pattern="MMMM"/>
+										</h:outputText>
+										<rich:spacer height="20" />
+										<h:outputText value="#{obj.date}" style="font-size:32px;font-weight:bold;">
+											<f:convertDateTime type="date" dateStyle="medium" pattern="dd"/>
+										</h:outputText>
+									</div>
+									<rich:spacer width="5" />
+									<div style="float:right;vertical-align:top;width:200px">
+									<h:commandLink view="/events.xhtml" action="#{settingsBean.setViewingEvent(obj)}">
+										<h:outputText value="#{obj.title}" style="font-size:14px;font-weight:bold;" />
+									</h:commandLink>
+									</div>
+								</rich:column>
+							</rich:dataTable>
+							<h:outputText value="No events found" rendered="#{empty settingsBean.upcomingEvents}"/>
+						</div>
+						<br/>
+						<s:link view="/eventsSearch.xhtml"><h:outputText value="All term events" style="float:right"/></s:link>
+						<br/>
+					</rich:panel>
+					</div>
+				</td>
+			</tr>
+		</table>
+		
+		</div>
+	</h:form>
+</ui:define>
+</ui:composition>

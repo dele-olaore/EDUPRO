@@ -1,0 +1,263 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="refsForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Awards</span><br/>
+							<span style="font-size:16px;">Create and manage various awards issued to students and staffs</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newRefMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Add new Award</a:commandLink>
+								</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:tabPanel id="awardsTab">
+				<rich:tab id="awardTab" label="Manage Awards" immediate="true">
+					<a4j:outputPanel id="mypanel">
+					<rich:dataTable id="refs" value="#{settingsBean.awards}" var="obj" rows="20" width="100%" rendered="#{settingsBean.awards.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying available awards" />
+					</f:facet>
+					<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}">
+						<f:facet name="header">Award</f:facet>
+						<h:outputText value="#{obj.name}" rendered="#{obj.id != settingsBean.refOBJ.id}" />
+						<h:inputText value="#{obj.name}" size="40" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+					</rich:column>
+					<rich:column>
+						<f:facet name="header">Description</f:facet>
+						<h:outputText value="#{obj.desc}" rendered="#{obj.id != settingsBean.refOBJ.id}" />
+						<h:inputText value="#{obj.desc}" size="40" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+					</rich:column>
+					<rich:column>
+						<f:facet name="header">Type</f:facet>
+						<h:outputText value="#{(obj.type == 'ST') ? 'Student' : 'Staff'}" />
+					</rich:column>
+					<rich:column align="center">
+						<f:facet name="header">Update</f:facet>
+						<a4j:commandLink reRender="refs" value="Update" rendered="#{obj.id != settingsBean.refOBJ.id}">
+							<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.refOBJ}"/>
+						</a4j:commandLink>
+						
+						<a4j:commandLink reRender="refs,messagepanel" action="#{settingsBean.UpdateRefObject(9)}" value="SAVE" rendered="#{obj.id == settingsBean.refOBJ.id}">
+							<f:setPropertyActionListener value="#{obj}" target="#{settingsBean.refOBJ}"/>
+						</a4j:commandLink>
+						
+						<h:outputText value=" - " rendered="#{obj.id == settingsBean.refOBJ.id}" />
+						
+						<a4j:commandLink reRender="refs" action="#{settingsBean.reset}" value="CANCEL" rendered="#{obj.id == settingsBean.refOBJ.id}" />
+						
+					</rich:column>
+					</rich:dataTable>
+					<h:outputText value="No awards found" rendered="#{empty settingsBean.awards}"/>
+					<rich:datascroller id="dsrefs" for="refs" renderIfSinglePage="false" reRender="mypanel" />
+					</a4j:outputPanel>
+				</rich:tab>
+				<rich:tab id="assignAwardTab" label="Present Awards" immediate="true">
+					<a4j:outputPanel id="presentAwardPanel">
+						<rich:dataTable id="pawards" value="#{settingsBean.sessionAwards}" var="obj" rows="50" width="100%" rendered="#{settingsBean.sessionAwards.size() > 0}">
+						<f:facet name="header">
+							<h:outputText value="Displaying presented awards for current session" />
+						</f:facet>
+						<rich:column sortBy="#{obj.type}" filterBy="#{obj.type}">
+							<f:facet name="header">Type</f:facet>
+							<h:outputText value="#{(obj.type == 1) ? 'Student' : 'Staff'}" />
+						</rich:column>
+						<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}">
+							<f:facet name="header">Award</f:facet>
+							<h:outputText value="#{obj.name}" />
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">Awarded To</f:facet>
+							<h:outputText value="#{obj.entity_fn} #{obj.entity_mn} #{obj.entity_ln}" />
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">Comment</f:facet>
+							<h:outputText value="#{obj.comment}" />
+						</rich:column>
+						</rich:dataTable>
+						<h:outputText value="No presented awards found for current session" rendered="#{empty settingsBean.sessionAwards}"/>
+						<rich:datascroller id="dspawards" for="pawards" renderIfSinglePage="false" reRender="presentAwardPanel" />
+					</a4j:outputPanel>
+					
+					<div class="dialog">
+						<a4j:outputPanel id="presentToPanel">
+						<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+							<h:outputLabel for="awdt">Type</h:outputLabel>
+							<h:selectOneMenu id="awdt" value="#{settingsBean.presentAward.typeStr}" defaultLabel="Select a award type...">
+								<f:selectItem itemValue="" itemLabel="" />
+								<f:selectItem itemValue="SF" itemLabel="Staff" />
+								<f:selectItem itemValue="ST" itemLabel="Student" />
+								<a4j:support event="onchange" action="#{settingsBean.setPresentingAwards(null)}" reRender="awd, presentToPanel" ajaxSingle="true" />
+							</h:selectOneMenu>
+							<rich:message for="awdt" style="color: red;"/>
+							
+							<h:outputLabel for="awd">Award</h:outputLabel>
+							<h:selectOneMenu id="awd" value="#{settingsBean.presentAward.id}" defaultLabel="Select an award...">
+								<f:selectItems value="#{settingsBean.presentingAwards}" var="awd" itemValue="#{awd.id}" itemLabel="#{awd.name}" />
+							</h:selectOneMenu>
+							<rich:message for="awd" style="color: red;"/>
+						</h:panelGrid>
+						
+						<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg" rendered="#{settingsBean.presentAward.typeStr == 'SF'}">
+							<h:outputLabel for="scat">Staff Category</h:outputLabel>
+							<h:selectOneMenu id="scat" value="#{dropdownBean.staff_cat_id}" defaultLabel="Select a category...">
+								<f:selectItem itemValue="-1" itemLabel="" />
+								<f:selectItems value="#{dropdownBean.staffCategories}"/>
+								<a4j:support event="onchange" reRender="sf" ajaxSingle="true" />
+							</h:selectOneMenu>
+							<rich:message for="scat" style="color: red;"/>
+							
+							<h:outputLabel for="sdept">Staff Department</h:outputLabel>
+							<h:selectOneMenu id="sdept" value="#{dropdownBean.department_id}" defaultLabel="Select a department...">
+								<f:selectItem itemValue="-1" itemLabel="" />
+								<f:selectItems value="#{dropdownBean.departments}"/>
+								<a4j:support event="onchange" reRender="sf" ajaxSingle="true" />
+							</h:selectOneMenu>
+							<rich:message for="sdept" style="color: red;"/>
+							
+							<h:outputLabel for="sf">Staff</h:outputLabel>
+							<h:selectOneMenu id="sf" value="#{settingsBean.presentAward.entity_id}" defaultLabel="Select a staff...">
+								<f:selectItems value="#{dropdownBean.staffs}" var="sff" itemValue="#{sff.staff_id}" itemLabel="#{sff.staff_fn} #{sff.staff_mn} #{sff.staff_ln}" />
+							</h:selectOneMenu>
+							<rich:message for="sf" style="color: red;"/>
+							
+							<h:outputLabel for="ac">Award comment</h:outputLabel>
+							<h:inputTextarea id="ac" value="#{settingsBean.presentAward.comment}" required="true" style="width: 300px; height: 100px;">
+								<rich:beanValidator/>
+							</h:inputTextarea>
+							<rich:message for="ac" style="color: red;"/>
+						</h:panelGrid>
+						<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg" rendered="#{settingsBean.presentAward.typeStr == 'ST'}">
+							<h:outputLabel for="cls2">Class</h:outputLabel>
+							<h:selectOneMenu id="cls2" value="#{dropdownBean.class_id}" defaultLabel="Select a class...">
+								<f:selectItem itemValue="-1" itemLabel="" />
+								<f:selectItems value="#{dropdownBean.classes}"/>
+								<a4j:support event="onchange" reRender="st" ajaxSingle="true" />
+							</h:selectOneMenu>
+							<rich:message for="cls2" style="color: red;"/>
+							
+							<h:outputLabel for="st">Student</h:outputLabel>
+							<h:selectOneMenu id="st" value="#{settingsBean.presentAward.entity_id}" defaultLabel="Select a student...">
+								<f:selectItems value="#{dropdownBean.students}" var="sdt" itemValue="#{sdt.student_id}" itemLabel="#{sdt.student_fn} #{sdt.student_mn} #{sdt.student_ln}" />
+							</h:selectOneMenu>
+							<rich:message for="st" style="color: red;"/>
+							
+							<h:outputLabel for="ac2">Award comment</h:outputLabel>
+							<h:inputTextarea id="ac2" value="#{settingsBean.presentAward.comment}" required="true" style="width: 300px; height: 100px;">
+								<rich:beanValidator/>
+							</h:inputTextarea>
+							<rich:message for="ac2" style="color: red;"/>
+						</h:panelGrid>
+						</a4j:outputPanel>
+					</div>
+					<div class="actionButtons">
+						<rich:toolBar>
+							<rich:toolBarGroup>
+							<a4j:commandButton value="Present the Award" action="#{settingsBean.PresentTheAward}" reRender="messagepanel,presentAwardPanel,presentToPanel" />
+							</rich:toolBarGroup>
+						</rich:toolBar>
+					</div>
+				</rich:tab>
+			</rich:tabPanel>
+		</td>
+	</tr>
+	</table>
+</div>
+</h:form>
+
+<rich:modalPanel id="newRefMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Create new Award"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newRefMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:350px;overflow:auto;">
+<h:form id="newRefForm">
+<rich:panel>
+	<f:facet name="header">
+	<h:outputText value="Award details"/>
+	</f:facet>
+	
+	<div class="dialog">
+		<a4j:outputPanel id="messagepanel2">
+			<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+		</a4j:outputPanel>
+	
+		<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+			<h:outputLabel for="rname">Award</h:outputLabel>
+			<h:inputText id="rname" value="#{settingsBean.refOBJ.name}" required="true" size="35">
+				<rich:beanValidator/>
+			</h:inputText>
+			<rich:message for="rname" style="color: red;"/>
+			
+			<h:outputLabel for="rdesc">Award description</h:outputLabel>
+			<h:inputTextarea id="rdesc" value="#{settingsBean.refOBJ.desc}" required="true" style="width: 300px; height: 100px;">
+				<rich:beanValidator/>
+			</h:inputTextarea>
+			<rich:message for="rdesc" style="color: red;"/>
+			
+			<h:outputLabel for="rtype">Award type</h:outputLabel>
+			<h:selectOneMenu id="rtype" value="#{settingsBean.refOBJ.type}" defaultLabel="Select a type...">
+				<f:selectItem itemValue="ST" itemLabel="For Students" />
+				<f:selectItem itemValue="SF" itemLabel="For Staffs" />
+			</h:selectOneMenu>
+			<rich:message for="rtype" style="color: red;"/>
+		</h:panelGrid>
+		
+		<div class="actionButtons">
+			<rich:toolBar>
+				<rich:toolBarGroup>
+				<a4j:commandButton value="Save" action="#{settingsBean.CreateRefObject(9)}" reRender="mypanel,newRefForm" />
+				</rich:toolBarGroup>
+				<rich:toolBarGroup location="right">
+				<a:commandLink onclick="#{rich:component('newRefMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+				</rich:toolBarGroup>
+			</rich:toolBar>
+		</div>
+	</div>
+</rich:panel>
+</h:form>
+</div>
+</rich:modalPanel>
+
+</ui:composition>

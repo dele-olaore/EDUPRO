@@ -1,0 +1,91 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    template="WEB-INF/layout/basic_layout.xhtml">
+<ui:define name="pageTitle"> Term Events</ui:define>
+<ui:define name="body">
+    <style>
+        .header {
+            font-weight:bold;
+        }
+        .rich-calendar-header {
+            text-align:center;
+        }
+        .organizer-cell {
+            width: 90px;
+            height: 90px;
+            overflow: hidden;
+        }
+    </style>
+
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Term Events</span><br/>
+							<span style="font-size:16px;">Scroll through events</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td colspan="2">
+		<h:form>
+        <rich:messages />
+        <rich:calendar popup="false" showApplyButton="false" cellWidth="100px" cellHeight="100px" boundaryDatesMode="none" showWeeksBar="false" 
+            dataModel="#{calendarDataModel}" id="organizer" showFooter="true">
+            <f:facet name="header">
+                <h:panelGroup>
+                    <h:outputText value="Current Month" styleClass="header"/>
+                </h:panelGroup>
+            </f:facet>
+            
+            <a4j:outputPanel layout="block" id="cell" style="height: 100%;" styleClass="organizer-cell">
+                <div>
+                    <h:outputText value="{day}" style="align:center"/>
+                </div>
+                <div>&#xA0;</div>
+                <div>
+                	<h:outputText value="{data.title}" />
+                	<br/>
+                	<c:if test="{data.title != ''}">
+					<h:commandButton action="#{settingsBean.ViewEvent(data.id)}" value="View" />
+					</c:if>
+                </div>
+            </a4j:outputPanel>
+            
+        </rich:calendar>
+        </h:form>
+		</td>
+	</tr>
+</table>
+</div>
+</ui:define>
+</ui:composition>

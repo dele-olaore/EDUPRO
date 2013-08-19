@@ -1,0 +1,22 @@
+<m:message xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:m="http://jboss.com/products/seam/mail"
+    xmlns:h="http://java.sun.com/jsf/html">
+  
+    <m:from name="Bradawl" address="do-not-reply@bradawl.com" />
+    <m:to name="#{staffBean.staff.staff_fn} #{staffBean.staff.staff_ln}">#{staffBean.staff.email}</m:to>
+    <m:subject>Welcome to Bradawl!</m:subject>
+    
+    <m:body>
+        <p><h:outputText value="Dear #{staffBean.staff.staff_fn}" />,</p>
+        <p>Welcome to the Bradawl community! </p>
+        <p>
+        	Your access details are below: -<br/><br/>
+        	Username: #{staffBean.staff.user.username}
+        	Password: #{staffBean.staff.user.user_password}
+        </p>
+        <p>Please browse to the Portal to change your password after your first log in.</p>
+        <p>Regards,</p>
+        <p>The Bradawl Team</p>
+    </m:body>
+    
+</m:message>

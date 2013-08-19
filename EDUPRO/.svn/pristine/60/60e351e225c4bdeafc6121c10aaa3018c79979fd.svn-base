@@ -1,0 +1,1202 @@
+package com.dexter.bradawl.model;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Random;
+
+import com.dexter.bradawl.dto.ClassSubjectDayTiming;
+import com.dexter.bradawl.dto.DayTiming;
+import com.dexter.bradawl.util.Env;
+
+public class TimetableModel
+{
+	/*
+	 * Private members for database access, retrieval and manipulation.
+	 * */
+	private Connection con;
+	private CallableStatement stored_procedure;
+	private ResultSet result;
+	
+	/**
+	 * Used internally to connect to the bradawlnew database.
+	 * */
+	private void connectToDB() throws Exception
+	{
+		closeConnection();
+		
+		con = Env.getConnectionBradawl();
+	}
+	
+	/**
+	 * Used internally to close the connection after use. 
+	 * */
+	private void closeConnection()
+	{
+		if(result != null)
+		{
+			try
+			{
+				result.close();
+				result = null;
+			}
+			catch(Exception ignore){}
+		}
+		if(con != null)
+		{
+			try
+			{
+				con.close();
+				con = null;
+			}
+			catch(Exception ignore){}
+		}
+	}
+	
+	public int InsertDayTimingSettings(DayTiming dt)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_sch_timetable_set_sp(?,?,?,?,?,?,?,?)}");
+			stored_procedure.setInt(1, dt.getDay());
+			stored_procedure.setInt(2, dt.getStart_time());
+			stored_procedure.setInt(3, dt.getEnd_time());
+			stored_procedure.setInt(4, dt.getSession_dur());
+			stored_procedure.setInt(5, dt.getBrk_start_time());
+			stored_procedure.setInt(6, dt.getBrk_end_time());
+			stored_procedure.setInt(7, dt.getUser_id());
+			stored_procedure.setInt(8, -1);
+			stored_procedure.registerOutParameter(8, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(8);
+			
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	public int UpdateDayTimingSettings(DayTiming dt)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call up_sch_timetable_set_sp(?,?,?,?,?,?,?,?)}");
+			stored_procedure.setInt(1, dt.getDay());
+			stored_procedure.setInt(2, dt.getStart_time());
+			stored_procedure.setInt(3, dt.getEnd_time());
+			stored_procedure.setInt(4, dt.getSession_dur());
+			stored_procedure.setInt(5, dt.getBrk_start_time());
+			stored_procedure.setInt(6, dt.getBrk_end_time());
+			stored_procedure.setInt(7, dt.getUser_id());
+			stored_procedure.setInt(8, -1);
+			stored_procedure.registerOutParameter(8, Types.INTEGER);
+			
+			stored_procedure.execute();
+			ret = stored_procedure.getInt(8);
+			
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	public ArrayList<DayTiming> getTimings()
+	{
+		ArrayList<DayTiming> list = new ArrayList<DayTiming>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_sch_timetable_sets_sp}");
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				// sch_timetable_set_id, [day], start_time_in_munites, end_time_in_minutes, session_minutes, break_start_time, break_end_time, user_id, crt_dt
+				DayTiming dt = new DayTiming();
+				
+				dt.setId(result.getInt(1));
+				dt.setDay(result.getInt(2));
+				dt.setStart_time(result.getInt(3));
+				dt.setEnd_time(result.getInt(4));
+				dt.setSession_dur(result.getInt(5));
+				dt.setBrk_start_time(result.getInt(6));
+				dt.setBrk_end_time(result.getInt(7));
+				dt.setUser_id(result.getInt(8));
+				dt.setCrt_dt(result.getDate(9));
+				
+				dt.setStart_time_hr(dt.getStart_time()/60);
+				dt.setStart_time_min(dt.getStart_time()%60);
+				
+				dt.setEnd_time_hr(dt.getEnd_time()/60);
+				dt.setEnd_time_min(dt.getEnd_time()%60);
+				
+				dt.setBrk_start_time_hr(dt.getBrk_start_time()/60);
+				dt.setBrk_start_time_min(dt.getBrk_start_time()%60);
+				
+				dt.setBrk_dur_min(dt.getBrk_end_time()-dt.getBrk_start_time());
+				
+				list.add(dt);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	public ArrayList<ClassSubjectDayTiming> getClassDayTimings(int class_id, int day)
+	{
+		ArrayList<ClassSubjectDayTiming> list = new ArrayList<ClassSubjectDayTiming>();
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_class_subs_timetable_sp(?,?)}");
+			stored_procedure.setInt(1, day);
+			stored_procedure.setInt(2, class_id);
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				// class_sub_timetable_id, class_id, sub_id, start_time_in_minutes, session_count, [day], user_id, crt_dt
+				ClassSubjectDayTiming e = new ClassSubjectDayTiming();
+				
+				e.setId(result.getInt(1));
+				e.setClass_id(result.getInt(2));
+				e.setSubject_id(result.getInt(3));
+				e.setStart_time_in_minutes(result.getInt(4));
+				e.setDay(result.getInt(6));
+				e.setUser_id(result.getInt(7));
+				e.setCrt_dt(result.getDate(8));
+				e.setSub_nm(result.getString(9));
+				e.setSub_desc(result.getString(10));
+				
+				list.add(e);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return list;
+	}
+	
+	public ClassSubjectDayTiming getClassDayTimeSub(int class_id, int day, int start_time)
+	{
+		ClassSubjectDayTiming e = null;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_class_time_sub_timetable_sp(?,?,?)}");
+			stored_procedure.setInt(1, day);
+			stored_procedure.setInt(2, class_id);
+			stored_procedure.setInt(3, start_time);
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				// class_sub_timetable_id, class_id, sub_id, start_time_in_minutes, session_count, [day], user_id, crt_dt
+				e = new ClassSubjectDayTiming();
+				
+				e.setId(result.getInt(1));
+				e.setClass_id(result.getInt(2));
+				e.setSubject_id(result.getInt(3));
+				e.setStart_time_in_minutes(result.getInt(4));
+				e.setDay(result.getInt(6));
+				e.setUser_id(result.getInt(7));
+				e.setCrt_dt(result.getDate(8));
+				e.setSub_nm(result.getString(9));
+				e.setSub_desc(result.getString(10));
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return e;
+	}
+	
+	public ClassSubjectDayTiming getStaffDayTimeSub(int staff_id, int day, int start_time)
+	{
+		ClassSubjectDayTiming e = null;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call get_staff_time_sub_timetable_sp(?,?,?)}");
+			stored_procedure.setInt(1, day);
+			stored_procedure.setInt(2, staff_id);
+			stored_procedure.setInt(3, start_time);
+			result = stored_procedure.executeQuery();
+			while(result.next())
+			{
+				// class_sub_timetable_id, class_id, sub_id, start_time_in_minutes, session_count, [day], user_id, crt_dt
+				e = new ClassSubjectDayTiming();
+				
+				e.setId(result.getInt(1));
+				e.setClass_id(result.getInt(2));
+				e.setSubject_id(result.getInt(3));
+				e.setStart_time_in_minutes(result.getInt(4));
+				e.setDay(result.getInt(6));
+				e.setUser_id(result.getInt(7));
+				e.setCrt_dt(result.getDate(8));
+				e.setSub_nm(result.getString(9));
+				e.setSub_desc(result.getString(10));
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return e;
+	}
+	
+	public int setClassDayTimeSub(int class_id, int day, int sub_id, int start_time, int user_id)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call crt_class_sub_timetable_sp(?,?,?,?,?,?)}");
+			stored_procedure.setInt(1, day);
+			stored_procedure.setInt(2, class_id);
+			stored_procedure.setInt(3, sub_id);
+			stored_procedure.setInt(4, start_time);
+			stored_procedure.setInt(5, user_id);
+			stored_procedure.setInt(6, -1);
+			stored_procedure.registerOutParameter(6, Types.INTEGER);
+			
+			stored_procedure.execute();
+			
+			ret = stored_procedure.getInt(6);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	public int removeClassDayTimeSub(int class_id, int day, int sub_id, int start_time)
+	{
+		int ret = -1;
+		
+		try
+		{
+			connectToDB();
+			
+			stored_procedure = con.prepareCall("{call del_class_sub_timetable_sp(?,?,?,?,?)}");
+			stored_procedure.setInt(1, day);
+			stored_procedure.setInt(2, class_id);
+			stored_procedure.setInt(3, sub_id);
+			stored_procedure.setInt(4, start_time);
+			stored_procedure.setInt(5, -1);
+			stored_procedure.registerOutParameter(5, Types.INTEGER);
+			
+			stored_procedure.execute();
+			
+			ret = stored_procedure.getInt(5);
+			if(ret == 0)
+				con.commit();
+			else
+				con.rollback();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			closeConnection();
+		}
+		
+		return ret;
+	}
+	
+	// only subjects that still have possible slots
+	private ArrayList<String[]> coreSubjects = new ArrayList<String[]>();
+	private ArrayList<String[]> noncoreSubjects = new ArrayList<String[]>();
+	
+	public TimetableModel()
+	{
+		String[] coreSub1 = new String[] {"1","Maths","4","0"}; // id, name, slots count left, slots alocated so far for the day
+		String[] coreSub2 = new String[] {"2","English","4","0"};
+		String[] coreSub3 = new String[] {"3","Biology","4","0"};
+		String[] coreSub4 = new String[] {"4","Physics","4","0"};
+		String[] coreSub5 = new String[] {"5","Chemistry","4","0"};
+		
+		coreSubjects.add(coreSub1);
+		coreSubjects.add(coreSub2);
+		coreSubjects.add(coreSub3);
+		coreSubjects.add(coreSub4);
+		coreSubjects.add(coreSub5);
+		
+		String[] noncoreSub1 = new String[] {"6","Geography","4","0"};
+		String[] noncoreSub2 = new String[] {"7","Further Maths","4","0"};
+		String[] noncoreSub3 = new String[] {"8","Yoruba","4","0"};
+		String[] noncoreSub4 = new String[] {"9","Igbo","4","0"};
+		
+		noncoreSubjects.add(noncoreSub1);
+		noncoreSubjects.add(noncoreSub2);
+		noncoreSubjects.add(noncoreSub3);
+		noncoreSubjects.add(noncoreSub4);
+	}
+	
+	public static void main(String[] args)
+	{
+		TimetableModel ttm = new TimetableModel();
+		ttm.GenerateTimetable(0);
+	}
+	
+	public void GenerateTimetable(int class_id)
+	{
+		// only subjects that still have possible slots
+		//ArrayList<String[]> coreSubjects = new ArrayList<String[]>();
+		//ArrayList<String[]> noncoreSubjects = new ArrayList<String[]>();
+		
+		for(int day=1;day<=5;day++)
+		{
+			int coreSlotsMaxCount = 8; // maximum of 4 core subjects per day, with each having a maximum of 2 slots per day
+			int nonCoreSlotsMaxCount = 10; // maximum of 5 non-core subjects per day, with each having a maximum of 2 slots per day
+			int freeSlotMaxCount = 4; // maximum of 4 free slots per day
+			
+			System.out.println("Day: " + day);
+			ArrayList<String[]> coreSubjects = new ArrayList<String[]>();
+			ArrayList<String[]> noncoreSubjects = new ArrayList<String[]>();
+			
+			for(String[] sub : this.coreSubjects)
+			{
+				sub[3] = "0"; // so far default to 0
+				coreSubjects.add(sub);
+			}
+			
+			for(String[] sub : this.noncoreSubjects)
+			{
+				sub[3] = "0"; // so far default to 0
+				noncoreSubjects.add(sub);
+			}
+			
+			int slotsCount = 18; // 30 minutes per slot in a 9 hour teaching period
+			Random rand = new Random();
+			
+			for(int i=0; i<slotsCount; i++)
+			{
+				int type = 0;
+				int type2 = 0;
+				
+				//if(freeSlotMaxCount > 0 && coreSlotsMaxCount > 0 && nonCoreSlotsMaxCount > 0)
+				if(freeSlotMaxCount > 0 && coreSubjects.size() > 0 && noncoreSubjects.size() > 0)
+					type = rand.nextInt(3); // 0 - free, 1 - core, 2 - non core
+				else if(freeSlotMaxCount > 0 && coreSubjects.size()<=0 && noncoreSubjects.size() > 0)
+				{
+					type = rand.nextInt(2); // 0 - free, 1 - noncore
+					type2 = 1;
+				}
+				else if(freeSlotMaxCount > 0 && coreSubjects.size() > 0 && noncoreSubjects.size() <= 0)
+				{
+					type = rand.nextInt(2); // 0 - free, 1 - core
+					type2 = 2;
+				}
+				else if(freeSlotMaxCount <= 0 && coreSubjects.size() > 0 && noncoreSubjects.size() > 0)
+				{
+					type = rand.nextInt(2); // 0 - core, 1 - noncore
+					type2 = 3;
+				}
+				else if(freeSlotMaxCount <= 0 && coreSubjects.size() <= 0 && noncoreSubjects.size() > 0)
+				{
+					type = 0; // 0 - noncore
+					type2 = 4;
+				}
+				else if(freeSlotMaxCount <= 0 && coreSubjects.size() > 0 && noncoreSubjects.size() <= 0)
+				{
+					type = 0; // 0 - core
+					type2 = 5;
+				}
+				else if(freeSlotMaxCount > 0 && coreSubjects.size() <= 0 && noncoreSubjects.size() <= 0)
+				{
+					type = 0; // 0 - free
+					type2 = 6;
+				}
+				
+				switch(type2)
+				{
+					case 0: // everything is still valid
+					{
+						if(type == 0) // free slot
+						{
+							if(freeSlotMaxCount > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = Free");
+									i += (slotCount);
+									freeSlotMaxCount -= 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = Free");
+										freeSlotMaxCount -= 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = Free");
+									freeSlotMaxCount -= 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = Free");
+								freeSlotMaxCount -= 1;
+							}
+						}
+						else if(type == 1) // a core subject
+						{
+							int index = rand.nextInt(coreSubjects.size());
+							
+							String[] sub = coreSubjects.get(index);
+							String sid = sub[0];
+							String snm = sub[1];
+							int slotLeft = Integer.parseInt(sub[2]);
+							int soFar = Integer.parseInt(sub[3]);
+							
+							if(slotLeft > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = " + snm);
+									i += (slotCount);
+									coreSlotsMaxCount -= 1; // remove from all core subjects
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = " + snm);
+										coreSlotsMaxCount -= 1;
+										slotLeft -= 1;
+										soFar += 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									coreSlotsMaxCount -= 1;
+									slotLeft -= 1;
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								coreSlotsMaxCount -= 1;
+								slotLeft -= 1;
+								soFar += 1;
+							}
+							
+							sub[2] = ""+slotLeft;
+							sub[3] = ""+soFar;
+							
+							if(slotLeft <= 0)
+							{
+								this.coreSubjects.remove(index);
+								this.coreSubjects.trimToSize();
+								
+								coreSubjects.remove(index);
+								coreSubjects.trimToSize();
+							}
+							else if(soFar == 2)
+							{
+								coreSubjects.remove(index);
+								coreSubjects.trimToSize();
+								
+								this.coreSubjects.set(index, sub);
+								this.coreSubjects.trimToSize();
+							}
+							else
+							{
+								coreSubjects.set(index, sub);
+								coreSubjects.trimToSize();
+								
+								this.coreSubjects.set(index, sub);
+								this.coreSubjects.trimToSize();
+							}
+						}
+						else if(type == 2) // a noncore subject
+						{
+							int index = rand.nextInt(noncoreSubjects.size());
+							
+							String[] sub = noncoreSubjects.get(index);
+							String sid = sub[0];
+							String snm = sub[1];
+							int slotLeft = Integer.parseInt(sub[2]);
+							int soFar = Integer.parseInt(sub[3]);
+							
+							if(slotLeft > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = " + snm);
+									i += (slotCount);
+									nonCoreSlotsMaxCount -= 1;
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = " + snm);
+										nonCoreSlotsMaxCount -= 1;
+										slotLeft -= 1; // remove from this core subject
+										soFar += 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									nonCoreSlotsMaxCount -= 1;
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								nonCoreSlotsMaxCount -= 1;
+								slotLeft -= 1; // remove from this core subject
+								soFar += 1;
+							}
+							
+							sub[2] = ""+slotLeft;
+							sub[3] = ""+soFar;
+							
+							if(slotLeft <= 0)
+							{
+								this.noncoreSubjects.remove(index);
+								this.noncoreSubjects.trimToSize();
+								
+								noncoreSubjects.remove(index);
+								noncoreSubjects.trimToSize();
+							}
+							else if(soFar == 2)
+							{
+								noncoreSubjects.remove(index);
+								noncoreSubjects.trimToSize();
+								
+								this.noncoreSubjects.set(index, sub);
+								this.noncoreSubjects.trimToSize();
+							}
+							else
+							{
+								noncoreSubjects.set(index, sub);
+								noncoreSubjects.trimToSize();
+								
+								this.noncoreSubjects.set(index, sub);
+								this.noncoreSubjects.trimToSize();
+							}
+						}
+						break;
+					}
+					case 1:
+					{
+						if(type == 0) // free slot
+						{
+							if(freeSlotMaxCount > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = Free");
+									i += (slotCount);
+									freeSlotMaxCount -= 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = Free");
+										freeSlotMaxCount -= 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = Free");
+									freeSlotMaxCount -= 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = Free");
+								freeSlotMaxCount -= 1;
+							}
+						}
+						else if(type == 1) // a noncore subject
+						{
+							int index = rand.nextInt(noncoreSubjects.size());
+							
+							String[] sub = noncoreSubjects.get(index);
+							String sid = sub[0];
+							String snm = sub[1];
+							int slotLeft = Integer.parseInt(sub[2]);
+							int soFar = Integer.parseInt(sub[3]);
+							
+							if(slotLeft > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = " + snm);
+									i += (slotCount);
+									nonCoreSlotsMaxCount -= 1;
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = " + snm);
+										nonCoreSlotsMaxCount -= 1;
+										slotLeft -= 1; // remove from this core subject
+										soFar += 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									nonCoreSlotsMaxCount -= 1;
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								nonCoreSlotsMaxCount -= 1;
+								slotLeft -= 1; // remove from this core subject
+								soFar += 1;
+							}
+							
+							sub[2] = ""+slotLeft;
+							sub[3] = ""+soFar;
+							
+							if(slotLeft <= 0)
+							{
+								this.noncoreSubjects.remove(index);
+								this.noncoreSubjects.trimToSize();
+								
+								noncoreSubjects.remove(index);
+								noncoreSubjects.trimToSize();
+							}
+							else if(soFar == 2)
+							{
+								noncoreSubjects.remove(index);
+								noncoreSubjects.trimToSize();
+								
+								this.noncoreSubjects.set(index, sub);
+								this.noncoreSubjects.trimToSize();
+							}
+							else
+							{
+								noncoreSubjects.set(index, sub);
+								noncoreSubjects.trimToSize();
+								
+								this.noncoreSubjects.set(index, sub);
+								this.noncoreSubjects.trimToSize();
+							}
+						}
+						break;
+					}
+					case 2:
+					{
+						if(type == 0) // free slot
+						{
+							if(freeSlotMaxCount > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = Free");
+									i += (slotCount);
+									freeSlotMaxCount -= 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = Free");
+										freeSlotMaxCount -= 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = Free");
+									freeSlotMaxCount -= 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = Free");
+								freeSlotMaxCount -= 1;
+							}
+						}
+						else if(type == 1) // a core subject
+						{
+							int index = rand.nextInt(coreSubjects.size());
+							
+							String[] sub = coreSubjects.get(index);
+							String sid = sub[0];
+							String snm = sub[1];
+							int slotLeft = Integer.parseInt(sub[2]);
+							int soFar = Integer.parseInt(sub[3]);
+							
+							if(slotLeft > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = " + snm);
+									i += (slotCount);
+									coreSlotsMaxCount -= 1; // remove from all core subjects
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = " + snm);
+										coreSlotsMaxCount -= 1;
+										slotLeft -= 1;
+										soFar += 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									coreSlotsMaxCount -= 1;
+									slotLeft -= 1;
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								coreSlotsMaxCount -= 1;
+								slotLeft -= 1;
+								soFar += 1;
+							}
+							
+							sub[2] = ""+slotLeft;
+							sub[3] = ""+soFar;
+							
+							if(slotLeft <= 0)
+							{
+								this.coreSubjects.remove(index);
+								this.coreSubjects.trimToSize();
+								
+								coreSubjects.remove(index);
+								coreSubjects.trimToSize();
+							}
+							else if(soFar == 2)
+							{
+								coreSubjects.remove(index);
+								coreSubjects.trimToSize();
+								
+								this.coreSubjects.set(index, sub);
+								this.coreSubjects.trimToSize();
+							}
+							else
+							{
+								coreSubjects.set(index, sub);
+								coreSubjects.trimToSize();
+								
+								this.coreSubjects.set(index, sub);
+								this.coreSubjects.trimToSize();
+							}
+						}
+						break;
+					}
+					case 3:
+					{
+						if(type == 0) // a core subject
+						{
+							int index = rand.nextInt(coreSubjects.size());
+							
+							String[] sub = coreSubjects.get(index);
+							String sid = sub[0];
+							String snm = sub[1];
+							int slotLeft = Integer.parseInt(sub[2]);
+							int soFar = Integer.parseInt(sub[3]);
+							
+							if(slotLeft > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = " + snm);
+									i += (slotCount);
+									coreSlotsMaxCount -= 1; // remove from all core subjects
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = " + snm);
+										coreSlotsMaxCount -= 1;
+										slotLeft -= 1;
+										soFar += 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									coreSlotsMaxCount -= 1;
+									slotLeft -= 1;
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								coreSlotsMaxCount -= 1;
+								slotLeft -= 1;
+								soFar += 1;
+							}
+							
+							sub[2] = ""+slotLeft;
+							sub[3] = ""+soFar;
+							
+							if(slotLeft <= 0)
+							{
+								this.coreSubjects.remove(index);
+								this.coreSubjects.trimToSize();
+								
+								coreSubjects.remove(index);
+								coreSubjects.trimToSize();
+							}
+							else if(soFar == 2)
+							{
+								coreSubjects.remove(index);
+								coreSubjects.trimToSize();
+								
+								this.coreSubjects.set(index, sub);
+								this.coreSubjects.trimToSize();
+							}
+							else
+							{
+								coreSubjects.set(index, sub);
+								coreSubjects.trimToSize();
+								
+								this.coreSubjects.set(index, sub);
+								this.coreSubjects.trimToSize();
+							}
+						}
+						else if(type == 1) // a noncore subject
+						{
+							int index = rand.nextInt(noncoreSubjects.size());
+							
+							String[] sub = noncoreSubjects.get(index);
+							String sid = sub[0];
+							String snm = sub[1];
+							int slotLeft = Integer.parseInt(sub[2]);
+							int soFar = Integer.parseInt(sub[3]);
+							
+							if(slotLeft > 1)
+							{
+								if(i+2 < slotsCount) // do a random to pick a double slot or single
+								{
+									int slotCount = rand.nextInt(2);
+									System.out.println("Slot: " + i + " = " + snm);
+									i += (slotCount);
+									nonCoreSlotsMaxCount -= 1;
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+									if(slotCount == 1)
+									{
+										System.out.println("Slot: " + i + " = " + snm);
+										nonCoreSlotsMaxCount -= 1;
+										slotLeft -= 1; // remove from this core subject
+										soFar += 1;
+									}
+								}
+								else
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									nonCoreSlotsMaxCount -= 1;
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								nonCoreSlotsMaxCount -= 1;
+								slotLeft -= 1; // remove from this core subject
+								soFar += 1;
+							}
+							
+							sub[2] = ""+slotLeft;
+							sub[3] = ""+soFar;
+							
+							if(slotLeft <= 0)
+							{
+								this.noncoreSubjects.remove(index);
+								this.noncoreSubjects.trimToSize();
+								
+								noncoreSubjects.remove(index);
+								noncoreSubjects.trimToSize();
+							}
+							else if(soFar == 2)
+							{
+								noncoreSubjects.remove(index);
+								noncoreSubjects.trimToSize();
+								
+								this.noncoreSubjects.set(index, sub);
+								this.noncoreSubjects.trimToSize();
+							}
+							else
+							{
+								noncoreSubjects.set(index, sub);
+								noncoreSubjects.trimToSize();
+								
+								this.noncoreSubjects.set(index, sub);
+								this.noncoreSubjects.trimToSize();
+							}
+						}
+						break;
+					}
+					case 4:
+					{
+						int index = rand.nextInt(noncoreSubjects.size());
+						
+						String[] sub = noncoreSubjects.get(index);
+						String sid = sub[0];
+						String snm = sub[1];
+						int slotLeft = Integer.parseInt(sub[2]);
+						int soFar = Integer.parseInt(sub[3]);
+						
+						if(slotLeft > 1)
+						{
+							if(i+2 < slotsCount) // do a random to pick a double slot or single
+							{
+								int slotCount = rand.nextInt(2);
+								System.out.println("Slot: " + i + " = " + snm);
+								i += (slotCount);
+								nonCoreSlotsMaxCount -= 1;
+								slotLeft -= 1; // remove from this core subject
+								soFar += 1;
+								if(slotCount == 1)
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									nonCoreSlotsMaxCount -= 1;
+									slotLeft -= 1; // remove from this core subject
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								nonCoreSlotsMaxCount -= 1;
+								slotLeft -= 1; // remove from this core subject
+								soFar += 1;
+							}
+						}
+						else
+						{
+							System.out.println("Slot: " + i + " = " + snm);
+							nonCoreSlotsMaxCount -= 1;
+							slotLeft -= 1; // remove from this core subject
+							soFar += 1;
+						}
+						
+						sub[2] = ""+slotLeft;
+						sub[3] = ""+soFar;
+						
+						if(slotLeft <= 0)
+						{
+							this.noncoreSubjects.remove(index);
+							this.noncoreSubjects.trimToSize();
+							
+							noncoreSubjects.remove(index);
+							noncoreSubjects.trimToSize();
+						}
+						else if(soFar == 2)
+						{
+							noncoreSubjects.remove(index);
+							noncoreSubjects.trimToSize();
+							
+							this.noncoreSubjects.set(index, sub);
+							this.noncoreSubjects.trimToSize();
+						}
+						else
+						{
+							noncoreSubjects.set(index, sub);
+							noncoreSubjects.trimToSize();
+							
+							this.noncoreSubjects.set(index, sub);
+							this.noncoreSubjects.trimToSize();
+						}
+						break;
+					}
+					case 5:
+					{
+						int index = rand.nextInt(coreSubjects.size());
+						
+						String[] sub = coreSubjects.get(index);
+						String sid = sub[0];
+						String snm = sub[1];
+						int slotLeft = Integer.parseInt(sub[2]);
+						int soFar = Integer.parseInt(sub[3]);
+						
+						if(slotLeft > 1)
+						{
+							if(i+2 < slotsCount) // do a random to pick a double slot or single
+							{
+								int slotCount = rand.nextInt(2);
+								System.out.println("Slot: " + i + " = " + snm);
+								i += (slotCount);
+								coreSlotsMaxCount -= 1; // remove from all core subjects
+								slotLeft -= 1; // remove from this core subject
+								soFar += 1;
+								if(slotCount == 1)
+								{
+									System.out.println("Slot: " + i + " = " + snm);
+									coreSlotsMaxCount -= 1;
+									slotLeft -= 1;
+									soFar += 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = " + snm);
+								coreSlotsMaxCount -= 1;
+								slotLeft -= 1;
+								soFar += 1;
+							}
+						}
+						else
+						{
+							System.out.println("Slot: " + i + " = " + snm);
+							coreSlotsMaxCount -= 1;
+							slotLeft -= 1;
+							soFar += 1;
+						}
+						
+						sub[2] = ""+slotLeft;
+						sub[3] = ""+soFar;
+						
+						if(slotLeft <= 0)
+						{
+							this.coreSubjects.remove(index);
+							this.coreSubjects.trimToSize();
+							
+							coreSubjects.remove(index);
+							coreSubjects.trimToSize();
+						}
+						else if(soFar == 2)
+						{
+							coreSubjects.remove(index);
+							coreSubjects.trimToSize();
+							
+							this.coreSubjects.set(index, sub);
+							this.coreSubjects.trimToSize();
+						}
+						else
+						{
+							coreSubjects.set(index, sub);
+							coreSubjects.trimToSize();
+							
+							this.coreSubjects.set(index, sub);
+							this.coreSubjects.trimToSize();
+						}
+						break;
+					}
+					case 6:
+					{
+						if(freeSlotMaxCount > 1)
+						{
+							if(i+2 < slotsCount) // do a random to pick a double slot or single
+							{
+								int slotCount = rand.nextInt(2);
+								System.out.println("Slot: " + i + " = Free");
+								i += (slotCount);
+								freeSlotMaxCount -= 1;
+								if(slotCount == 1)
+								{
+									System.out.println("Slot: " + i + " = Free");
+									freeSlotMaxCount -= 1;
+								}
+							}
+							else
+							{
+								System.out.println("Slot: " + i + " = Free");
+								freeSlotMaxCount -= 1;
+							}
+						}
+						else
+						{
+							System.out.println("Slot: " + i + " = Free");
+							freeSlotMaxCount -= 1;
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+}

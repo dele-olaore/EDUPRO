@@ -1,0 +1,29 @@
+<rich:toolBar xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    itemSeparator="square">
+<f:loadBundle basename="resources.messages" var="bundle"/>
+    <rich:toolBarGroup location="left" rendered="#{authenticator.user != null}">
+    	<div class="rightFooter">
+    	<h:form>
+    		<h:panelGrid columns="3" rowClasses="prop">
+    		<h:outputText value="Choose skin:"/>
+    		<h:selectOneMenu value="#{userOptions.skin}">
+    			<s:selectItems value="#{appOptions.availableSkins}" var="skin" label="#{skin}" itemValue="#{skin}" />
+			</h:selectOneMenu>
+			<h:commandButton value="Change skin" action="#{userOptions.setOptions}"/>
+			</h:panelGrid>
+		</h:form>
+		</div>
+    </rich:toolBarGroup>
+    
+    <rich:toolBarGroup location="right">
+    	<div class="footer">
+			<p><h:outputText value="#{bundle.footercopyright}" /></p>
+		</div>
+    </rich:toolBarGroup>
+    
+</rich:toolBar>

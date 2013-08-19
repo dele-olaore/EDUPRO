@@ -1,0 +1,265 @@
+package com.dexter.bradawl.mbean;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.log.Log;
+
+import com.dexter.bradawl.dto.Ref;
+import com.dexter.bradawl.dto.Staff;
+import com.dexter.bradawl.dto.Student;
+import com.dexter.bradawl.dto.User;
+import com.dexter.bradawl.model.DashboardModel;
+import com.dexter.bradawl.model.OptionModel;
+import com.dexter.bradawl.model.RefModel;
+import com.dexter.bradawl.model.StaffModel;
+import com.dexter.bradawl.model.StudentModel;
+import com.dexter.bradawl.model.UserModel;
+import com.dexter.bradawl.security.Encrypter;
+import com.dexter.bradawl.util.UserOptions;
+import com.dexter.bradawl.util.Utils;
+import com.sun.faces.context.FacesContextImpl;
+
+@Name("authenticator")
+@Scope(ScopeType.SESSION)
+@AutoCreate
+public class AuthenticatorBean implements java.io.Serializable
+{
+	private static final long serialVersionUID = 1L;
+	
+	private String username;
+	private String user_password;
+	
+	private User user;
+	private Staff staff;
+	private Student student;
+	
+	@In(create=true)
+	UserOptions userOptions;
+	
+	@Logger
+	private Log log;
+	
+	private ArrayList<Ref> modules;
+	private Hashtable<Integer, ArrayList<Ref>> functions;
+	
+	public String authenticate()
+	{
+		String ret = "index";
+		
+		FacesContext curContext = FacesContextImpl.getCurrentInstance();
+		
+		String user_password_ecypt = Encrypter.Encrypt(user_password);
+		
+		UserModel uModel = new UserModel();
+		StaffModel stModel = new StaffModel();
+		StudentModel stuModel = new StudentModel();
+		
+		user = uModel.getUserByUsername(username);
+		
+		if(user != null && user_password_ecypt.equals(user.getUser_password()))
+		{
+			log.info("User {0} signed in", username);
+			// Now get the staff or student object for the current user
+			
+			if(user.getRole_id() == 8) // user is a student
+			{
+				student = stuModel.getStudentByID(user.getStudent_id());
+			}
+			else
+			{
+				staff = stModel.getStaffByID(user.getStaff_id());
+			}
+			
+			String[] options = new OptionModel().getUserOptions(user.getUser_id());
+			if(options != null)
+			{
+				userOptions.setSkin(options[0]);
+			}
+			
+			ArrayList<Ref> roles = new RefModel().getRefObjects(3);
+			for(Ref e : roles)
+			{
+				if(e.getId() == user.getRole_id())
+				{
+					user.setRole_nm(e.getName());
+					break;
+				}
+			}
+			
+			ret = Dashboard();
+		}
+		else
+		{
+			log.info("User {0} failed authentication", username);
+			
+			curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, Utils.getBundleMessage("org.jboss.seam.loginFailed", null), null));
+		}
+		
+		return ret;
+	}
+	
+	public String Dashboard()
+	{
+		String ret = "dashboard";
+		
+		// here we load the modules and functions for the current role
+		DashboardModel dm = new DashboardModel();
+		
+		ArrayList<Ref> modules = dm.GetRoleModules(user.getRole_id());
+		ArrayList<Ref> myModules = new ArrayList<Ref>();
+		
+		for(Ref mod : modules)
+		{
+			if(mod.getName().equalsIgnoreCase("my classes")) // here, the staff must have at least one class mapped to him/her before they can see this module
+			{
+				if(new RefModel().getStaffClasses(user.getStaff_id()).size() > 0)
+					myModules.add(mod);
+			}
+			else if(mod.getName().equalsIgnoreCase("my subjects")) // here, the staff must have at least one subject mapped to him/her
+			{
+				if(new StaffModel().GetStaffSubjects(user.getStaff_id()).size() > 0)
+					myModules.add(mod);
+			}
+			else
+			{
+				myModules.add(mod);
+			}
+		}
+		
+		setModules(myModules);
+		for(Ref m : getModules())
+		{
+			ArrayList<Ref> functions = dm.GetRoleFunctionsByModule(user.getRole_id(), m.getId());
+			getFunctions().put(m.getId(), functions);
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Signs out a user.
+	 * */
+	public String signOut()
+	{
+		String ret = "index";
+		
+		FacesContext curContext = FacesContextImpl.getCurrentInstance();
+		curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, Utils.getBundleMessage("org.jboss.seam.logout", null), null));
+		
+		setUser(null);
+		setStaff(null);
+		setStudent(null);
+		
+		setUsername(null);
+		setUser_password(null);
+		
+		userOptions.setSkin(null);
+		
+		Map<String, Object> sessionMap = curContext.getExternalContext().getSessionMap();
+		
+		Iterator<String> sessItr = sessionMap.keySet().iterator();
+		while(sessItr.hasNext())
+		{
+			String nm = sessItr.next();
+			//if(!nm.equalsIgnoreCase("authenticator"))
+			//{
+				sessionMap.put(nm, null);
+				sessionMap.remove(nm);
+			//}
+		}
+		
+		sessionMap.clear();
+		
+		org.jboss.seam.web.Session.getInstance().invalidate();
+		
+		return ret;
+	}
+
+	public String getUsername()
+	{
+		return username;
+	}
+
+	public void setUsername(String username)
+	{
+		this.username = username;
+	}
+
+	public String getUser_password()
+	{
+		return user_password;
+	}
+
+	public void setUser_password(String user_password)
+	{
+		this.user_password = user_password;
+	}
+
+	public User getUser()
+	{
+		return user;
+	}
+
+	public void setUser(User user)
+	{
+		this.user = user;
+	}
+
+	public Staff getStaff()
+	{
+		return staff;
+	}
+
+	public void setStaff(Staff staff)
+	{
+		this.staff = staff;
+	}
+
+	public Student getStudent()
+	{
+		return student;
+	}
+
+	public void setStudent(Student student)
+	{
+		this.student = student;
+	}
+
+	public ArrayList<Ref> getModules()
+	{
+		if(modules == null)
+			modules = new ArrayList<Ref>();
+		return modules;
+	}
+
+	public void setModules(ArrayList<Ref> modules)
+	{
+		this.modules = modules;
+	}
+
+	public Hashtable<Integer, ArrayList<Ref>> getFunctions()
+	{
+		if(functions == null)
+			functions = new Hashtable<Integer, ArrayList<Ref>>();
+		
+		return functions;
+	}
+
+	public void setFunctions(Hashtable<Integer, ArrayList<Ref>> functions)
+	{
+		this.functions = functions;
+	}
+	
+}

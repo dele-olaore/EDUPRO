@@ -1,0 +1,44 @@
+<rich:toolBar xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    itemSeparator="square">
+<f:loadBundle basename="resources.messages" var="bundle"/>
+
+	<rich:toolBarGroup location="left" rendered="#{authenticator.user.role_id == 1}">
+		<h:form id="dashForm"><h:commandLink id="dashboard" action="#{authenticator.Dashboard}" value="Dashboard" rendered="#{authenticator.user != null}"/></h:form>
+		<s:link view="/timetable.xhtml" value="Time Table" propagation="none" rendered="#{authenticator.user != null}" />
+		<h:form id="settingsForm">
+		<rich:dropDownMenu value="Settings" rendered="#{authenticator.user != null}">
+			<rich:menuItem submitMode="none">
+				<s:link value="Application Logs" />
+			</rich:menuItem>
+			<rich:menuSeparator/>
+			<rich:menuItem submitMode="none">
+				<s:link view="/grades.xhtml" value="Grades" />
+			</rich:menuItem>
+			<rich:menuSeparator/>
+			<rich:menuItem submitMode="none">
+				<s:link view="/subjects.xhtml" value="Subjects" />
+			</rich:menuItem>
+			<rich:menuSeparator/>
+			<rich:menuItem submitMode="none">
+				<s:link view="/classes.xhtml" value="Classes" />
+			</rich:menuItem>
+			<rich:menuSeparator/>
+			<rich:menuItem submitMode="none">
+				<s:link view="/session_term.xhtml" value="Session and Term" />
+			</rich:menuItem>
+		</rich:dropDownMenu>
+		</h:form>
+	</rich:toolBarGroup>
+	
+	<rich:toolBarGroup location="right" rendered="#{authenticator.user != null}">
+		<h:outputText value="#{bundle['org.jboss.seam.loginSuccessful2']} #{authenticator.user.username} (#{authenticator.user.role_nm})" />
+		<s:link view="/messages.xhtml" value="Messages" propagation="none" rendered="#{authenticator.user != null}" />
+		<h:form id="logoutForm"><h:commandLink id="logout" action="#{authenticator.signOut}" value="Logout" rendered="#{authenticator.user != null}"/></h:form>
+	</rich:toolBarGroup>
+
+</rich:toolBar>

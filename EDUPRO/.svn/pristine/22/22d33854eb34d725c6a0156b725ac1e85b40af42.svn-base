@@ -1,0 +1,184 @@
+package com.dexter.bradawl.mbean;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.log.Log;
+
+import com.sun.faces.context.FacesContextImpl;
+import org.richfaces.event.UploadEvent;
+import org.richfaces.model.UploadItem;
+
+import com.dexter.bradawl.dto.Ref;
+import com.dexter.bradawl.model.RefModel;
+import com.dexter.bradawl.dto.School;
+import com.dexter.bradawl.dto.Staff;
+import com.dexter.bradawl.model.SetupModel;
+import com.dexter.bradawl.security.Encrypter;
+import com.dexter.bradawl.util.AppOptions;
+import com.dexter.bradawl.util.Utils;
+
+@Name("setupBean")
+@Scope(ScopeType.CONVERSATION)
+@AutoCreate
+public class SetupBean implements java.io.Serializable
+{
+	private static final long serialVersionUID = 1L;
+	
+	private School school;
+	private Staff staff;
+	
+	@Logger
+	private Log log;
+	
+	@In
+	AppOptions appOptions;
+	
+	private SelectItem[] deptList;
+	private SelectItem[] catList;
+	
+	/**
+	 * SAVEs the setup information to the database.
+	 * */
+	public void setup()
+	{
+		FacesContext curContext = FacesContextImpl.getCurrentInstance();
+		
+		if(staff.getUser().getUser_password().equals(staff.getUser().getRe_password()))
+		{
+			staff.getUser().setUsername("S1"); // default username for administrator, first user in the db
+			staff.getUser().setUser_password(Encrypter.Encrypt(staff.getUser().getUser_password()));
+			
+			int ret = new SetupModel().setupBradawl(school, staff);
+			switch(ret)
+			{
+				case 0:
+				{
+					curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, Utils.getBundleMessage("setup.success", null), null));
+					appOptions.setAppSetup(true);
+					log.info("Completed setup of Br@dawl", "");
+					break;
+				}
+				case -11:
+				{
+					curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, Utils.getBundleMessage("setup.failed", new Object[] {"School address details"}), null));
+					break;
+				}
+				case -12:
+				{
+					curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, Utils.getBundleMessage("setup.failed", new Object[] {"School details"}), null));
+					break;
+				}
+				case -13:
+				{
+					curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, Utils.getBundleMessage("setup.failed", new Object[] {"Administrator address details"}), null));
+					break;
+				}
+				case -14:
+				{
+					curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, Utils.getBundleMessage("setup.failed", new Object[] {"Administrator details"}), null));
+					break;
+				}
+				case -15:
+				{
+					curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, Utils.getBundleMessage("setup.failed", new Object[] {"Administrator user details"}), null));
+					break;
+				}
+			}
+		}
+		else
+		{
+			curContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, Utils.getBundleMessage("user.password.notthesame", null), null));
+		}
+	}
+	
+	public void schlistener(UploadEvent event) throws Exception
+	{
+		UploadItem item = event.getUploadItem();
+		
+		// Copying the files into the disk using the new id
+		
+		Utils.copyFile(new FileInputStream(item.getFile()), new FileOutputStream(appOptions.getFileSavePath() + "logo"));
+	}
+	
+	public void admlistener(UploadEvent event) throws Exception
+	{
+		UploadItem item = event.getUploadItem();
+		
+		// Copying the files into the disk using the new id
+		
+		Utils.copyFile(new FileInputStream(item.getFile()), new FileOutputStream(appOptions.getFileSavePath() + "admin"));
+	}
+	
+	public SelectItem[] getDeptList()
+	{
+		ArrayList<Ref> list = new RefModel().getRefObjects(1);
+		deptList = new SelectItem[list.size()];
+		
+		for(int i=0; i<list.size(); i++)
+		{
+			Ref e = list.get(i);
+			
+			deptList[i] = new SelectItem(""+e.getId(), e.getName());
+		}
+		
+		return deptList;
+	}
+
+	public SelectItem[] getCatList()
+	{
+		ArrayList<Ref> list = new RefModel().getRefObjects(2);
+		catList = new SelectItem[list.size()];
+		
+		for(int i=0; i<list.size(); i++)
+		{
+			Ref e = list.get(i);
+			
+			catList[i] = new SelectItem(""+e.getId(), e.getName(), e.getDesc());
+		}
+		
+		return catList;
+	}
+
+	public School getSchool()
+	{
+		if(school == null)
+		{
+			school = new School();
+		}
+		
+		return school;
+	}
+	
+	public void setSchool(School school)
+	{
+		this.school = school;
+	}
+	
+	public Staff getStaff()
+	{
+		if(staff == null)
+		{
+			staff = new Staff();
+		}
+		
+		return staff;
+	}
+	
+	public void setStaff(Staff staff)
+	{
+		this.staff = staff;
+	}
+	
+}

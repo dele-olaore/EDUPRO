@@ -1,0 +1,209 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="gForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">View Report Card</span><br/>
+							<span style="font-size:16px;">View your academic performance report card</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<!-- <li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newRefMP')}.show();" styleClass="image-command-link">Add new</a:commandLink>
+								</li> -->
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div class="dialog">
+				<div class="dialog">
+					<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+						<h:outputLabel for="fstuds">Student</h:outputLabel>
+						<h:selectOneMenu id="fstuds" value="#{teacherBean.student_id}" defaultLabel="Select student...">
+							<f:selectItem itemValue="#{authenticator.student.student_id}" itemLabel="#{authenticator.student.student_fn} #{authenticator.student.student_mn} #{authenticator.student.student_ln} (#{authenticator.student.rollNumber})" />
+						</h:selectOneMenu>
+						<rich:message for="fstuds" style="color: red;"/>
+					</h:panelGrid>
+				</div>
+				
+				<div class="actionButtons">
+					<rich:toolBar>
+						<rich:toolBarGroup>
+						<h:commandButton value="View Result" action="#{teacherBean.ViewResults2}" reRender="messagepanel,viewPanel" />
+						</rich:toolBarGroup>
+					</rich:toolBar>
+				</div>
+				
+				<rich:spacer height="15" />
+				
+				<rich:dataTable id="studentResults" value="#{teacherBean.results}" var="obj" rows="100" width="100%" rendered="#{teacherBean.results.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying results of students in class over the terms" />
+					</f:facet>
+					
+					<rich:column sortBy="#{obj.student.student_fn}" filterBy="#{obj.student.student_fn}">
+						<f:facet name="header">Student</f:facet>
+						<h:outputText value="#{obj.student.student_fn} #{obj.student.student_mn} #{obj.student.student_ln} (#{obj.student.rollNumber})" />
+					</rich:column>
+					
+					<rich:column rendered="#{teacherBean.term_result_available[0]}">
+						<f:facet name="header">1st Term</f:facet>
+						<h:outputText value="#{(obj.results.get(0).result == 'P') ? 'Pass' : 'Fail'}" rendered="#{obj.results != null and obj.results.size > 0}" /><h:outputText value=" / " rendered="#{obj.results != null and obj.results.size > 0}"/>
+						<a4j:commandLink reRender="resultDetailsPanel" value="Details" immediate="true" onclick="#{rich:component('resultDetailMP')}.show();" rendered="#{obj.results != null and obj.results.size > 0}">
+							<f:setPropertyActionListener value="#{obj.results.get(0)}" target="#{teacherBean.termResult}"/>
+						</a4j:commandLink>
+						<h:outputText value="No result yet!" rendered="#{obj.results == null or obj.results.size == 0}"/>
+					</rich:column>
+					
+					<rich:column rendered="#{teacherBean.term_result_available[1]}">
+						<f:facet name="header">2nd Term</f:facet>
+						<h:outputText value="#{(obj.results.get(1).result == 'P') ? 'Pass' : 'Fail'}" rendered="#{obj.results != null and obj.results.size > 0}" /><h:outputText value=" / " rendered="#{obj.results != null and obj.results.size > 1}" />
+						<a4j:commandLink reRender="resultDetailsPanel" value="Details" immediate="true" onclick="#{rich:component('resultDetailMP')}.show();" rendered="#{obj.results != null and obj.results.size > 0}">
+							<f:setPropertyActionListener value="#{obj.results.get(1)}" target="#{teacherBean.termResult}"/>
+						</a4j:commandLink>
+						<h:outputText value="No result yet!" rendered="#{obj.results == null or obj.results.size == 0}"/>
+					</rich:column>
+					
+					<rich:column rendered="#{teacherBean.term_result_available[2]}">
+						<f:facet name="header">3rd Term</f:facet>
+						<h:outputText value="#{(obj.results.get(2).result == 'P') ? 'Pass' : 'Fail'}" rendered="#{obj.results != null and obj.results.size > 0}" /><h:outputText value=" / " rendered="#{obj.results != null and obj.results.size > 2}"/>
+						<a4j:commandLink reRender="resultDetailsPanel" value="Details" immediate="true" onclick="#{rich:component('resultDetailMP')}.show();" rendered="#{obj.results != null and obj.results.size > 0}">
+							<f:setPropertyActionListener value="#{obj.results.get(2)}" target="#{teacherBean.termResult}"/>
+						</a4j:commandLink>
+						<h:outputText value="No result yet!" rendered="#{obj.results == null or obj.results.size == 0}"/>
+					</rich:column>
+					
+					<rich:column rendered="#{teacherBean.term_result_available[0]}">
+						<f:facet name="header">Report Card</f:facet>
+						<h:commandLink action="#{teacherBean.ViewReportCard}" value="View / Print Report Card" rendered="#{obj.results != null and obj.results.size > 0}">
+							<f:setPropertyActionListener value="#{obj}" target="#{teacherBean.result}"/>
+						</h:commandLink>
+						<h:outputText value="No result yet!" rendered="#{obj.results == null or obj.results.size == 0}"/>
+					</rich:column>
+					
+				</rich:dataTable>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+
+<rich:modalPanel id="resultDetailMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Result Details"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('resultDetailMP')">X</a>
+	</f:facet>
+	<h:form id="resultDetailForm">
+	<div style="width:100%;height:550px;overflow:auto;">
+	<rich:panel>
+		<f:facet name="header">
+		<h:outputText value="Result details"/>
+		</f:facet>
+		
+		<div class="dialog">
+			<a4j:outputPanel id="resultDetailsPanel">
+				<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			
+				<h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value">
+					<h:outputLabel for="student_nm">Student</h:outputLabel>
+					<h:outputText id="student_nm" value="#{teacherBean.termResult.student_nm}" />
+					
+					<h:outputLabel for="term_nm">Term</h:outputLabel>
+					<h:outputText id="term_nm" value="#{teacherBean.termResult.term_nm}" />
+					
+					<h:outputLabel for="session_nm">Session</h:outputLabel>
+					<h:outputText id="session_nm" value="#{teacherBean.termResult.session_nm}" />
+				</h:panelGrid>
+				
+				<rich:dataTable id="resultDetails" value="#{teacherBean.termResult.details}" var="obj" rows="100" width="100%" rendered="#{teacherBean.results.size() > 0}">
+					<f:facet name="header">
+						<h:outputText value="Displaying student scores on all subjects for the current result" />
+					</f:facet>
+					
+					<rich:column sortBy="#{obj.sub_nm}" filterBy="#{obj.sub_nm}">
+						<f:facet name="header">Subject</f:facet>
+						<h:outputText value="#{obj.sub_nm}" /><br/>
+						<h:outputText value="(#{obj.sub_desc})" />
+					</rich:column>
+					
+					<rich:column sortBy="#{obj.attendance_score}">
+						<f:facet name="header">Attendance</f:facet>
+						<h:outputText value="#{obj.attendance_score}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.test_score}">
+						<f:facet name="header">Test</f:facet>
+						<h:outputText value="#{obj.test_score}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.exam_score}">
+						<f:facet name="header">Exam</f:facet>
+						<h:outputText value="#{obj.exam_score}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.total_score}">
+						<f:facet name="header">Total Score</f:facet>
+						<h:outputText value="#{obj.total_score}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.grade.grade_letter}">
+						<f:facet name="header">Grade</f:facet>
+						<h:outputText value="#{obj.grade.grade_letter}" />
+					</rich:column>
+					<rich:column sortBy="#{obj.grade.grade_remark}">
+						<f:facet name="header">Remark</f:facet>
+						<h:outputText value="#{obj.grade.grade_remark}" />
+					</rich:column>
+					
+				</rich:dataTable>
+			
+			</a4j:outputPanel>
+		</div>
+	</rich:panel>
+	</div>
+	<div class="actionButtons">
+		<rich:toolBar>
+			<rich:toolBarGroup location="right">
+			<a4j:commandLink reRender="resultDetailsPanel" value="Close" action="#{teacherBean.setTermResult(null)}" immediate="true" onclick="#{rich:component('resultDetailMP')}.hide();" />
+			</rich:toolBarGroup>
+		</rich:toolBar>
+	</div>
+	</h:form>
+	
+</rich:modalPanel>
+
+</ui:composition>

@@ -1,0 +1,145 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:p="http://jboss.com/products/seam/pdf"
+    xmlns:c="http://java.sun.com/jstl/core">
+
+<h:form id="gForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">View Subject Performance</span><br/>
+							<span style="font-size:16px;">View your subject performance history</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<!-- <li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newRefMP')}.show();" styleClass="image-command-link">Add new</a:commandLink>
+								</li> -->
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div class="dialog">
+				<a4j:outputPanel id="tablePanel">
+					<rich:dataTable id="scoresTable" value="#{studentBean.session_scores}" var="obj" rows="20" width="100%" rendered="#{studentBean.session_scores.size() > 0}">
+						<f:facet name="header">
+							<h:outputText value="Displaying available scores" />
+						</f:facet>
+						
+						<rich:column style="vertical-align: top">
+							<f:facet name="header">Session</f:facet>
+							<h:outputText value="#{obj.session_nm}" />
+						</rich:column>
+						
+						<rich:column filterBy="#{obj.term_nm}" sortBy="#{obj.term_nm}" style="vertical-align: top">
+							<f:facet name="header">Term</f:facet>
+							<h:outputText value="#{obj.term_nm}" />
+						</rich:column>
+						
+						<rich:column filterBy="#{obj.sub_nm}" sortBy="#{obj.sub_nm}" style="vertical-align: top">
+							<f:facet name="header">Subject</f:facet>
+							<h:outputText value="#{obj.sub_nm}" />
+						</rich:column>
+						
+						<rich:column sortBy="#{obj.attendance_score}" style="vertical-align: top">
+							<f:facet name="header">Attendance</f:facet>
+							<h:outputText value="#{obj.attendance_score}" />
+						</rich:column>
+						<rich:column sortBy="#{obj.test_score}" style="vertical-align: top">
+							<f:facet name="header">Test</f:facet>
+							<h:outputText value="#{obj.test_score}" />
+						</rich:column>
+						<rich:column sortBy="#{obj.exam_score}" style="vertical-align: top">
+							<f:facet name="header">Exam</f:facet>
+							<h:outputText value="#{obj.exam_score}" />
+						</rich:column>
+						<rich:column sortBy="#{obj.total_score}" style="vertical-align: top">
+							<f:facet name="header">Overall</f:facet>
+							<h:outputText value="#{obj.total_score}" />
+						</rich:column>
+					</rich:dataTable>
+					<rich:spacer height="10" rendered="#{studentBean.session_scores.size() > 0}" />
+					<p:linechart title="Performance History" domainAxisLabel="Terms" legend="true" rendered="#{studentBean.session_scores.size() > 0}">
+						<c:forEach items="#{studentBean.chart.keySet()}" var="_series">
+							<p:series key="#{_series}">
+								<ui:repeat var="_c" value="#{studentBean.chart.get(_series)}">
+									<p:data key="#{_c.period}" value="#{_c.value}"/>
+								</ui:repeat>
+							</p:series>
+						</c:forEach>
+					</p:linechart>
+					<rich:spacer height="30" rendered="#{studentBean.session_scores.size() > 0}" />
+				</a4j:outputPanel>
+			
+				<a4j:outputPanel id="formPanel">
+				<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+					
+					<h:outputLabel for="session">Session</h:outputLabel>
+					<h:selectOneMenu id="session" value="#{studentBean.search.session_id}" required="true" defaultLabel="Select session...">
+						<f:selectItem itemLabel="" itemValue="0"/>
+						<f:selectItems value="#{dropdownBean.sessions}"/>
+						<a4j:support event="onchange" reRender="fsubs" ajaxSingle="true" />
+					</h:selectOneMenu>
+					<rich:message for="session" style="color: red;"/>
+					
+					<h:outputLabel for="fstuds">Student</h:outputLabel>
+					<h:selectOneMenu id="fstuds" value="#{teacherBean.student_id}" defaultLabel="Select student...">
+						<f:selectItem itemValue="#{authenticator.student.student_id}" itemLabel="#{authenticator.student.student_fn} #{authenticator.student.student_mn} #{authenticator.student.student_ln} (#{authenticator.student.rollNumber})" />
+					</h:selectOneMenu>
+					<rich:message for="fstuds" style="color: red;"/>
+					
+					<h:outputLabel for="fsubs">Subject</h:outputLabel>
+					<h:selectOneMenu id="fsubs" value="#{studentBean.search.sub_id}" defaultLabel="Select subject...">
+						<f:selectItems value="#{dropdownBean.getStudentSessionSubjects(authenticator.student.student_id, studentBean.search.session_id)}" />
+					</h:selectOneMenu>
+					<rich:message for="fsubs" style="color: red;"/>
+					
+				</h:panelGrid>
+				</a4j:outputPanel>
+			</div>
+			<div class="actionButtons">
+				<rich:toolBar>
+					<rich:toolBarGroup>
+					<h:commandButton value="View Performance History" action="#{studentBean.ViewPerformanceHistory}" />
+					</rich:toolBarGroup>
+				</rich:toolBar>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+</ui:composition>

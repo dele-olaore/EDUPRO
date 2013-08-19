@@ -1,0 +1,163 @@
+package com.dexter.bradawl.dto;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+import com.dexter.bradawl.model.TeacherModel;
+
+public class TermResult
+{
+	private int id;
+	private int student_id;
+	private int class_id;
+	private int term_id;
+	private int session_id;
+	private String result;
+	private int position;
+	private int user_id;
+	private Date crt_dt;
+	
+	private String student_nm;
+	private String term_nm;
+	private String session_nm;
+	
+	private ArrayList<Score> details;
+	
+	public TermResult()
+	{}
+
+	public int getId()
+	{
+		return id;
+	}
+
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+
+	public int getStudent_id()
+	{
+		return student_id;
+	}
+
+	public void setStudent_id(int student_id)
+	{
+		this.student_id = student_id;
+	}
+
+	public int getClass_id() {
+		return class_id;
+	}
+
+	public void setClass_id(int class_id) {
+		this.class_id = class_id;
+	}
+
+	public int getTerm_id()
+	{
+		return term_id;
+	}
+
+	public void setTerm_id(int term_id)
+	{
+		this.term_id = term_id;
+	}
+
+	public int getSession_id()
+	{
+		return session_id;
+	}
+
+	public void setSession_id(int session_id)
+	{
+		this.session_id = session_id;
+	}
+
+	public String getResult()
+	{
+		return result;
+	}
+
+	public void setResult(String result)
+	{
+		this.result = result;
+	}
+
+	public int getPosition()
+	{
+		return position;
+	}
+
+	public void setPosition(int position)
+	{
+		this.position = position;
+	}
+
+	public int getUser_id()
+	{
+		return user_id;
+	}
+
+	public void setUser_id(int user_id)
+	{
+		this.user_id = user_id;
+	}
+
+	public Date getCrt_dt()
+	{
+		return crt_dt;
+	}
+
+	public void setCrt_dt(Date crt_dt)
+	{
+		this.crt_dt = crt_dt;
+	}
+
+	public String getStudent_nm() {
+		return student_nm;
+	}
+
+	public void setStudent_nm(String student_nm) {
+		this.student_nm = student_nm;
+	}
+
+	public String getTerm_nm()
+	{
+		return term_nm;
+	}
+
+	public void setTerm_nm(String term_nm)
+	{
+		this.term_nm = term_nm;
+	}
+
+	public String getSession_nm()
+	{
+		return session_nm;
+	}
+
+	public void setSession_nm(String session_nm)
+	{
+		this.session_nm = session_nm;
+	}
+
+	public ArrayList<Score> getDetails() {
+		if(details == null)
+		{
+			if(getStudent_id() > 0 && getClass_id() > 0 && getTerm_id() > 0)
+			{
+				details = new TeacherModel().GetClassStudentSubjectsScores(getClass_id(), getStudent_id(), getTerm_id());
+			}
+			else
+				details = new ArrayList<Score>();
+		}
+		
+		return details;
+	}
+
+	public void setDetails(ArrayList<Score> details) {
+		this.details = details;
+	}
+	
+}

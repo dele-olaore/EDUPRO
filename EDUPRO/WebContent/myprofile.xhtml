@@ -1,0 +1,193 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    template="WEB-INF/layout/basic_layout.xhtml">
+<ui:define name="pageTitle"> My Profile</ui:define>
+<ui:define name="body">
+<h:form id="newsForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">My Profile</span><br/>
+							<span style="font-size:16px;">Showing your profile details</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<!-- <ul style="float:right;margin:0 0 0 0;padding:0;">
+								<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									
+								</li>
+							</ul> -->
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td colspan="2">
+			<rich:panel rendered="#{authenticator.staff != null}">
+				<table width="100%" cellspacing="2" cellpadding="2" border="0">
+					<tr>
+					<td>
+				<h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value">
+					<h:outputLabel value="First name" />
+					<h:outputText value="#{authenticator.staff.staff_fn}" />
+					
+					<h:outputLabel value="Middle name" />
+					<h:outputText value="#{authenticator.staff.staff_mn}" />
+					
+					<h:outputLabel value="Last name" />
+					<h:outputText value="#{authenticator.staff.staff_ln}" />
+					
+					<h:outputLabel value="Category" />
+					<h:outputText value="#{authenticator.staff.staff_cat_nm}" />
+					
+					<h:outputLabel value="Department" />
+					<h:outputText value="#{authenticator.staff.department_nm}" />
+					
+					<h:outputLabel value="Date employed" />
+					<h:outputText value="#{authenticator.staff.dt_employed}">
+						<f:convertDateTime type="date" dateStyle="long" />
+					</h:outputText>
+					
+					<h:outputLabel value="Email" />
+					<h:outputText value="#{authenticator.staff.email}" />
+					
+					<h:outputLabel value="Address line 1" />
+					<h:outputText value="#{authenticator.staff.address.addr1}" />
+					
+					<h:outputLabel value="Address line 2" />
+					<h:outputText value="#{authenticator.staff.address.addr2}" />
+					
+					<h:outputLabel value="Phone 1" />
+					<h:outputText value="#{authenticator.staff.address.phone1}" />
+					
+					<h:outputLabel value="Phone 2" />
+					<h:outputText value="#{authenticator.staff.address.phone2}" />
+					
+					<h:outputLabel value="Username" />
+					<h:outputText value="#{authenticator.user.username}" />
+				</h:panelGrid>
+				</td>
+				<td>
+					<h:graphicImage url="/uploads/school/staffs/#{authenticator.staff.staff_id}" alt="#{authenticator.staff.staff_fn} #{authenticator.staff.staff_mn} #{authenticator.staff.staff_ln}" width="120px" height="120px" />
+				</td>
+				</tr>
+				</table>
+			</rich:panel>
+			<rich:panel rendered="#{authenticator.student != null}">
+				<table width="100%" cellspacing="2" cellpadding="2" border="0">
+					<tr>
+					<td>
+				<h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value">
+					<h:outputLabel value="First name" />
+					<h:outputText value="#{authenticator.student.student_fn}" />
+					
+					<h:outputLabel value="Middle name" />
+					<h:outputText value="#{authenticator.student.student_mn}" />
+					
+					<h:outputLabel value="Last name" />
+					<h:outputText value="#{authenticator.student.student_ln}" />
+					
+					<h:outputLabel value="Gender" />
+					<h:outputText value="#{authenticator.student.gender}" />
+					
+					<h:outputLabel value="Date of birth" />
+					<h:outputText value="#{authenticator.student.dob}">
+						<f:convertDateTime type="date" dateStyle="long" />
+					</h:outputText>
+					
+					<h:outputLabel value="Date enrolled" />
+					<h:outputText value="#{authenticator.student.date_enrolled}">
+						<f:convertDateTime type="date" dateStyle="long" />
+					</h:outputText>
+					
+					<h:outputLabel value="Roll number" />
+					<h:outputText value="#{authenticator.student.rollNumber}" />
+					
+					<h:outputLabel value="House" />
+					<h:outputText value="#{authenticator.student.house_nm}" />
+					
+					<h:outputLabel value="Class" />
+					<h:outputText value="#{authenticator.student.class_nm}" />
+					
+					<h:outputLabel value="Address line 1" />
+					<h:outputText value="#{authenticator.student.address.addr1}" />
+					
+					<h:outputLabel value="Address line 2" />
+					<h:outputText value="#{authenticator.student.address.addr2}" />
+					
+					<h:outputLabel value="Phone 1" />
+					<h:outputText value="#{authenticator.student.address.phone1}" />
+					
+					<h:outputLabel value="Phone 2" />
+					<h:outputText value="#{authenticator.student.address.phone2}" />
+				</h:panelGrid>
+				</td>
+				<td>
+					<h:graphicImage url="/uploads/school/students/#{authenticator.student.student_id}" alt="#{authenticator.student.student_fn} #{authenticator.student.student_mn} #{authenticator.student.student_ln}" width="120px" height="120px" />
+				</td>
+				</tr>
+				</table>
+			</rich:panel>
+			<rich:panel rendered="#{authenticator.guardian != null}">
+				<table width="100%" cellspacing="2" cellpadding="2" border="0">
+					<tr>
+					<td>
+					<h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value">
+						<h:outputLabel value="Title" />
+						<h:outputText value="#{authenticator.guardian.title_nm}" />
+						<h:outputLabel value="Name" />
+						<h:outputText value="#{authenticator.guardian.name}" />
+						<h:outputLabel value="Email" />
+						<h:outputText value="#{authenticator.guardian.email}" />
+						<h:outputLabel value="Address line 1" />
+						<h:outputText value="#{authenticator.guardian.address.addr1}" />
+						
+						<h:outputLabel value="Address line 2" />
+						<h:outputText value="#{authenticator.guardian.address.addr2}" />
+						
+						<h:outputLabel value="Phone 1" />
+						<h:outputText value="#{authenticator.guardian.address.phone1}" />
+						
+						<h:outputLabel value="Phone 2" />
+						<h:outputText value="#{authenticator.guardian.address.phone2}" />
+					</h:panelGrid>
+					</td>
+					</tr>
+				</table>
+			</rich:panel>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+</ui:define>
+</ui:composition>

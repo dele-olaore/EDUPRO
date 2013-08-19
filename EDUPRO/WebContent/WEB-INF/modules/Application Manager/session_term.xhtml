@@ -1,0 +1,277 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:c="http://java.sun.com/jstl/core">
+	<h:form id="sessionForm">
+		<div style="width: 800px" align="center">
+			<table width="100%" cellspacing="2" cellpadding="2">
+			<tr>
+				<td align="left">
+					<table>
+						<tr>
+							<td valign="top" align="left">
+								<p>
+									<span style="font-size:30px;font-weight:bold;color:#888;">Session and Term</span><br/>
+									<span style="font-size:16px;">Create and manage current session and its various terms</span>
+								</p>
+							</td>
+							<td valign="bottom" align="right">
+								<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+								<div style="height:1.8em;margin:0;padding:0;width:100%">
+									<ul style="float:right;margin:0 0 0 0;padding:0;">
+										<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:200px;">
+											<a:commandLink id="newsessionLink" onclick="#{rich:component('newSessionMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Start New Academic Session</a:commandLink>
+										</li>
+										<li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+											<a:commandLink id="newtermLink" onclick="#{rich:component('newTermMP')}.show();" styleClass="image-command-link" style="color:#fff;text-decoration:none;">Start New Term</a:commandLink>
+										</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<rich:spacer height="2" />
+					<a4j:outputPanel id="messagepanel">
+						<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+					</a4j:outputPanel>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="left" width="100%">
+					<c:if test="${settingsBean.session != null}">
+						<span style="font-size:16px">Current Session: <b><h:outputText value="#{appOptions.session.session_nm}" /></b></span><br/>
+						<span style="font-size:14px">Start Date: <b><h:outputText value="#{appOptions.session.session_st_dt}"><f:convertDateTime type="date"/></h:outputText></b></span><br/>
+					</c:if>
+					<c:if test="${settingsBean.session == null}">
+						<span style="font-size:16px;color:red">No session available, please start a new session!</span>
+					</c:if>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center" width="100%">
+					<rich:tabPanel id="sessionTab">
+						<rich:tab id="sessionsTab" label="Session Terms" immediate="true">
+							<a4j:outputPanel id="termsPanel">
+							<rich:dataTable id="terms" value="#{settingsBean.sessionTerms}" var="term" rows="#{settingsBean.sessionTerms.size()}" width="100%" rendered="#{settingsBean.sessionTerms.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying session terms" />
+								</f:facet>
+								<rich:column sortBy="#{term.term_nm}">
+									<f:facet name="header">Term</f:facet>
+									<h:outputText value="#{term.term_nm}"/>
+								</rich:column>
+								<rich:column sortBy="#{term.term_st_dt}">
+									<f:facet name="header">Start date</f:facet>
+									<h:outputText value="#{term.term_st_dt}">
+										<f:convertDateTime type="date"/>
+									</h:outputText>
+								</rich:column>
+								<rich:column sortBy="#{term.term_end_dt}">
+									<f:facet name="header">End date</f:facet>
+									<h:outputText value="#{term.term_end_dt}" rendered="#{term.term_end_dt != null and term.term_id != settingsBean.term.term_id}">
+										<f:convertDateTime type="date"/>
+									</h:outputText>
+									<h:outputText value="In progress" rendered="#{term.term_end_dt == null and term.term_id != settingsBean.term.term_id}"/>
+									<rich:calendar value="#{term.term_end_dt}" locale="us" datePattern="yyyy-MM-dd" rendered="#{term.term_id == settingsBean.term.term_id}">
+										<rich:beanValidator/>
+									</rich:calendar>
+								</rich:column>
+								<rich:column align="center">
+									<f:facet name="header">Update</f:facet>
+									<a4j:commandLink reRender="termsPanel, terms" value="Update" rendered="#{term.term_id != settingsBean.term.term_id and term.term_end_dt == null}">
+										<f:setPropertyActionListener value="#{term}" target="#{settingsBean.term}"/>
+									</a4j:commandLink>
+									<h:outputText value="Can't update" rendered="#{term.term_end_dt != null}"/>
+									
+									<a4j:commandLink reRender="terms,messagepanel" action="#{settingsBean.UpdateTerm}" value="SAVE" rendered="#{term.term_id == settingsBean.term.term_id}">
+										<f:setPropertyActionListener value="#{term}" target="#{settingsBean.term}"/>
+									</a4j:commandLink>
+									
+									<h:outputText value=" - " rendered="#{term.term_id == settingsBean.term.term_id}" />
+									
+									<a4j:commandLink reRender="terms" action="#{settingsBean.reset}" value="CANCEL" rendered="#{term.term_id == settingsBean.term.term_id}" />
+									
+								</rich:column>
+							</rich:dataTable>
+							</a4j:outputPanel>
+						</rich:tab>
+						<rich:tab id="newsssTab" label="Map new JSS 1 and SSS 1 Students" immediate="true">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="cls">Class</h:outputLabel>
+								<h:selectOneMenu id="cls" value="#{settingsBean.newSSS.class_id}" defaultLabel="Select a class...">
+									<f:selectItem itemValue="0" itemLabel="" />
+									<f:selectItems value="#{dropdownBean.primary6Classes}"/>
+									<f:selectItems value="#{dropdownBean.jss3Classes}"/>
+								</h:selectOneMenu>
+								<rich:message for="cls" style="color: red;"/>
+							</h:panelGrid>
+							
+							<div class="actionButtons">
+								<rich:toolBar>
+									<rich:toolBarGroup>
+									<a4j:commandButton value="Show Students" action="#{settingsBean.newSSS.setStudents(null)}" reRender="studentsPanel" />
+									</rich:toolBarGroup>
+								</rich:toolBar>
+							</div>
+							
+							<rich:spacer height="15" />
+							
+							<a4j:outputPanel id="studentsPanel">
+								<rich:dataTable id="classStudents" value="#{settingsBean.newSSS.students}" var="obj" rows="20" width="100%" rendered="#{settingsBean.newSSS.students.size() > 0}">
+									<f:facet name="header">
+										<h:outputText value="Displaying students in class" />
+									</f:facet>
+									
+									<rich:column sortBy="#{obj.student_fn}" filterBy="#{obj.student_fn}">
+										<f:facet name="header">Student</f:facet>
+										<h:outputText value="#{obj.student_fn} #{obj.student_mn} #{obj.student_ln} (#{obj.rollNumber})" />
+									</rich:column>
+									<rich:column>
+										<f:facet name="header">Mark</f:facet>
+										<h:selectBooleanCheckbox value="#{obj.flagBool}" />
+									</rich:column>
+								</rich:dataTable>
+								
+								<rich:spacer height="15" />
+								
+								<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg" rendered="#{settingsBean.newSSS.students.size() > 0}">
+									<h:outputLabel for="cls2">Class</h:outputLabel>
+									<h:selectOneMenu id="cls2" value="#{settingsBean.newSSS.class_id2}" defaultLabel="Select a class...">
+										<f:selectItem itemValue="0" itemLabel="" />
+										<f:selectItems value="#{dropdownBean.jss1Classes}"/>
+										<f:selectItems value="#{dropdownBean.sss1Classes}"/>
+									</h:selectOneMenu>
+									<rich:message for="cls2" style="color: red;"/>
+								</h:panelGrid>
+								
+								<div class="actionButtons">
+									<rich:toolBar rendered="#{settingsBean.newSSS.students.size() > 0}">
+										<rich:toolBarGroup>
+										<a4j:commandButton value="Map Students to New Class" action="#{settingsBean.MapNewSSS1Students}" reRender="studentsPanel" />
+										</rich:toolBarGroup>
+									</rich:toolBar>
+								</div>
+							</a4j:outputPanel>
+						</rich:tab>
+					</rich:tabPanel>
+				</td>
+			</tr>
+			</table>
+		</div>
+	</h:form>
+	
+	<rich:modalPanel id="newTermMP" minHeight="350" width="600" autosized="true" moveable="true" resizeable="false">
+		<f:facet name="header">
+			<h:outputText value="Start a new Academic Term within the current Session"/>
+		</f:facet>
+		<f:facet name="controls">
+			<a href="javascript:Richfaces.hideModalPanel('newTermMP')">X</a>
+		</f:facet>
+		<div style="width:100%;height:250px;overflow:auto;">
+		<h:form id="newTermForm">
+		<rich:panel>
+			<f:facet name="header">
+			<h:outputText value="Term details"/>
+			</f:facet>
+			
+			<div class="dialog">
+				<a4j:outputPanel id="messagepanel2">
+					<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+				</a4j:outputPanel>
+			
+				<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+					<h:outputLabel for="ses_name">Term Name</h:outputLabel>
+					<h:selectOneMenu id="ses_name" value="#{settingsBean.newterm.term_nm}" required="true" defaultLabel="Select a term...">
+						<f:selectItem itemValue="2nd Term" itemLabel="2nd Term" />
+						<f:selectItem itemValue="3rd Term" itemLabel="3rd Term" />
+						<rich:beanValidator/>
+					</h:selectOneMenu>
+					<rich:message for="ses_name" style="color: red;"/>
+					
+					<h:outputLabel for="ses_date">Term Start Date</h:outputLabel>
+					<rich:calendar id="ses_date" value="#{settingsBean.newterm.term_st_dt}" locale="us" datePattern="yyyy-MM-dd">
+						<rich:beanValidator/>
+					</rich:calendar>
+					<rich:message for="ses_date" style="color: red;"/>
+				</h:panelGrid>
+				
+				<div class="actionButtons">
+					<rich:toolBar>
+						<rich:toolBarGroup>
+						<a4j:commandButton value="Save" action="#{settingsBean.StartNewTerm}" reRender="mypanel,newTermForm,sessionForm" />
+						</rich:toolBarGroup>
+						<rich:toolBarGroup location="right">
+						<a:commandLink onclick="#{rich:component('newTermMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+						</rich:toolBarGroup>
+					</rich:toolBar>
+				</div>
+			</div>
+		</rich:panel>
+		</h:form>
+		</div>
+	</rich:modalPanel>
+	
+	<rich:modalPanel id="newSessionMP" minHeight="350" width="600" autosized="true" moveable="true" resizeable="false">
+		<f:facet name="header">
+			<h:outputText value="Start a new Academic Session"/>
+		</f:facet>
+		<f:facet name="controls">
+			<a href="javascript:Richfaces.hideModalPanel('newSessionMP')">X</a>
+		</f:facet>
+		<div style="width:100%;height:250px;overflow:auto;">
+		<h:form id="newSessionForm">
+		<rich:panel>
+			<f:facet name="header">
+			<h:outputText value="Session details"/>
+			</f:facet>
+			
+			<div class="dialog">
+				<a4j:outputPanel id="messagepanel2">
+					<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+				</a4j:outputPanel>
+			
+				<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+					<h:outputLabel for="ses_name">Session Name</h:outputLabel>
+					<h:inputText id="ses_name" value="#{settingsBean.newsession.session_nm}" required="true" size="35">
+						<rich:beanValidator/>
+					</h:inputText>
+					<rich:message for="ses_name" style="color: red;"/>
+					
+					<h:outputLabel for="ses_date">1ST Term Start Date</h:outputLabel>
+					<rich:calendar id="ses_date" value="#{settingsBean.newsession.session_st_dt}" locale="us" datePattern="yyyy-MM-dd">
+						<rich:beanValidator/>
+					</rich:calendar>
+					<rich:message for="ses_date" style="color: red;"/>
+				</h:panelGrid>
+				
+				<div class="actionButtons">
+					<rich:toolBar>
+						<rich:toolBarGroup>
+						<a4j:commandButton value="Save" action="#{settingsBean.StartNewSession}" reRender="mypanel,newSessionForm,sessionForm" />
+						</rich:toolBarGroup>
+						<rich:toolBarGroup location="right">
+						<a:commandLink onclick="#{rich:component('newSessionMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+						</rich:toolBarGroup>
+					</rich:toolBar>
+				</div>
+			</div>
+		</rich:panel>
+		</h:form>
+		</div>
+	</rich:modalPanel>
+</ui:composition>

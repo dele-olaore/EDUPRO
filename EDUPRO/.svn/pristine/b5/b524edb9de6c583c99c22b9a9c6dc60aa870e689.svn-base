@@ -1,0 +1,101 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="staffCatForm">
+	<a4j:outputPanel id="staffDepartmentAjxPanel">
+	<table width="100%" cellspacing="2" cellpadding="2">
+		<tr>
+			<td colspan="2">
+				<rich:spacer height="2" />
+				<a4j:outputPanel id="messagepanel">
+					<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+				</a4j:outputPanel>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<a:commandLink onclick="#{rich:component('newDepartmentMP')}.show();" styleClass="image-command-link">Add new</a:commandLink>
+				<br/>
+				<rich:dataTable id="departments" value="#{staffBean.departments}" var="obj" rows="10" width="100%" rendered="#{staffBean.departments.size() > 0}">
+				<f:facet name="header">
+					<h:outputText value="Displaying departments  --  " />
+				</f:facet>
+				<rich:column sortBy="#{obj.name}" filterBy="#{obj.name}">
+					<f:facet name="header">Department Name</f:facet>
+					<h:outputText value="#{obj.name}" rendered="#{obj.id != staffBean.department.id}" />
+					<h:inputText value="#{obj.name}" rendered="#{obj.id == staffBean.department.id}" />
+				</rich:column>
+				<rich:column align="center">
+					<f:facet name="header">Update</f:facet>
+					<a4j:commandLink reRender="departments" value="Update" rendered="#{obj.id != staffBean.department.id}">
+						<f:setPropertyActionListener value="#{obj}" target="#{staffBean.department}"/>
+					</a4j:commandLink>
+					
+					<a4j:commandLink reRender="departments,messagepanel" action="#{staffBean.UpdateDepartment}" value="SAVE" rendered="#{obj.id == staffBean.department.id}">
+						<f:setPropertyActionListener value="#{obj}" target="#{staffBean.department}"/>
+					</a4j:commandLink>
+					
+					<h:outputText value=" - " rendered="#{obj.id == staffBean.department.id}" />
+					
+					<a4j:commandLink reRender="departments" action="#{staffBean.reset}" value="CANCEL" rendered="#{obj.id == staffBean.department.id}" />
+					
+				</rich:column>
+				</rich:dataTable>
+				<h:outputText value="No departments found" rendered="#{empty staffBean.departments}"/>
+				<rich:datascroller id="dsdepartments" for="departments" renderIfSinglePage="false" />
+			</td>
+		</tr>
+	</table>
+	</a4j:outputPanel>
+</h:form>
+
+<rich:modalPanel id="newDepartmentMP" minHeight="500" width="600" autosized="true" moveable="true" resizeable="false">
+	<f:facet name="header">
+		<h:outputText value="Insert Department"/>
+	</f:facet>
+	<f:facet name="controls">
+		<a href="javascript:Richfaces.hideModalPanel('newDepartmentMP')">X</a>
+	</f:facet>
+	<div style="width:100%;height:350px;overflow:auto;">
+	<h:form id="newDepartmentForm">
+	<rich:panel>
+		<f:facet name="header">
+		<h:outputText value="Department details"/>
+		</f:facet>
+		
+		<div class="dialog">
+			<a4j:outputPanel id="messagepanel2">
+				<h:messages id="localMessages2" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		
+			<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+				<h:outputLabel for="dept_name">Department name</h:outputLabel>
+				<h:inputText id="dept_name" value="#{staffBean.department.name}" required="true" size="35">
+					<rich:beanValidator/>
+				</h:inputText>
+				<rich:message for="dept_name" style="color: red;"/>
+			</h:panelGrid>
+			
+			<div class="actionButtons">
+				<rich:toolBar>
+					<rich:toolBarGroup>
+					<a4j:commandButton value="Save" action="#{staffBean.CreateDepartment}" reRender="staffDepartmentAjxPanel" />
+					</rich:toolBarGroup>
+					<rich:toolBarGroup location="right">
+					<a:commandLink onclick="#{rich:component('newDepartmentMP')}.hide();" styleClass="image-command-link">Close</a:commandLink>
+					</rich:toolBarGroup>
+				</rich:toolBar>
+			</div>
+		</div>
+	</rich:panel>
+	</h:form>
+	</div>
+</rich:modalPanel>
+
+</ui:composition>

@@ -1,0 +1,1 @@
+folder to hold school settings, logo and so on

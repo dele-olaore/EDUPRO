@@ -1,0 +1,184 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich"
+    xmlns:a="http://richfaces.org/a4j"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+
+<h:form id="attendanceForm">
+<div style="width: 800px" align="center">
+	<table width="100%" cellspacing="2" cellpadding="2">
+	<tr>
+		<td align="left">
+			<table>
+				<tr>
+					<td valign="top" align="left">
+						<p>
+							<span style="font-size:30px;font-weight:bold;color:#888;">Lecture Attendance</span><br/>
+							<span style="font-size:16px;">Mark and/or view students attendance for a subject lecture.</span>
+						</p>
+					</td>
+					<td valign="bottom" align="right">
+						<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						<div style="height:1.8em;margin:0;padding:0;width:100%">
+							<ul style="float:right;margin:0 0 0 0;padding:0;">
+								<!-- <li style="background-color:#000000;color:#fff;float:left;font-size:1.0em;height:1.8em;list-style-type:none;margin:0 0 0 10px;padding:0;text-align:center;width:100px;">
+									<a:commandLink onclick="#{rich:component('newRefMP')}.show();" styleClass="image-command-link">Add new</a:commandLink>
+								</li> -->
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<rich:spacer height="2" />
+			<a4j:outputPanel id="messagepanel">
+				<h:messages id="localMessages" styleClass="message" errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"/>
+			</a4j:outputPanel>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div class="dialog">
+				<rich:tabPanel id="attendanceTab">
+					<rich:tab id="markTab" label="Mark Attendance" immediate="true">
+						<div class="dialog">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="subs">Subjects</h:outputLabel>
+								<h:selectOneMenu id="subs" value="#{teacherBean.subjectAttendance.subject_id}" defaultLabel="Select a subject...">
+									<f:selectItem itemValue="0" itemLabel="" />
+									<f:selectItems value="#{dropdownBean.mysubjects}"/>
+									<a4j:support event="onchange" action="#{teacherBean.setClassSubjectStudents(null)}" reRender="cls,classStudentsPanel" ajaxSingle="true" />
+								</h:selectOneMenu>
+								<rich:message for="subs" style="color: red;"/>
+							
+								<h:outputLabel for="cls">Class</h:outputLabel>
+								<h:selectOneMenu id="cls" value="#{teacherBean.subjectAttendance.class_id}" defaultLabel="Select a class...">
+									<f:selectItems value="#{dropdownBean.getSubjectClasses(teacherBean.subjectAttendance.subject_id)}"/>
+									<a4j:support event="onchange" action="#{teacherBean.setClassSubjectStudents(null)}" reRender="classStudentsPanel" ajaxSingle="true" />
+								</h:selectOneMenu>
+								<rich:message for="cls" style="color: red;"/>
+								
+								<h:outputLabel for="adt">Date</h:outputLabel>
+								<rich:calendar id="adt" value="#{teacherBean.subjectAttendance.date}" locale="us" required="true" datePattern="yyyy-MM-dd">
+									<rich:beanValidator/>
+								</rich:calendar>
+								<rich:message for="adt" style="color: red;"/>
+							</h:panelGrid>
+						</div>
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<a4j:commandButton value="Show Students" action="#{teacherBean.setClassSubjectStudents(null)}" reRender="classStudentsPanel" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+						
+						<rich:spacer height="15" />
+						
+						<a4j:outputPanel id="classStudentsPanel">
+							<rich:dataTable id="classStudents" value="#{teacherBean.classSubjectStudents}" var="obj" rows="20" width="100%" rendered="#{teacherBean.classSubjectStudents.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying students in class" />
+								</f:facet>
+								
+								<rich:column sortBy="#{obj.student_fn}" filterBy="#{obj.student_fn}">
+									<f:facet name="header">Student</f:facet>
+									<h:outputText value="#{obj.student_fn} #{obj.student_mn} #{obj.student_ln} (#{obj.rollNumber})" />
+								</rich:column>
+								<rich:column>
+									<f:facet name="header">Mark</f:facet>
+									<h:selectBooleanCheckbox value="#{obj.flagBool}" />
+								</rich:column>
+								
+							</rich:dataTable>
+							
+							<div class="actionButtons">
+								<rich:toolBar rendered="#{teacherBean.classSubjectStudents.size() > 0}">
+									<rich:toolBarGroup>
+									<h:commandButton value="Mark Attendance" action="#{teacherBean.MarkStudentSubjectAttendance}" />
+									</rich:toolBarGroup>
+								</rich:toolBar>
+							</div>
+						</a4j:outputPanel>
+					</rich:tab>
+					<rich:tab id="viewTab" label="View Attendance" immediate="true">
+						<div class="dialog">
+							<h:panelGrid columns="3" rowClasses="prop" columnClasses="name,value,validatormsg">
+								<h:outputLabel for="subs2">Subjects</h:outputLabel>
+								<h:selectOneMenu id="subs2" value="#{teacherBean.subjectAttendance.subject_id}" defaultLabel="Select a subject...">
+									<f:selectItem itemValue="0" itemLabel="" />
+									<f:selectItems value="#{dropdownBean.mysubjects}"/>
+									<a4j:support event="onchange" action="#{teacherBean.setClassSubjectStudents(null)}" reRender="cls,classStudentsPanel" ajaxSingle="true" />
+								</h:selectOneMenu>
+								<rich:message for="subs2" style="color: red;"/>
+							
+								<h:outputLabel for="cls2">Class</h:outputLabel>
+								<h:selectOneMenu id="cls2" value="#{teacherBean.subjectAttendance.class_id}" defaultLabel="Select a class...">
+									<f:selectItems value="#{dropdownBean.getSubjectClasses(teacherBean.subjectAttendance.subject_id)}"/>
+									<a4j:support event="onchange" action="#{teacherBean.setClassSubjectStudents(null)}" reRender="classStudentsPanel" ajaxSingle="true" />
+								</h:selectOneMenu>
+								<rich:message for="cls2" style="color: red;"/>
+								
+								<h:outputLabel for="adt2">Date</h:outputLabel>
+								<rich:calendar id="adt2" value="#{teacherBean.subjectAttendance.date}" locale="us" required="true" datePattern="yyyy-MM-dd">
+									<rich:beanValidator/>
+								</rich:calendar>
+								<rich:message for="adt2" style="color: red;"/>
+							</h:panelGrid>
+						</div>
+						<div class="actionButtons">
+							<rich:toolBar>
+								<rich:toolBarGroup>
+								<a4j:commandButton value="View Attendance" action="#{teacherBean.setClassSubjectStudents2(null)}" reRender="classStudentsPanel2" />
+								</rich:toolBarGroup>
+							</rich:toolBar>
+						</div>
+						
+						<rich:spacer height="15" />
+						
+						<a4j:outputPanel id="classStudentsPanel2">
+							<rich:dataTable id="classStudents2" value="#{teacherBean.classSubjectStudents2}" var="obj" rows="20" width="100%" rendered="#{teacherBean.classSubjectStudents2.size() > 0}">
+								<f:facet name="header">
+									<h:outputText value="Displaying attendance of students" />
+								</f:facet>
+								
+								<rich:column sortBy="#{obj.student_fn}" filterBy="#{obj.student_fn}">
+									<f:facet name="header">Student</f:facet>
+									<h:outputText value="#{obj.student_fn} #{obj.student_mn} #{obj.student_ln} (#{obj.rollNumber})" />
+								</rich:column>
+								<rich:column>
+									<f:facet name="header">Mark</f:facet>
+									<h:selectBooleanCheckbox value="#{obj.flagBool}" />
+								</rich:column>
+								
+							</rich:dataTable>
+							
+							<div class="actionButtons">
+								<rich:toolBar rendered="#{teacherBean.classSubjectStudents2.size() > 0}">
+									<rich:toolBarGroup>
+									<h:commandButton value="Update Attendance" action="#{teacherBean.UpdateStudentSubjectAttendance}" />
+									</rich:toolBarGroup>
+								</rich:toolBar>
+							</div>
+						</a4j:outputPanel>
+					</rich:tab>
+				</rich:tabPanel>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+</h:form>
+</ui:composition>

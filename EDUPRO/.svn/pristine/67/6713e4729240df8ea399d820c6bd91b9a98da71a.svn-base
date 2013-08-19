@@ -1,0 +1,197 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:rich="http://richfaces.org/rich">
+    <h:form id="settingsForm">
+	<div style="width: 800px" align="center">
+		<table width="100%" cellspacing="2" cellpadding="2">
+		<tr>
+			<td align="left">
+				<table>
+					<tr>
+						<td valign="top" align="left">
+							<p>
+								<span style="font-size:30px;font-weight:bold;color:#888;">Settings</span><br/>
+								<span style="font-size:16px;">Various application settings</span>
+							</p>
+						</td>
+						<td valign="bottom" align="right">
+							<a href="#" onclick="history.back(-1);return false;"><img src="images/back.png" style="float: right;" /></a>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<h:graphicImage url="/images/content_header_img_bk.jpg" width="100%" />
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<rich:spacer height="2" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center" width="100%">
+				<table width="100%" align="center" cellspacing="50" cellpadding="2">
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/gen_settings.xhtml" value="General Settings" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Manage br@dawl setup settings</span>
+							</p>
+						</td>
+						<td width="50%">
+							
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/titles.xhtml" value="Titles" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various name titles</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/relationships.xhtml" value="Relationships" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage relationship types between guardians and students</span>
+							</p>
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/medical_tests.xhtml" value="Medical Tests" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various medical test required of students by the school</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/medical_results.xhtml" value="Medical Results" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage medical result types recognized by the school</span>
+							</p>
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/blocks.xhtml" value="Blocks" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various building blocks within the school premisses</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/clubs.xhtml" value="Clubs" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various clubs within the school system</span>
+							</p>
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/houses.xhtml" value="House" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various house within the school system for students grouping</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/hostels.xhtml" value="Hostels" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various hostels within the school premisses</span>
+							</p>
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/awards.xhtml" value="Awards" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various awards issued to students and staffs</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/prefects.xhtml" value="Prefectships" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage prefectships issued to selected senior students</span>
+							</p>
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<!-- <td width="50%">
+							<p>
+								<a href="#" onclick="return false;"><span style="font-size:22px;font-weight:bold;">Application Logs</span></a>
+								<br/>
+								<span style="font-size:12px;text-align:justify;">View logs of application processes performed automatically or manually by users</span>
+							</p>
+						</td> -->
+						<td width="50%">
+							<p>
+								<s:link view="/grades.xhtml" value="Grades" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Manage grades marks, descriptions and comments</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/subjects.xhtml" value="Subjects" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Manage various subjects the school offer</span>
+							</p>
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/classes.xhtml" value="Classes" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage various classes</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/session_term.xhtml" value="Session and Term" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Create and manage sessions and their various terms</span>
+							</p>
+						</td>
+					</tr>
+					<tr valign="top" align="left">
+						<td width="50%">
+							<p>
+								<s:link view="/grading.xhtml" value="Grading" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Specify percentage of various components that adds up to a students' grade</span>
+							</p>
+						</td>
+						<td width="50%">
+							<p>
+								<s:link view="/newsandevents.xhtml" value="News and Events" style="font-size:22px;font-weight:bold;" />
+								<br/>
+								<span style="font-size:12px;text-align:justify;">Post and manage news and events</span>
+							</p>
+						</td>
+					</tr>
+					<!-- <tr valign="top" align="left">
+						
+					</tr> -->
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+</h:form>
+</ui:composition>
